@@ -1,0 +1,148 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if object %}Editar{% else %}Nova{% endif %} Doença{% endblock %}
+
+{% block extra_css %}
+<style>
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-selection {
+        height: auto !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-two-thirds">
+                <h1 class="title">{% if object %}Editar{% else %}Nova{% endif %} Doença</h1>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="field">
+                        <label class="label">{{ form.nome.label }}</label>
+                        <div class="control">
+                            {{ form.nome }}
+                        </div>
+                    </div>
+                    
+                    <div class="columns">
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">{{ form.tipo.label }}</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        {{ form.tipo }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">{{ form.parte_afetada.label }}</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        {{ form.parte_afetada }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.contagiosa.label }}</label>
+                        <div class="control">
+                            <label class="checkbox">
+                                {{ form.contagiosa }}
+                                {{ form.contagiosa.label }}
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="field" id="forma-contagio-field" style="display: none;">
+                        <label class="label">{{ form.forma_contagio.label }}</label>
+                        <div class="control">
+                            {{ form.forma_contagio }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.sintomas.label }}</label>
+                        <div class="control">
+                            {{ form.sintomas }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.origem.label }}</label>
+                        <div class="control">
+                            {{ form.origem }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.tratamento.label }}</label>
+                        <div class="control">
+                            {{ form.tratamento }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.reacoes_esperadas.label }}</label>
+                        <div class="control">
+                            {{ form.reacoes_esperadas }}
+                        </div>
+                    </div>
+                    
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">
+                                <span class="icon">
+                                    <i class="fas fa-save"></i>
+                                </span>
+                                <span>Salvar</span>
+                            </button>
+                        </div>
+                        <div class="control">
+                            <a href="{% url 'doenca-list' %}" class="button is-light">
+                                <span class="icon">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Cancelar</span>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar/ocultar campo de forma de contágio
+    const contagiosaCheckbox = document.querySelector('#id_contagiosa');
+    const formaContagioField = document.querySelector('#forma-contagio-field');
+    
+    function toggleContagioField() {
+        formaContagioField.style.display = contagiosaCheckbox.checked ? 'block' : 'none';
+    }
+    
+    contagiosaCheckbox.addEventListener('change', toggleContagioField);
+    toggleContagioField(); // Inicializar estado
+    
+    // Inicializar Select2 para múltipla seleção de sintomas
+    $('#id_sintomas').select2({
+        placeholder: "Selecione os sintomas",
+        allowClear: true,
+        width: 'resolve'
+    });
+});
+</script>
+{% endblock %}

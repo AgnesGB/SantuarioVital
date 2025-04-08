@@ -1,0 +1,91 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if object %}Editar{% else %}Nova{% endif %} Criatura{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-two-thirds">
+                <h1 class="title">{% if object %}Editar{% else %}Nova{% endif %} Criatura</h1>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="field">
+                        <label class="label">{{ form.nome.label }}</label>
+                        <div class="control">
+                            {{ form.nome }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.titulo.label }}</label>
+                        <div class="control">
+                            {{ form.titulo }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.nivel_ameaca.label }}</label>
+                        <div class="control">
+                            <div class="select">
+                                {{ form.nivel_ameaca }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.aparencia.label }}</label>
+                        <div class="control">
+                            {{ form.aparencia }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.habilidades.label }}</label>
+                        <div class="control">
+                            {{ form.habilidades }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.doenca_relacionada.label }}</label>
+                        <div class="control">
+                            <div class="select">
+                                {{ form.doenca_relacionada }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.anotacoes.label }}</label>
+                        <div class="control">
+                            {{ form.anotacoes }}
+                        </div>
+                    </div>
+                    
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">
+                                <span class="icon">
+                                    <i class="fas fa-save"></i>
+                                </span>
+                                <span>Salvar</span>
+                            </button>
+                        </div>
+                        <div class="control">
+                            <a href="{% if object %}{% url 'besta-detail' object.pk %}{% else %}{% url 'besta-list' %}{% endif %}" class="button is-light">
+                                <span class="icon">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Cancelar</span>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Lista de Doenças{% endblock %}
+
+{% block content %}
+<div class="columns">
+    <div class="column is-3">
+        <div class="box">
+            <h2 class="title is-4">Filtros</h2>
+            <form method="get">
+                <div class="field">
+                    <label class="label">Nome</label>
+                    <div class="control">
+                        <input class="input" type="text" name="nome" value="{{ request.GET.nome }}" placeholder="Filtrar por nome...">
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Tipo</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="tipo">
+                                <option value="">Todos</option>
+                                <option value="F" {% if request.GET.tipo == 'F' %}selected{% endif %}>Física</option>
+                                <option value="M" {% if request.GET.tipo == 'M' %}selected{% endif %}>Mental</option>
+                                <option value="B" {% if request.GET.tipo == 'B' %}selected{% endif %}>Ambas</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Sintomas</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="sintoma">
+                                <option value="">Todos</option>
+                                {% for sintoma in sintomas %}
+                                <option value="{{ sintoma.id }}" {% if request.GET.sintoma == sintoma.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ sintoma }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <div class="control">
+                        <button type="submit" class="button is-primary is-fullwidth">Filtrar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <a href="{% url 'doenca-create' %}" class="button is-success is-fullwidth">
+            <span class="icon">
+                <i class="fas fa-plus"></i>
+            </span>
+            <span>Nova Doença</span>
+        </a>
+    </div>
+    
+    <div class="column is-9">
+        <h1 class="title">Doenças</h1>
+        
+        {% if doencas %}
+        <div class="columns is-multiline">
+            {% for doenca in doencas %}
+            <div class="column is-4">
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            {{ doenca.nome }}
+                            <span class="tag is-light ml-2">{{ doenca.get_tipo_display }}</span>
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            <p><strong>Parte afetada:</strong> {{ doenca.get_parte_afetada_display }}</p>
+                            <p><strong>Contagiosa:</strong> {% if doenca.contagiosa %}Sim{% else %}Não{% endif %}</p>
+                            
+                            <div class="mt-3">
+                                <h6 class="subtitle is-6">Sintomas:</h6>
+                                <div class="tags">
+                                    {% for sintoma in doenca.sintomas.all %}
+                                    <span class="tag is-info is-light">{{ sintoma }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="notification is-warning">
+            Nenhuma doença encontrada com os filtros atuais.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

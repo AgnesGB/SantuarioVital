@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ besta.nome }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="box">
+            <h1 class="title">{{ besta.nome }}</h1>
+            <h2 class="subtitle">{{ besta.titulo }}</h2>
+            
+            <div class="tags has-addons">
+                <span class="tag is-dark">Nível de Ameaça</span>
+                <span class="tag is-{{ besta.nivel_ameaca|lower }}">
+                    {{ besta.get_nivel_ameaca_display }}
+                </span>
+            </div>
+            
+            <div class="content mt-5">
+                <h3 class="title is-4">Aparência</h3>
+                <p>{{ besta.aparencia }}</p>
+                
+                <h3 class="title is-4 mt-5">Habilidades</h3>
+                <p>{{ besta.habilidades }}</p>
+                
+                {% if besta.doenca_relacionada %}
+                <h3 class="title is-4 mt-5">Doença Relacionada</h3>
+                <div class="box">
+                    <a href="{% url 'doenca-detail' besta.doenca_relacionada.pk %}">
+                        {{ besta.doenca_relacionada.nome }}
+                    </a>
+                </div>
+                {% endif %}
+                
+                {% if besta.anotacoes %}
+                <h3 class="title is-4 mt-5">Anotações</h3>
+                <div class="box">
+                    {{ besta.anotacoes }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

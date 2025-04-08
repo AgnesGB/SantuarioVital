@@ -1,0 +1,89 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- Cabeçalho e info do paciente -->
+        
+        <div class="columns">
+            <!-- Coluna de Sintomas -->
+            <div class="column is-4">
+                <div class="box">
+                    <h2 class="title is-4">Sintomas Observados</h2>
+                    <form method="post" action="{% url 'adicionar-sintoma' paciente.id %}">
+                        {% csrf_token %}
+                        <div class="field">
+                            <div class="control">
+                                {{ form_sintomas.sintoma }}
+                            </div>
+                        </div>
+                        <button class="button is-small is-primary">Adicionar</button>
+                    </form>
+                    
+                    <div class="tags mt-3">
+                        {% for sintoma in paciente.sintomas_observados.all %}
+                        <span class="tag is-medium">
+                            {{ sintoma.nome }}
+                            <a href="{% url 'remover-sintoma' paciente.id sintoma.id %}" class="delete is-small ml-2"></a>
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Coluna de Diagnósticos -->
+            <div class="box mt-4">
+                <h3 class="title is-4">Doenças Relacionadas</h3>
+                
+                {% if paciente.sintomas_observados.all %}
+                <div class="content">
+                    <h4 class="title is-5">Sugeridas pelos sintomas:</h4>
+                    <div class="columns is-multiline">
+                        {% for doenca in doencas_sugeridas %}
+                        <div class="column is-4">
+                            <div class="box">
+                                <h5 class="title is-6">{{ doenca.nome }}</h5>
+                                <div class="tags">
+                                    {% for sintoma in doenca.sintomas.all %}
+                                    <span class="tag is-info is-light">
+                                        {{ sintoma.nome }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                <a href="{% url 'adicionar-diagnostico' paciente.id %}?doenca={{ doenca.id }}"
+                                   class="button is-small is-primary mt-2">
+                                    Associar Diagnóstico
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="content">
+                    <h4 class="title is-5">Todas as Doenças:</h4>
+                    <form method="get" action="{% url 'adicionar-diagnostico' paciente.id %}">
+                        <div class="field has-addons">
+                            <div class="control is-expanded">
+                                <div class="select is-fullwidth">
+                                    <select name="doenca">
+                                        {% for doenca in todas_doencas %}
+                                        <option value="{{ doenca.id }}">{{ doenca.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="control">
+                                <button type="submit" class="button is-primary">
+                                    Criar Diagnóstico
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

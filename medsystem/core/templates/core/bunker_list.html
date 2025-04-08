@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Lista de Bunkers{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Lista de Bunkers</h1>
+            </div>
+            <div class="level-right">
+                <a href="{% url 'bunker-create' %}" class="button is-primary">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>Novo Bunker</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="columns is-multiline">
+            {% for bunker in bunkers %}
+            <div class="column is-one-third">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-content">
+                                <p class="title is-4">{{ bunker.nome }}</p>
+                                <p class="subtitle is-6">{{ bunker.pacientes.count }} pacientes</p>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="buttons">
+                                <a href="#" class="button is-small is-info">
+                                    <span class="icon">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                    <span>Ver</span>
+                                </a>
+                                <a href="#" class="button is-small is-warning">
+                                    <span class="icon">
+                                        <i class="fas fa-edit"></i>
+                                    </span>
+                                    <span>Editar</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="column">
+                <div class="notification is-warning">
+                    Nenhum bunker cadastrado ainda.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

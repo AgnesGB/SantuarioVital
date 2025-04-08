@@ -1,0 +1,66 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Bestiário{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Bestiário</h1>
+            </div>
+            <div class="level-right">
+                <a href="{% url 'besta-create' %}" class="button is-primary">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>Adicionar Criatura</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="columns is-multiline">
+            {% for besta in bestas %}
+            <div class="column is-4">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-content">
+                                <p class="title is-4">{{ besta.nome }}</p>
+                                <p class="subtitle is-6">{{ besta.titulo }}</p>
+                                <span class="tag is-{{ besta.nivel_ameaca|lower }}">
+                                    {{ besta.get_nivel_ameaca_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <p class="has-text-grey is-size-7">{{ besta.aparencia|truncatechars:100 }}</p>
+                        </div>
+                    </div>
+                    <footer class="card-footer">
+                        <a href="{% url 'besta-detail' besta.pk %}" class="card-footer-item">
+                            <span class="icon">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                            <span>Detalhes</span>
+                        </a>
+                        <a href="{% url 'besta-update' besta.pk %}" class="card-footer-item">
+                            <span class="icon">
+                                <i class="fas fa-edit"></i>
+                            </span>
+                            <span>Editar</span>
+                        </a>
+                    </footer>
+                </div>
+            </div>
+            {% empty %}
+            <div class="column">
+                <div class="notification is-warning">
+                    Nenhuma criatura registrada no bestiário.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

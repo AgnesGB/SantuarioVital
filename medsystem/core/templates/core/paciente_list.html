@@ -1,0 +1,226 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Lista de Pacientes{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        {% if messages %}
+        <div class="columns">
+            <div class="column is-12">
+                {% for message in messages %}
+                <div class="notification is-{{ message.tags }}">
+                    <button class="delete"></button>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Lista de Pacientes</h1>
+            </div>
+            <div class="level-right">
+                <div class="buttons">
+                    <a href="{% url 'bunker-create' %}" class="button is-info">
+                        <span class="icon">
+                            <i class="fas fa-warehouse"></i>
+                        </span>
+                        <span>Adicionar Bunker</span>
+                    </a>
+                    <a href="{% url 'paciente-create' %}" class="button is-primary">
+                        <span class="icon">
+                            <i class="fas fa-user-plus"></i>
+                        </span>
+                        <span>Adicionar Paciente</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns">
+            <div class="column is-3">
+                <div class="box">
+                    <h2 class="title is-5">Filtros</h2>
+                    
+                    <form method="get">
+                        <div class="field">
+                            <label class="label">Nome</label>
+                            <div class="control">
+                                <input class="input" type="text" name="nome" value="{{ request.GET.nome }}" placeholder="Buscar por nome...">
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label">Status</label>
+                            <div class="control">
+                                <div class="select is-fullwidth">
+                                    <select name="status">
+                                        <option value="">Todos</option>
+                                        {% for value, label in status_choices %}
+                                        <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label">Tipo Sanguíneo</label>
+                            <div class="control">
+                                <div class="select is-fullwidth">
+                                    <select name="tipo_sanguineo">
+                                        <option value="">Todos</option>
+                                        {% for value, label in tipo_sanguineo_choices %}
+                                        <option value="{{ value }}" {% if request.GET.tipo_sanguineo == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label">Bunker</label>
+                            <div class="control">
+                                <div class="select is-fullwidth">
+                                    <select name="bunker">
+                                        <option value="">Todos</option>
+                                        {% for bunker in bunkers %}
+                                        <option value="{{ bunker.id }}" {% if request.GET.bunker == bunker.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ bunker.nome }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="control">
+                                <button type="submit" class="button is-primary is-fullwidth">
+                                    <span class="icon">
+                                        <i class="fas fa-filter"></i>
+                                    </span>
+                                    <span>Filtrar</span>
+                                </button>
+                                <a href="{% url 'paciente-list' %}" class="button is-light is-fullwidth mt-2">
+                                    <span class="icon">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                    <span>Limpar</span>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="column is-9">
+                {% if pacientes %}
+                <div class="columns is-multiline">
+                    {% for paciente in pacientes %}
+                    <div class="column is-4">
+                        <div class="card">
+                            <div class="card-content">
+                                <div class="media">
+                                    <div class="media-content">
+                                        <p class="title is-5">{{ paciente.nome }}</p>
+                                        <p class="subtitle is-6">
+                                            {{ paciente.idade }} anos
+                                            {% if paciente.tipo_sanguineo %}
+                                            <span class="tag is-danger is-light">
+                                                <span class="icon">
+                                                    <i class="fas fa-tint"></i>
+                                                </span>
+                                                {{ paciente.get_tipo_sanguineo_display }}
+                                            </span>
+                                            {% endif %}
+                                            <span class="tag is-{{ paciente.status|lower }}">
+                                                {{ paciente.get_status_display }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="content">
+                                    <p class="has-text-grey">
+                                        <span class="icon">
+                                            <i class="fas fa-warehouse"></i>
+                                        </span>
+                                        {{ paciente.bunker.nome }}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <footer class="card-footer">
+                                <a href="{% url 'paciente-detail' paciente.id %}" class="card-footer-item">
+                                    <span class="icon">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                    <span>Detalhes</span>
+                                </a>
+                                <a href="{% url 'paciente-update' paciente.id %}" class="card-footer-item">
+                                    <span class="icon">
+                                        <i class="fas fa-edit"></i>
+                                    </span>
+                                    <span>Editar</span>
+                                </a>
+                            </footer>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="notification is-warning">
+                    Nenhum paciente encontrado com os filtros atuais.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fechar notificações
+    (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+        $notification = $delete.parentNode;
+        $delete.addEventListener('click', () => {
+            $notification.parentNode.removeChild($notification);
+        });
+    });
+});
+</script>
+
+<style>
+    .tag.is-estavel {
+        background-color: #48c774;
+        color: white;
+    }
+    .tag.is-tratamento {
+        background-color: #ffdd57;
+        color: rgba(0, 0, 0, 0.7);
+    }
+    .tag.is-cronico {
+        background-color: #ff3860;
+        color: white;
+    }
+    .tag.is-obito {
+        background-color: #363636;
+        color: white;
+    }
+    
+    .card-content .content p {
+        margin-bottom: 0.5em;
+    }
+</style>
+{% endblock %}

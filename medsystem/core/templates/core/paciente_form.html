@@ -1,0 +1,76 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Paciente{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-half">
+                <h1 class="title">{% if object %}Editar{% else %}Novo{% endif %} Paciente</h1>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="field">
+                        <label class="label">{{ form.nome.label }}</label>
+                        <div class="control">
+                            {{ form.nome }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.idade.label }}</label>
+                        <div class="control">
+                            {{ form.idade }}
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">{{ form.tipo_sanguineo.label }}</label>
+                        <div class="control">
+                            {{ form.tipo_sanguineo }}
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">{{ form.status.label }}</label>
+                        <div class="control">
+                            {{ form.status }}
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.bunker.label }}</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                {{ form.bunker }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">{{ form.observacoes.label }}</label>
+                        <div class="control">
+                            {{ form.observacoes }}
+                        </div>
+                    </div>
+                    
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">
+                                Salvar
+                            </button>
+                        </div>
+                        <div class="control">
+                            <a href="{% url 'paciente-list' %}" class="button is-light">
+                                Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

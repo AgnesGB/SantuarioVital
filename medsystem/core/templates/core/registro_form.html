@@ -1,0 +1,86 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Novo Registro Médico{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-complete para sintomas
+    const sintomasInput = document.getElementById('id_sintomas_texto');
+    const sintomasSuggestions = document.getElementById('sintomas-suggestions');
+    
+    sintomasInput.addEventListener('input', function() {
+        const termo = this.value;
+        if (termo.length > 2) {
+            fetch(`/buscar-sintomas/?termo=${termo}`)
+                .then(response => response.json())
+                .then(data => {
+                    sintomasSuggestions.innerHTML = '';
+                    data.forEach(sintoma => {
+                        const div = document.createElement('div');
+                        div.className = 'dropdown-item';
+                        div.textContent = `${sintoma.nome} (${sintoma.tipo === 'F' ? 'Físico' : 'Mental'})`;
+                        div.addEventListener('click', () => {
+                            sintomasInput.value += `${sintoma.nome}, `;
+                            sintomasSuggestions.innerHTML = '';
+                        });
+                        sintomasSuggestions.appendChild(div);
+                    });
+                    if (data.length > 0) {
+                        sintomasSuggestions.style.display = 'block';
+                    }
+                });
+        } else {
+            sintomasSuggestions.innerHTML = '';
+            sintomasSuggestions.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+    <div class="column is-6 is-offset-3">
+        <div class="box">
+            <h1 class="title">Novo Registro Médico</h1>
+            <h2 class="subtitle">Paciente: {{ form.initial.paciente }}</h2>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="field">
+                    <label class="label">Sintomas Observados</label>
+                    <div class="control">
+                        {{ form.sintomas_texto }}
+                        <div id="sintomas-suggestions" class="dropdown-content" style="display: none;"></div>
+                    </div>
+                    <p class="help">Descreva os sintomas ou comece a digitar para ver sugestões</p>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Observações</label>
+                    <div class="control">
+                        {{ form.observacoes }}
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Tratamento Aplicado</label>
+                    <div class="control">
+                        {{ form.tratamento_aplicado }}
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <div class="control">
+                        <button type="submit" class="button is-primary is-fullwidth">
+                            Salvar Registro
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
