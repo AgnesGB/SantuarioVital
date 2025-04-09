@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Registrar{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-half">
+                <div class="box">
+                    <h1 class="title">Criar Conta</h1>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="field">
+                            <label class="label">Nome de usuário</label>
+                            <div class="control">
+                                {{ form.username }}
+                            </div>
+                            {{ form.username.errors }}
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label">Nickname (Discord)</label>
+                            <div class="control">
+                                {{ form.nickname }}
+                            </div>
+                            {{ form.nickname.errors }}
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label">Senha</label>
+                            <div class="control">
+                                {{ form.password1 }}
+                            </div>
+                            {{ form.password1.errors }}
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label">Confirmar Senha</label>
+                            <div class="control">
+                                {{ form.password2 }}
+                            </div>
+                            {{ form.password2.errors }}
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label">Tipo de Usuário</label>
+                            <div class="control">
+                                <div class="select is-fullwidth">
+                                    {{ form.tipo }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <label class="label">Bunker</label>
+                            <div class="control">
+                                <div class="select is-fullwidth">
+                                    {{ form.bunker }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="control">
+                                <button type="submit" class="button is-primary is-fullwidth">
+                                    Registrar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

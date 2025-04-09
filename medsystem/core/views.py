@@ -1,30 +1,68 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import DeleteView, ListView, DetailView, CreateView, UpdateView, TemplateView
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Doenca, Sintoma, Besta, Bunker, Paciente, RegistroMedico, Diagnostico
-from .forms import DoencaForm, SintomaForm, BestaForm, PacienteForm, RegistroMedicoForm, BunkerForm, DiagnosticoForm
+from .models import Doenca, RelatorioExpedicao, Postagem, Comentario, Usuario, Besta, Bunker, Paciente, RegistroMedico, Diagnostico
+from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, BunkerForm, DiagnosticoForm
 from django.contrib import messages
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from .mixins import MedicoRequiredMixin 
 
-class BunkerCreateView(CreateView):
+def registrar(request):
+    if request.method == 'POST':
+        form = UsuarioCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UsuarioCreationForm()
+    return render(request, 'core/registrar.html', {'form': form})
+
+class HomeView(TemplateView):
+    template_name = 'core/home.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuarios'] = Usuario.objects.all().order_by('nickname')
+        context['is_medico'] = self.request.user.is_authenticated and self.request.user.tipo == 'MED'
+        return context
+
+class RelatorioExpedicaoListView(LoginRequiredMixin, ListView):
+    model = RelatorioExpedicao
+    template_name = 'core/relatorio_list.html'
+
+class RelatorioExpedicaoCreateView(LoginRequiredMixin, CreateView):
+    model = RelatorioExpedicao
+    fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
+    template_name = 'core/relatorio_form.html'
+    success_url = reverse_lazy('relatorio-list')
+    
+    def form_valid(self, form):
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
+
+class BunkerDetailView(DetailView):
     model = Bunker
-    form_class = BunkerForm
-    template_name = 'core/bunker_form.html'
-    success_url = reverse_lazy('bunker-list')
+    template_name = 'core/bunker_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['membros'] = Usuario.objects.filter(bunker=self.object)
+        context['pacientes'] = Paciente.objects.filter(bunker=self.object).only('nome', 'idade', 'tipo_sanguineo')
+        return context
 
 class BunkertListView(ListView):
     model = Bunker
     template_name = 'core/bunker_list.html'
     context_object_name = 'bunkers'
 
-class PacienteCreateView(CreateView):
-    model = Paciente
-    form_class = PacienteForm
-    template_name = 'core/paciente_form.html'
-    success_url = reverse_lazy('paciente-list')
-
-class DoencaListView(ListView):
+class DoencaListView(MedicoRequiredMixin, ListView):
     model = Doenca
     template_name = 'core/doenca_list.html'
     context_object_name = 'doencas'
@@ -33,104 +71,46 @@ class DoencaListView(ListView):
         queryset = super().get_queryset()
         nome = self.request.GET.get('nome')
         tipo = self.request.GET.get('tipo')
-        sintoma_query = self.request.GET.get('sintoma_query')
+        sintoma_query = self.request.GET.get('sintoma', '').strip()
         
         if nome:
             queryset = queryset.filter(nome__icontains=nome)
         if tipo:
             queryset = queryset.filter(tipo=tipo)
         if sintoma_query:
-            queryset = queryset.filter(
-                Q(sintomas__nome__icontains=sintoma_query) |
-                Q(sintomas__descricao__icontains=sintoma_query)
-                )
+            # Divide os termos de busca por vírgula ou espaço
+            termos = [termo.strip() for termo in sintoma_query.replace(',', ' ').split()]
+            # Cria uma consulta OR para cada termo
+            q_objects = Q()
+            for termo in termos:
+                q_objects |= Q(sintomas__icontains=termo)
+            queryset = queryset.filter(q_objects)
             
-        return queryset.distinct()
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['sintomas'] = Sintoma.objects.all()
-        return context
+        return queryset
 
-    def render_to_response(self, context, **response_kwargs):
-        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            doencas = list(context['doencas'].values('id', 'nome'))
-            return JsonResponse(doencas, safe=False)
-        return super().render_to_response(context, **response_kwargs)
-
-class DoencaDetailView(DetailView):
+class DoencaDetailView(MedicoRequiredMixin, DetailView):
     model = Doenca
     template_name = 'core/doenca_detail.html'
     context_object_name = 'doenca'
 
-class DoencaCreateView(CreateView):
+class DoencaCreateView(MedicoRequiredMixin, CreateView):
     model = Doenca
     form_class = DoencaForm
     template_name = 'core/doenca_form.html'
     success_url = reverse_lazy('doenca-list')
 
-class DoencaUpdateView(UpdateView):
+class DoencaUpdateView(MedicoRequiredMixin, UpdateView):
     model = Doenca
     form_class = DoencaForm
     template_name = 'core/doenca_form.html'
     success_url = reverse_lazy('doenca-list')
 
-class PacienteListView(ListView):
-    model = Paciente
-    template_name = 'core/paciente_list.html'
-    context_object_name = 'pacientes'
-    
-    def get_queryset(self):
-        queryset = super().get_queryset().select_related('bunker')
-        nome = self.request.GET.get('nome')
-        status = self.request.GET.get('status')
-        tipo_sanguineo = self.request.GET.get('tipo_sanguineo')
-        bunker = self.request.GET.get('bunker')
-        
-        if nome:
-            queryset = queryset.filter(nome__icontains=nome)
-        if status:
-            queryset = queryset.filter(status=status)
-        if tipo_sanguineo:
-            queryset = queryset.filter(tipo_sanguineo=tipo_sanguineo)
-        if bunker:
-            queryset = queryset.filter(bunker_id=bunker)
-            
-        return queryset
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['bunkers'] = Bunker.objects.all()
-        context['status_choices'] = Paciente.STATUS_CHOICES
-        context['tipo_sanguineo_choices'] = Paciente.TIPO_SANGUINEO_CHOICES
-        return context
+class DoencaDeleteView(MedicoRequiredMixin, DeleteView):
+    model = Doenca
+    template_name = 'core/doenca_confirm_delete.html'
+    success_url = reverse_lazy('doenca-list')
 
-class PacienteDetailView(DetailView):
-    model = Paciente
-    template_name = 'core/paciente_detail.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        paciente = self.object
-        
-        # Diagnosticos existentes
-        context['diagnosticos'] = paciente.diagnostico_set.select_related('doenca')
-        
-        # Formulários
-        context['form_sintoma'] = SintomaForm()
-        context['form_diagnostico'] = DiagnosticoForm()
-        
-        # Doenças sugeridas pelos sintomas
-        context['doencas_sugeridas'] = Doenca.objects.filter(
-            sintomas__in=paciente.sintomas_observados.all()
-        ).distinct()
-        
-        # Todas as doenças para seleção manual
-        context['todas_doencas'] = Doenca.objects.all()
-        
-        return context
-
-class AdicionarDiagnosticoView(CreateView):
+class AdicionarDiagnosticoView(MedicoRequiredMixin, CreateView):
     model = Diagnostico
     form_class = DiagnosticoForm
     template_name = 'core/adicionar_diagnostico.html'
@@ -147,44 +127,8 @@ class AdicionarDiagnosticoView(CreateView):
     
     def get_success_url(self):
         return reverse('paciente-detail', kwargs={'pk': self.kwargs['paciente_id']})
-
-class PacienteUpdateView(UpdateView):
-    model = Paciente
-    form_class = PacienteForm
-    template_name = 'core/paciente_form.html'
     
-    def get_success_url(self):
-        return reverse_lazy('paciente-detail', kwargs={'pk': self.object.pk})
-
-class PacienteCreateView(CreateView):
-    model = Paciente
-    form_class = PacienteForm
-    template_name = 'core/paciente_form.html'
-    success_url = reverse_lazy('paciente-list')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, 'Paciente cadastrado com sucesso!')
-        return response
-
-    def form_invalid(self, form):
-        messages.error(self.request, 'Erro ao cadastrar paciente. Verifique os dados.')
-        return super().form_invalid(form)
-
-class PacienteUpdateView(UpdateView):
-    model = Paciente
-    form_class = PacienteForm
-    template_name = 'core/paciente_form.html'
-
-    def get_success_url(self):
-        messages.success(self.request, 'Paciente atualizado com sucesso!')
-        return reverse_lazy('paciente-detail', kwargs={'pk': self.object.pk})
-
-    def form_invalid(self, form):
-        messages.error(self.request, 'Erro ao atualizar paciente. Verifique os dados.')
-        return super().form_invalid(form)
-    
-class RegistroMedicoCreateView(CreateView):
+class RegistroMedicoCreateView(MedicoRequiredMixin, CreateView):
     model = RegistroMedico
     form_class = RegistroMedicoForm
     template_name = 'core/registro_form.html'
@@ -219,7 +163,18 @@ class RegistroMedicoCreateView(CreateView):
                 return doenca
         return None
 
-class NovaDoencaView(CreateView):
+class DoencaCreateView(MedicoRequiredMixin, CreateView):
+    model = Doenca
+    form_class = DoencaForm
+    template_name = 'core/doenca_form.html'
+    success_url = reverse_lazy('doenca-list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Você pode adicionar lógica adicional aqui se necessário
+        return response
+
+class NovaDoencaView(MedicoRequiredMixin, CreateView):
     model = Doenca
     form_class = DoencaForm
     template_name = 'core/nova_doenca.html'
@@ -231,49 +186,233 @@ class NovaDoencaView(CreateView):
         if sintomas_texto:
             initial['sintomas_texto'] = sintomas_texto
         return initial
-    
-def buscar_sintomas(request):
-    termo = request.GET.get('termo', '')
-    sintomas = Sintoma.objects.filter(
-        Q(nome__icontains=termo) |
-        Q(descricao__icontains=termo)
-    ).values('id', 'nome', 'tipo')[:10]
-    return JsonResponse(list(sintomas), safe=False)
 
-def adicionar_sintoma(request, paciente_id):
-    paciente = get_object_or_404(Paciente, pk=paciente_id)
-    if request.method == 'POST':
-        sintoma_id = request.POST.get('sintoma')
-        sintoma = get_object_or_404(Sintoma, pk=sintoma_id)
-        paciente.sintomas_observados.add(sintoma)
-        messages.success(request, 'Sintoma adicionado com sucesso!')
-    return redirect('paciente-detail', pk=paciente_id)
-
-def remover_sintoma(request, paciente_id, sintoma_id):
-    paciente = get_object_or_404(Paciente, pk=paciente_id)
-    sintoma = get_object_or_404(Sintoma, pk=sintoma_id)
-    paciente.sintomas_observados.remove(sintoma)
-    messages.success(request, 'Sintoma removido com sucesso!')
-    return redirect('paciente-detail', pk=paciente_id)
-
-class BestaListView(ListView):
+class BestaListView(LoginRequiredMixin, ListView):
     model = Besta
     template_name = 'core/besta_list.html'
     context_object_name = 'bestas'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filtros
+        nome = self.request.GET.get('nome')
+        nivel_ameaca = self.request.GET.get('nivel_ameaca')
+        habilidades = self.request.GET.get('habilidades')
+        
+        if nome:
+            queryset = queryset.filter(nome__icontains=nome)
+        if nivel_ameaca:
+            queryset = queryset.filter(nivel_ameaca=nivel_ameaca)
+        if habilidades:
+            queryset = queryset.filter(habilidades__icontains=habilidades)
+            
+        return queryset.order_by('nome')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adiciona os parâmetros de filtro ao contexto para manter os valores nos campos
+        context['request'] = self.request
+        return context
 
-class BestaCreateView(CreateView):
+class BestaCreateView(LoginRequiredMixin, CreateView):
     model = Besta
     form_class = BestaForm
     template_name = 'core/besta_form.html'
-    success_url = reverse_lazy('besta-list')
 
-class BestaDetailView(DetailView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'Criatura criada com sucesso!')
+        return response
+
+    def get_success_url(self):
+        return reverse('besta-detail', kwargs={'pk': self.object.pk})
+
+class BestaUpdateView(LoginRequiredMixin, UpdateView):
+    model = Besta
+    form_class = BestaForm
+    template_name = 'core/besta_form.html'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'Criatura atualizada com sucesso!')
+        return response
+
+    def get_success_url(self):
+        return reverse('besta-detail', kwargs={'pk': self.object.pk})
+
+class BestaDetailView(LoginRequiredMixin, DetailView):
     model = Besta
     template_name = 'core/besta_detail.html'
     context_object_name = 'besta'
 
-class BestaUpdateView(UpdateView):
+class BestaDeleteView(LoginRequiredMixin, DeleteView):
     model = Besta
-    form_class = BestaForm
-    template_name = 'core/besta_form.html'
+    template_name = 'core/besta_confirm_delete.html'
     success_url = reverse_lazy('besta-list')
+
+# diagnostico
+class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
+    model = Diagnostico
+    form_class = DiagnosticoForm  # Use seu form personalizado
+    template_name = 'core/diagnostico_form.html'  # Seu template original
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['paciente'] = get_object_or_404(Paciente, pk=self.kwargs['paciente_id'])
+        context['doencas'] = Doenca.objects.all()
+        return context
+
+    def form_valid(self, form):
+        form.instance.paciente = get_object_or_404(Paciente, pk=self.kwargs['paciente_id'])
+        form.instance.responsavel = self.request.user
+        
+        # Primeiro salva o diagnóstico para obter um ID
+        self.object = form.save()
+        
+        # Depois do save, podemos adicionar as hipóteses
+        hipoteses_ids = [int(id) for id in self.request.POST.get('hipoteses', '').split(',') if id]
+        if hipoteses_ids:
+            self.object.hipoteses.set(hipoteses_ids)
+        
+        messages.success(self.request, 'Diagnóstico salvo com sucesso!')
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('paciente-detail', kwargs={'pk': self.kwargs['paciente_id']})
+    
+class DiagnosticoUpdateView(MedicoRequiredMixin, UpdateView):
+    model = Diagnostico
+    fields = ['sintomas', 'observacoes', 'hipoteses', 'doenca']
+    template_name = 'core/diagnostico_form.html'
+
+    def get_success_url(self):
+        return reverse('paciente-detail', kwargs={'pk': self.object.paciente.pk})
+
+class DiagnosticoDeleteView(MedicoRequiredMixin, DeleteView):
+    model = Diagnostico
+    template_name = 'core/diagnostico_confirm_delete.html'
+
+    def get_success_url(self):
+        paciente_id = self.object.paciente.pk
+        return reverse('paciente-detail', kwargs={'pk': paciente_id})
+
+
+#paciente
+class PacienteDeleteView(MedicoRequiredMixin, DeleteView):
+    model = Paciente
+    template_name = 'core/paciente_confirm_delete.html'
+    success_url = reverse_lazy('paciente-list')
+
+class PacienteCreateView(MedicoRequiredMixin, CreateView):
+    model = Paciente
+    fields = ['nome', 'idade', 'tipo_sanguineo', 'status', 'bunker', 'observacoes']  # Remova form_class temporariamente
+    template_name = 'core/paciente_form.html'
+    
+    def form_valid(self, form):
+        try:
+            self.object = form.save()
+            messages.success(self.request, 'Salvo com sucesso!')
+            return redirect('paciente-list')
+        except Exception as e:
+            messages.error(self.request, f'ERRO GRAVE: {str(e)}')
+            return self.form_invalid(form)
+
+class PacienteUpdateView(MedicoRequiredMixin, UpdateView):
+    model = Paciente
+    form_class = PacienteForm
+    template_name = 'core/paciente_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('paciente-detail', kwargs={'pk': self.object.pk})
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Paciente atualizado com sucesso!')
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Erro ao atualizar paciente. Verifique os dados.')
+        return super().form_invalid(form)
+    
+class PacienteListView(MedicoRequiredMixin, ListView):
+    model = Paciente
+    template_name = 'core/paciente_list.html'
+    context_object_name = 'pacientes'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('bunker').order_by('nome')  # Ordenação padrão por nome
+        
+        # Aplica filtros se existirem
+        nome = self.request.GET.get('nome')
+        status = self.request.GET.get('status')
+        tipo_sanguineo = self.request.GET.get('tipo_sanguineo')
+        bunker = self.request.GET.get('bunker')
+        
+        if nome:
+            queryset = queryset.filter(nome__icontains=nome)
+        if status:
+            queryset = queryset.filter(status=status)
+        if tipo_sanguineo:
+            queryset = queryset.filter(tipo_sanguineo=tipo_sanguineo)
+        if bunker:
+            queryset = queryset.filter(bunker_id=bunker)
+            
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['bunkers'] = Bunker.objects.all()
+        context['status_choices'] = Paciente.STATUS_CHOICES
+        context['tipo_sanguineo_choices'] = Paciente.TIPO_SANGUINEO_CHOICES
+        
+        # Adiciona flag para saber se há filtros ativos
+        context['has_filters'] = any([
+            self.request.GET.get('nome'),
+            self.request.GET.get('status'),
+            self.request.GET.get('tipo_sanguineo'),
+            self.request.GET.get('bunker')
+        ])
+        
+        return context
+
+class PacienteDetailView(MedicoRequiredMixin, DetailView):
+    model = Paciente
+    template_name = 'core/paciente_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['diagnosticos'] = self.object.diagnostico_set.all()
+        context['todas_doencas'] = Doenca.objects.all()
+        return context
+
+class RelatorioExpedicaoListView(LoginRequiredMixin, ListView):
+    model = RelatorioExpedicao
+    template_name = 'core/relatorio_list.html'
+    context_object_name = 'relatorios'
+    ordering = ['-data']
+
+class RelatorioExpedicaoCreateView(LoginRequiredMixin, CreateView):
+    model = RelatorioExpedicao
+    fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
+    template_name = 'core/relatorio_form.html'
+    success_url = reverse_lazy('relatorio-list')
+    
+    def form_valid(self, form):
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
+
+class RelatorioExpedicaoDetailView(LoginRequiredMixin, DetailView):
+    model = RelatorioExpedicao
+    template_name = 'core/relatorio_detail.html'
+    context_object_name = 'relatorio'  # Isso define o nome da variável no template
+
+class RelatorioExpedicaoUpdateView(LoginRequiredMixin, UpdateView):
+    model = RelatorioExpedicao
+    fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
+    template_name = 'core/relatorio_form.html'
+    success_url = reverse_lazy('relatorio-list')
+
+class RelatorioExpedicaoDeleteView(LoginRequiredMixin, DeleteView):
+    model = RelatorioExpedicao
+    template_name = 'core/relatorio_confirm_delete.html'
+    success_url = reverse_lazy('relatorio-list')

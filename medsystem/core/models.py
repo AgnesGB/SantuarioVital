@@ -1,4 +1,18 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+class Usuario(AbstractUser):
+    TIPO_CHOICES = [
+        ('MED', 'Médico'),
+        ('OUT', 'Outro'),
+    ]
+    
+    nickname = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=3, choices=TIPO_CHOICES, default='OUT')
+    bunker = models.ForeignKey('Bunker', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.username} ({self.get_tipo_display()})"
 
 PARTES_CORPO = [
     ('CAB', 'Cabeça'),
@@ -21,16 +35,7 @@ TIPO_SINTOMA = [
     ('M', 'Mental'),
 ]
 
-class Sintoma(models.Model):
-    nome = models.CharField(max_length=100)
-    tipo = models.CharField(max_length=1, choices=TIPO_SINTOMA)
-    descricao = models.TextField(blank=True)
-    
-    class Meta:
-        ordering = ['tipo', 'nome']
-    
-    def __str__(self):
-        return f"{self.get_tipo_display()}: {self.nome}"
+# Doenças
 
 class Doenca(models.Model):
     nome = models.CharField(max_length=100)
@@ -39,7 +44,7 @@ class Doenca(models.Model):
     forma_contagio = models.CharField(max_length=255, blank=True, null=True)
     parte_afetada = models.CharField(max_length=3, choices=PARTES_CORPO)
     tipo = models.CharField(max_length=1, choices=TIPO_DOENCA)
-    sintomas = models.ManyToManyField(Sintoma)
+    sintomas = models.TextField('Sintomas', blank=True, help_text="Descreva os sintomas, separados por vírgula")
     tratamento = models.TextField(blank=True, help_text="Protocolo de tratamento recomendado")
     reacoes_esperadas = models.TextField(blank=True, help_text="Reações esperadas ao tratamento")
     
@@ -53,6 +58,7 @@ class Doenca(models.Model):
 
 class Bunker(models.Model):
     nome = models.CharField(max_length=100)
+    funcao = models.CharField(max_length=100, default=None)
     
     def __str__(self):
         return self.nome
@@ -83,7 +89,6 @@ class Paciente(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ESTAVEL')
     observacoes = models.TextField(blank=True)
     doencas = models.ManyToManyField(Doenca, through='Diagnostico', related_name='pacientes')
-    sintomas_observados = models.ManyToManyField(Sintoma, blank=True)
     
     def __str__(self):
         return f"{self.nome} ({self.idade} anos, {self.get_status_display()})"
@@ -94,12 +99,18 @@ class Paciente(models.Model):
 
 class Diagnostico(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
-    doenca = models.ForeignKey(Doenca, on_delete=models.CASCADE)
-    data_diagnostico = models.DateField(auto_now_add=True)
+    sintomas = models.TextField(blank=True)
     observacoes = models.TextField(blank=True)
+    hipoteses = models.ManyToManyField(Doenca, related_name='diagnosticos_hipotese', blank=True)
+    doenca = models.ForeignKey(Doenca, on_delete=models.SET_NULL, null=True, blank=True)
+    data = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    responsavel = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
     
     class Meta:
-        ordering = ['-data_diagnostico']
+        ordering = ['-data']
+    
+    def __str__(self):
+        return f"Diagnóstico para {self.paciente} em {self.data}"
 
 class RegistroMedico(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='registros')
@@ -134,17 +145,55 @@ class Besta(models.Model):
     
     nome = models.CharField(max_length=100)
     titulo = models.CharField(max_length=200, blank=True)
+    imagem = models.ImageField(upload_to='bestas/', null=True, blank=True)
     nivel_ameaca = models.CharField(max_length=2, choices=NIVEL_AMEAÇA_CHOICES, default='01')
     aparencia = models.TextField()
     habilidades = models.TextField()
-    doenca_relacionada = models.ForeignKey(
-        Doenca, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
+    doenca_relacionada = models.ManyToManyField(
+        Doenca,
         related_name='bestas'
     )
     anotacoes = models.TextField(blank=True)
     
     def __str__(self):
         return f"{self.nome} - {self.get_nivel_ameaca_display()}"
+
+
+class Postagem(models.Model):
+    titulo = models.CharField(max_length=200)
+    descricao = models.TextField()
+    data = models.DateTimeField(auto_now_add=True)
+    imagem = models.ImageField(upload_to='postagens/', null=True, blank=True)
+    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    
+    class Meta:
+        ordering = ['-data']
+    
+    def __str__(self):
+        return self.titulo
+
+class Comentario(models.Model):
+    postagem = models.ForeignKey(Postagem, on_delete=models.CASCADE, related_name='comentarios')
+    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    texto = models.TextField()
+    data = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['data']
+    
+    def __str__(self):
+        return f"Comentário de {self.autor} em {self.postagem}"
+
+class RelatorioExpedicao(models.Model):
+    titulo = models.CharField(max_length=200)
+    localizacao = models.CharField(max_length=200)
+    data = models.DateTimeField(auto_now_add=True)
+    descobertas = models.TextField()
+    observacoes = models.TextField(blank=True)
+    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    
+    class Meta:
+        ordering = ['-data']
+    
+    def __str__(self):
+        return self.titulo

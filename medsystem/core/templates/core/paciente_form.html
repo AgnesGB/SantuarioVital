@@ -9,61 +9,105 @@
             <div class="column is-half">
                 <h1 class="title">{% if object %}Editar{% else %}Novo{% endif %} Paciente</h1>
                 
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if 'sucesso' not in message.tags %}  <!-- Mostra apenas mensagens que não são de sucesso -->
+                            <div class="notification is-{{ message.tags }}">
+                                <button class="delete"></button>
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                
                 <form method="post">
                     {% csrf_token %}
                     
+                    <!-- Campos Básicos do Paciente -->
                     <div class="field">
-                        <label class="label">{{ form.nome.label }}</label>
+                        <label class="label">Nome</label>
                         <div class="control">
-                            {{ form.nome }}
+                            <input class="input" type="text" name="nome" value="{{ form.nome.value|default:'' }}" required>
                         </div>
+                        {% if form.nome.errors %}
+                            <p class="help is-danger">{{ form.nome.errors }}</p>
+                        {% endif %}
                     </div>
                     
                     <div class="field">
-                        <label class="label">{{ form.idade.label }}</label>
+                        <label class="label">Idade</label>
                         <div class="control">
-                            {{ form.idade }}
+                            <input class="input" type="number" name="idade" value="{{ form.idade.value|default:'' }}" min="0" max="150" required>
                         </div>
+                        {% if form.idade.errors %}
+                            <p class="help is-danger">{{ form.idade.errors }}</p>
+                        {% endif %}
                     </div>
 
                     <div class="field">
-                        <label class="label">{{ form.tipo_sanguineo.label }}</label>
+                        <label class="label">Tipo Sanguíneo</label>
                         <div class="control">
-                            {{ form.tipo_sanguineo }}
+                            <div class="select">
+                                <select name="tipo_sanguineo" required>
+                                    {% for value, label in form.fields.tipo_sanguineo.choices %}
+                                        <option value="{{ value }}" {% if form.tipo_sanguineo.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
+                        {% if form.tipo_sanguineo.errors %}
+                            <p class="help is-danger">{{ form.tipo_sanguineo.errors }}</p>
+                        {% endif %}
                     </div>
 
-                    <div class="field">
-                        <label class="label">{{ form.status.label }}</label>
-                        <div class="control">
-                            {{ form.status }}
-                        </div>
-                    </div>
-                    
                     <div class="field">
                         <label class="label">{{ form.bunker.label }}</label>
                         <div class="control">
-                            <div class="select is-fullwidth">
+                            <div class="select">
                                 {{ form.bunker }}
                             </div>
                         </div>
+                        {% if form.bunker.errors %}
+                            <p class="help is-danger">{{ form.bunker.errors }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Status</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="status" required>
+                                    {% for value, label in form.fields.status.choices %}
+                                        <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        {% if form.status.errors %}
+                            <p class="help is-danger">{{ form.status.errors }}</p>
+                        {% endif %}
                     </div>
                     
                     <div class="field">
-                        <label class="label">{{ form.observacoes.label }}</label>
+                        <label class="label">Observações</label>
                         <div class="control">
-                            {{ form.observacoes }}
+                            <textarea class="textarea" name="observacoes">{{ form.observacoes.value|default:'' }}</textarea>
                         </div>
+                        {% if form.observacoes.errors %}
+                            <p class="help is-danger">{{ form.observacoes.errors }}</p>
+                        {% endif %}
                     </div>
                     
                     <div class="field is-grouped">
                         <div class="control">
                             <button type="submit" class="button is-primary">
-                                Salvar
+                                <span class="icon"><i class="fas fa-save"></i></span>
+                                <span>Salvar</span>
                             </button>
                         </div>
                         <div class="control">
-                            <a href="{% url 'paciente-list' %}" class="button is-light">
+                            <a href="{% if object %}{% url 'paciente-detail' object.pk %}{% else %}{% url 'paciente-list' %}{% endif %}" 
+                               class="button is-light">
                                 Cancelar
                             </a>
                         </div>
@@ -73,4 +117,18 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Fechar notificações
+    (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+        const $notification = $delete.parentNode;
+        $delete.addEventListener('click', () => {
+            $notification.parentNode.removeChild($notification);
+        });
+    });
+});
+</script>
 {% endblock %}

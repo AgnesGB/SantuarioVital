@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Adicionar Diagnóstico{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Adicionar Diagnóstico para {{ paciente.nome }}</h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="field">
+                <label class="label">{{ form.doenca.label }}</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        {{ form.doenca }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="field">
+                <label class="label">{{ form.observacoes.label }}</label>
+                <div class="control">
+                    {{ form.observacoes }}
+                </div>
+            </div>
+            
+            <div class="field is-grouped">
+                <div class="control">
+                    <button type="submit" class="button is-primary">
+                        Salvar Diagnóstico
+                    </button>
+                </div>
+                <div class="control">
+                    <a href="{% url 'paciente-detail' paciente.id %}" class="button is-light">
+                        Cancelar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

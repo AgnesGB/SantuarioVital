@@ -1,66 +1,132 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Bestiário{% endblock %}
+{% block title %}Lista de Criaturas{% endblock %}
 
 {% block content %}
-<section class="section">
-    <div class="container">
-        <div class="level">
-            <div class="level-left">
-                <h1 class="title">Bestiário</h1>
-            </div>
-            <div class="level-right">
-                <a href="{% url 'besta-create' %}" class="button is-primary">
-                    <span class="icon">
-                        <i class="fas fa-plus"></i>
-                    </span>
-                    <span>Adicionar Criatura</span>
-                </a>
-            </div>
+<div class="columns">
+    <div class="column is-3">
+        <div class="box">
+            <h2 class="title is-4">Filtros</h2>
+            <form method="get" action="{% url 'besta-list' %}">
+                <div class="field">
+                    <label class="label">Nome</label>
+                    <div class="control">
+                        <input class="input" type="text" name="nome" 
+                               value="{{ request.GET.nome }}" 
+                               placeholder="Filtrar por nome...">
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Nível de Ameaça</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="nivel_ameaca">
+                                <option value="">Todos</option>
+                                <option value="01" {% if request.GET.nivel_ameaca == '01' %}selected{% endif %}> 01/10</option>
+                                <option value="02" {% if request.GET.nivel_ameaca == '02' %}selected{% endif %}> 02/10</option>
+                                <option value="03" {% if request.GET.nivel_ameaca == '03' %}selected{% endif %}> 03/10</option>
+                                <option value="04" {% if request.GET.nivel_ameaca == '04' %}selected{% endif %}> 04/10</option>
+                                <option value="05" {% if request.GET.nivel_ameaca == '05' %}selected{% endif %}> 05/10</option>
+                                <option value="06" {% if request.GET.nivel_ameaca == '06' %}selected{% endif %}> 06/10</option>
+                                <option value="07" {% if request.GET.nivel_ameaca == '07' %}selected{% endif %}> 07/10</option>
+                                <option value="08" {% if request.GET.nivel_ameaca == '08' %}selected{% endif %}> 08/10</option>
+                                <option value="09" {% if request.GET.nivel_ameaca == '09' %}selected{% endif %}> 09/10</option>
+                                <option value="10" {% if request.GET.nivel_ameaca == '10' %}selected{% endif %}> 10/10</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Habilidades</label>
+                    <div class="control">
+                        <input class="input" type="text" name="habilidades" 
+                               value="{{ request.GET.habilidades }}" 
+                               placeholder="Ex: fogo, veneno, invisibilidade">
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <div class="control">
+                        <button type="submit" class="button is-primary is-fullwidth">Filtrar</button>
+                        {% if request.GET.nome or request.GET.nivel_ameaca or request.GET.habilidades %}
+                        <a href="{% url 'besta-list' %}" class="button is-light is-fullwidth mt-2">
+                            Limpar filtros
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
         </div>
-
+        
+        <a href="{% url 'besta-create' %}" class="button is-success is-fullwidth">
+            <span class="icon">
+                <i class="fas fa-plus"></i>
+            </span>
+            <span>Nova Criatura</span>
+        </a>
+    </div>
+    
+    <div class="column is-9">
+        <h1 class="title">Criaturas</h1>
+        
+        {% if bestas %}
         <div class="columns is-multiline">
             {% for besta in bestas %}
             <div class="column is-4">
                 <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            Nome: {{ besta.nome }}
+                        </p>
+                    </header>
                     <div class="card-content">
-                        <div class="media">
-                            <div class="media-content">
-                                <p class="title is-4">{{ besta.nome }}</p>
-                                <p class="subtitle is-6">{{ besta.titulo }}</p>
-                                <span class="tag is-{{ besta.nivel_ameaca|lower }}">
-                                    {{ besta.get_nivel_ameaca_display }}
-                                </span>
-                            </div>
-                        </div>
                         <div class="content">
-                            <p class="has-text-grey is-size-7">{{ besta.aparencia|truncatechars:100 }}</p>
+                            <p><strong>Título:</strong> {{ besta.titulo }}</p>
+                            <p><strong>Nível de Ameaça:</strong> {{ besta.get_nivel_ameaca_display }}</p>
+                            <p><strong>Aparência:</strong> {{ besta.aparencia|truncatechars:50 }}</p>
+                            <p><strong>Habilidades:</strong> {{ besta.habilidades|truncatechars:50 }}</p>
+                            
+                            {% if besta.doencas.all %}
+                            <div class="mt-3">
+                                <h6 class="subtitle is-6">Doenças associadas:</h6>
+                                <div class="tags">
+                                    {% for doenca in besta.doencas.all %}
+                                    <span class="tag is-danger">{{ doenca.nome }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
+                    
                     <footer class="card-footer">
                         <a href="{% url 'besta-detail' besta.pk %}" class="card-footer-item">
                             <span class="icon">
                                 <i class="fas fa-eye"></i>
                             </span>
-                            <span>Detalhes</span>
                         </a>
                         <a href="{% url 'besta-update' besta.pk %}" class="card-footer-item">
                             <span class="icon">
                                 <i class="fas fa-edit"></i>
                             </span>
-                            <span>Editar</span>
+                        </a>
+                        <a href="{% url 'besta-delete' besta.pk %}" class="card-footer-item has-text-danger">
+                            <span class="icon">
+                                <i class="fas fa-trash"></i>
+                            </span>
                         </a>
                     </footer>
                 </div>
             </div>
-            {% empty %}
-            <div class="column">
-                <div class="notification is-warning">
-                    Nenhuma criatura registrada no bestiário.
-                </div>
-            </div>
             {% endfor %}
         </div>
+        {% else %}
+        <div class="notification is-warning">
+            Nenhuma criatura encontrada com os filtros atuais.
+        </div>
+        {% endif %}
     </div>
-</section>
+</div>
 {% endblock %}

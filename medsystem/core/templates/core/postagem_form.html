@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Nova Postagem{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Criar Nova Postagem</h1>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="field">
+                <label class="label">Título</label>
+                <div class="control">
+                    <input class="input" type="text" name="titulo" required>
+                </div>
+            </div>
+            
+            <div class="field">
+                <label class="label">Conteúdo</label>
+                <div class="control">
+                    <textarea class="textarea" name="descricao" required></textarea>
+                </div>
+            </div>
+            
+            <div class="field">
+                <label class="label">Imagem (opcional)</label>
+                <div class="control">
+                    <input class="input" type="file" name="imagem" accept="image/*">
+                </div>
+            </div>
+            
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-primary">Publicar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

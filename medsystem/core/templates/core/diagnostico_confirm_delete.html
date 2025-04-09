@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="box">
+            <h1 class="title">Confirmar Exclusão</h1>
+            <p>Tem certeza que deseja excluir este diagnóstico?</p>
+            
+            <div class="content">
+                <p><strong>Paciente:</strong> {{ object.paciente.nome }}</p>
+                <p><strong>Data:</strong> {{ object.data|date:"d/m/Y" }}</p>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="field is-grouped">
+                    <div class="control">
+                        <button type="submit" class="button is-danger">Confirmar</button>
+                    </div>
+                    <div class="control">
+                        <a href="{% url 'paciente-detail' object.paciente.pk %}" class="button is-light">Cancelar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

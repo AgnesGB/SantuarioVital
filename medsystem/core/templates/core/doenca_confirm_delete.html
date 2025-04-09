@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="box">
+            <h1 class="title">Confirmar Exclusão</h1>
+            <p>Tem certeza que deseja excluir a doença "{{ object.nome }}"?</p>
+            
+            <form method="post" class="mt-5">
+                {% csrf_token %}
+                <div class="field is-grouped">
+                    <div class="control">
+                        <button type="submit" class="button is-danger">Confirmar Exclusão</button>
+                    </div>
+                    <div class="control">
+                        <a href="{% url 'doenca-list' %}" class="button is-light">Cancelar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

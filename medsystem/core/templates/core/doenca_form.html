@@ -71,11 +71,45 @@
                     </div>
                     
                     <div class="field">
-                        <label class="label">{{ form.sintomas.label }}</label>
+                        <label class="label">Sintomas</label>
                         <div class="control">
-                            {{ form.sintomas }}
+                            <input type="text" name="sintomas" class="input" 
+                                   value="{{ form.sintomas.value|default:'' }}"
+                                   placeholder="Digite os sintomas separados por vírgula">
                         </div>
                     </div>
+                    
+                    <script>
+                    let sintomaCount = 1;
+                    
+                    function adicionarSintoma() {
+                        sintomaCount++;
+                        const container = document.getElementById('sintomas-container');
+                        const novoSelect = `
+                            <div class="field has-addons mt-2" id="sintoma-${sintomaCount}">
+                                <div class="control is-expanded">
+                                    <div class="select is-fullwidth">
+                                        <select name="sintomas" class="sintoma-select">
+                                            {% for sintoma in sintomas %}
+                                            <option value="{{ sintoma.id }}">{{ sintoma.nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="control">
+                                    <button type="button" class="button is-danger" onclick="removerSintoma(${sintomaCount})">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>`;
+                        container.insertAdjacentHTML('beforeend', novoSelect);
+                    }
+                    
+                    function removerSintoma(id) {
+                        const element = document.getElementById(`sintoma-${id}`);
+                        if (element) element.remove();
+                    }
+                    </script>
                     
                     <div class="field">
                         <label class="label">{{ form.origem.label }}</label>

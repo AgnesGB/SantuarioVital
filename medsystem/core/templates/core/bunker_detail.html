@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ bunker.nome }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="box">
+            <h1 class="title">{{ bunker.nome }}</h1>
+            <h2 class="subtitle">Função: {{ bunker.funcao }}</h2>
+            
+            <div class="tabs is-boxed">
+                <ul>
+                    <li class="is-active" data-tab="membros">
+                        <a>
+                            <span class="icon is-small"><i class="fas fa-users"></i></span>
+                            <span>Membros</span>
+                        </a>
+                    </li>
+                    <li data-tab="pacientes">
+                        <a>
+                            <span class="icon is-small"><i class="fas fa-user-injured"></i></span>
+                            <span>Pacientes</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div id="membros" class="tab-content is-active">
+                <h3 class="title is-4">Membros do Bunker</h3>
+                <div class="columns is-multiline">
+                    {% for membro in membros %}
+                    <div class="column is-4">
+                        <div class="box">
+                            <article class="media">
+                                <div class="media-content">
+                                    <div class="content">
+                                        <p>
+                                            <strong>{{ membro.username }}</strong>
+                                            <small>@{{ membro.nickname }}</small>
+                                            {% if membro.tipo == 'MED' %}
+                                            <span class="tag is-success is-light">
+                                                <span class="icon">
+                                                    <i class="fas fa-user-md"></i>
+                                                </span>
+                                                <span>Médico</span>
+                                            </span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="column">
+                        <div class="notification is-warning">
+                            Nenhum membro neste bunker.
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div id="pacientes" class="tab-content">
+                <h3 class="title is-4">Pacientes do Bunker</h3>
+                <div class="columns is-multiline">
+                    {% for paciente in pacientes %}
+                    <div class="column is-4">
+                        <div class="box">
+                            <article class="media">
+                                <div class="media-content">
+                                    <div class="content">
+                                        <p>
+                                            <strong>{{ paciente.nome }}</strong>
+                                            <small>{{ paciente.idade }} anos</small>
+                                            <br>
+                                            <span class="tag is-danger is-light">
+                                                <span class="icon">
+                                                    <i class="fas fa-tint"></i>
+                                                </span>
+                                                <span>{{ paciente.get_tipo_sanguineo_display }}</span>
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="column">
+                        <div class="notification is-warning">
+                            Nenhum paciente neste bunker.
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tabs li');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Remove is-active from all tabs and contents
+            tabs.forEach(t => t.classList.remove('is-active'));
+            tabContents.forEach(c => c.classList.remove('is-active'));
+            
+            // Add is-active to clicked tab and corresponding content
+            this.classList.add('is-active');
+            document.getElementById(tabId).classList.add('is-active');
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

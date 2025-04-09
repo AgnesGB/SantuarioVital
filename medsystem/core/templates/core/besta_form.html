@@ -2,6 +2,24 @@
 
 {% block title %}{% if object %}Editar{% else %}Nova{% endif %} Criatura{% endblock %}
 
+{% block extra_css %}
+<style>
+    .select2-container {
+        width: 100% !important;
+        min-height: 2.5em;
+    }
+    
+    .select2-selection {
+        min-height: 2.5em !important;
+        height: auto !important;
+    }
+    
+    textarea {
+        min-height: 120px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="section">
     <div class="container">
@@ -9,13 +27,25 @@
             <div class="column is-two-thirds">
                 <h1 class="title">{% if object %}Editar{% else %}Nova{% endif %} Criatura</h1>
                 
-                <form method="post">
+                {% if form.errors %}
+                <div class="notification is-danger">
+                    <button class="delete"></button>
+                    Corrija os erros abaixo antes de salvar.
+                </div>
+                {% endif %}
+                
+                <!-- Adicione enctype="multipart/form-data" aqui -->
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
+                    <!-- Campos básicos -->
                     <div class="field">
                         <label class="label">{{ form.nome.label }}</label>
                         <div class="control">
                             {{ form.nome }}
+                            {% if form.nome.errors %}
+                            <p class="help is-danger">{{ form.nome.errors }}</p>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -23,15 +53,35 @@
                         <label class="label">{{ form.titulo.label }}</label>
                         <div class="control">
                             {{ form.titulo }}
+                            {% if form.titulo.errors %}
+                            <p class="help is-danger">{{ form.titulo.errors }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Adicione o campo de imagem -->
+                    <div class="field">
+                        <label class="label">{{ form.imagem.label }}</label>
+                        <div class="control">
+                            {{ form.imagem }}
+                            {% if form.imagem.errors %}
+                            <p class="help is-danger">{{ form.imagem.errors }}</p>
+                            {% endif %}
+                            {% if object and object.imagem %}
+                            <p class="help">Imagem atual: <a href="{{ object.imagem.url }}" target="_blank">{{ object.imagem.name }}</a></p>
+                            {% endif %}
                         </div>
                     </div>
                     
                     <div class="field">
                         <label class="label">{{ form.nivel_ameaca.label }}</label>
                         <div class="control">
-                            <div class="select">
+                            <div class="select is-fullwidth">
                                 {{ form.nivel_ameaca }}
                             </div>
+                            {% if form.nivel_ameaca.errors %}
+                            <p class="help is-danger">{{ form.nivel_ameaca.errors }}</p>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -39,6 +89,9 @@
                         <label class="label">{{ form.aparencia.label }}</label>
                         <div class="control">
                             {{ form.aparencia }}
+                            {% if form.aparencia.errors %}
+                            <p class="help is-danger">{{ form.aparencia.errors }}</p>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -46,15 +99,22 @@
                         <label class="label">{{ form.habilidades.label }}</label>
                         <div class="control">
                             {{ form.habilidades }}
+                            {% if form.habilidades.errors %}
+                            <p class="help is-danger">{{ form.habilidades.errors }}</p>
+                            {% endif %}
                         </div>
                     </div>
                     
+                    <!-- Campo de doenças -->
                     <div class="field">
-                        <label class="label">{{ form.doenca_relacionada.label }}</label>
+                        <label class="label">Doenças associadas</label>
                         <div class="control">
-                            <div class="select">
-                                {{ form.doenca_relacionada }}
+                            <div class="select is-multiple is-fullwidth">
+                                {{ form.doenca_relacionada }}  <!-- Corrigido para usar o nome correto do campo -->
                             </div>
+                            {% if form.doenca_relacionada.errors %}
+                            <p class="help is-danger">{{ form.doenca_relacionada.errors }}</p>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -62,6 +122,9 @@
                         <label class="label">{{ form.anotacoes.label }}</label>
                         <div class="control">
                             {{ form.anotacoes }}
+                            {% if form.anotacoes.errors %}
+                            <p class="help is-danger">{{ form.anotacoes.errors }}</p>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -75,7 +138,7 @@
                             </button>
                         </div>
                         <div class="control">
-                            <a href="{% if object %}{% url 'besta-detail' object.pk %}{% else %}{% url 'besta-list' %}{% endif %}" class="button is-light">
+                            <a href="{% url 'besta-list' %}" class="button is-light">
                                 <span class="icon">
                                     <i class="fas fa-times"></i>
                                 </span>
@@ -88,4 +151,26 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar Select2 para o campo de doenças
+    $('select').select2({
+        placeholder: "Selecione as doenças",
+        allowClear: true,
+        width: '100%',
+        dropdownAutoWidth: true,
+        closeOnSelect: false
+    });
+    
+    // Fechar notificações
+    document.querySelectorAll('.notification .delete').forEach(function(deleteButton) {
+        deleteButton.addEventListener('click', function() {
+            this.parentNode.remove();
+        });
+    });
+});
+</script>
 {% endblock %}

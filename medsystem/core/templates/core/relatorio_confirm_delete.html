@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="box">
+            <h1 class="title">Confirmar Exclusão</h1>
+            <p>Tem certeza que deseja excluir o relatório "{{ object.titulo }}"?</p>
+            
+            <form method="post" class="mt-5">
+                {% csrf_token %}
+                <div class="field is-grouped">
+                    <div class="control">
+                        <button type="submit" class="button is-danger">
+                            <span class="icon">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                            <span>Confirmar Exclusão</span>
+                        </button>
+                    </div>
+                    <div class="control">
+                        <a href="{% url 'relatorio-detail' object.pk %}" class="button is-light">
+                            <span class="icon">
+                                <i class="fas fa-times"></i>
+                            </span>
+                            <span>Cancelar</span>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

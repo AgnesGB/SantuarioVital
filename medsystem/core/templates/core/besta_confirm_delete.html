@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="box">
+    <h1 class="title">Confirmar exclusão</h1>
+    <p>Tem certeza que deseja excluir "{{ object.nome }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="buttons mt-4">
+            <button type="submit" class="button is-danger">Confirmar</button>
+            <a href="{% url 'besta-detail' object.pk %}" class="button">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

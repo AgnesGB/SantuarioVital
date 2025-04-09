@@ -1,0 +1,268 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Adicionar Diagnóstico{% endblock %}
+
+{% block extra_css %}
+<style>
+    .diagnostico-section {
+        margin-bottom: 2rem;
+    }
+    .hipotese-tag {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .card.doenca-card {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .card.doenca-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .selected-hipoteses {
+        min-height: 60px;
+        border: 1px dashed #dbdbdb;
+        border-radius: 4px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Adicionar Diagnóstico para {{ paciente.nome }}</h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Seção de Sintomas e Observações -->
+            <div class="box diagnostico-section">
+                <h2 class="title is-4">Sintomas e Observações</h2>
+                
+                <div class="field">
+                    <label class="label">Descrição dos Sintomas</label>
+                    <div class="control">
+                        <textarea class="textarea" name="sintomas" placeholder="Descreva os sintomas observados..." required></textarea>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Observações Adicionais</label>
+                    <div class="control">
+                        <textarea class="textarea" name="observacoes" placeholder="Observações relevantes..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seção de Hipóteses Diagnósticas -->
+            <div class="box diagnostico-section">
+                <h2 class="title is-4">Hipóteses Diagnósticas</h2>
+                
+                <!-- Filtros de Doenças -->
+                <div class="box">
+                    <div class="columns">
+                        <div class="column is-4">
+                            <div class="field">
+                                <label class="label">Nome</label>
+                                <div class="control">
+                                    <input class="input" type="text" id="filtro-nome" placeholder="Filtrar por nome...">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="column is-4">
+                            <div class="field">
+                                <label class="label">Tipo</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        <select id="filtro-tipo">
+                                            <option value="">Todos</option>
+                                            <option value="F">Física</option>
+                                            <option value="M">Mental</option>
+                                            <option value="B">Ambas</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="column is-4">
+                            <div class="field">
+                                <label class="label">Sintomas</label>
+                                <div class="control">
+                                    <input class="input" type="text" id="filtro-sintomas" placeholder="Ex: febre, dor">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lista de Doenças para seleção -->
+                <div class="columns is-multiline" id="doencas-container">
+                    {% for doenca in doencas %}
+                    <div class="column is-4 doenca-item" 
+                         data-nome="{{ doenca.nome|lower }}"
+                         data-tipo="{{ doenca.tipo }}"
+                         data-sintomas="{{ doenca.sintomas|lower }}">
+                        <div class="card doenca-card" data-id="{{ doenca.id }}">
+                            <header class="card-header">
+                                <p class="card-header-title">
+                                    {{ doenca.nome }}
+                                    <span class="tag is-light ml-2">{{ doenca.get_tipo_display }}</span>
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <div class="content">
+                                    <p><strong>Sintomas:</strong> {{ doenca.sintomas|truncatechars:50 }}</p>
+                                    <p><strong>Tratamento:</strong> {{ doenca.tratamento|truncatechars:50 }}</p>
+                                </div>
+                            </div>
+                            <footer class="card-footer">
+                                <a href="{% url 'doenca-detail' doenca.pk %}" class="card-footer-item" target="_blank">
+                                    <span class="icon">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                </a>
+                                <a href="#" class="card-footer-item add-hipotese" data-id="{{ doenca.id }}" data-nome="{{ doenca.nome }}">
+                                    <span class="icon">
+                                        <i class="fas fa-plus"></i>
+                                    </span>
+                                </a>
+                            </footer>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Hipóteses Selecionadas -->
+                <div class="selected-hipoteses" id="hipoteses-selecionadas">
+                    <p class="has-text-grey" id="nenhuma-hipotese">Nenhuma hipótese selecionada</p>
+                    <!-- Hipóteses serão adicionadas aqui -->
+                </div>
+                <input type="hidden" name="hipoteses" id="hipoteses-input">
+            </div>
+            
+            <!-- Diagnóstico Final -->
+            <div class="box diagnostico-section">
+                <h2 class="title is-4">Diagnóstico Final</h2>
+                
+                <div class="field">
+                    <label class="label">Doença Confirmada (opcional)</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="doenca">
+                                <option value="">-- Selecione uma doença --</option>
+                                {% for doenca in doencas %}
+                                <option value="{{ doenca.id }}">{{ doenca.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botões de Ação -->
+            <div class="field is-grouped">
+                <div class="control">
+                    <button type="submit" class="button is-primary">
+                        <span class="icon">
+                            <i class="fas fa-save"></i>
+                        </span>
+                        <span>Salvar Diagnóstico</span>
+                    </button>
+                </div>
+                <div class="control">
+                    <a href="{% url 'paciente-detail' paciente.id %}" class="button is-light">
+                        <span class="icon">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        <span>Cancelar</span>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos DOM
+    const doencasContainer = document.getElementById('doencas-container');
+    const hipotesesSelecionadas = document.getElementById('hipoteses-selecionadas');
+    const hipotesesInput = document.getElementById('hipoteses-input');
+    const nenhumaHipoteseMsg = document.getElementById('nenhuma-hipotese');
+    const filtroNome = document.getElementById('filtro-nome');
+    const filtroTipo = document.getElementById('filtro-tipo');
+    const filtroSintomas = document.getElementById('filtro-sintomas');
+    
+    let hipoteses = [];
+    
+    // Função para filtrar doenças
+    function filtrarDoencas() {
+        const nomeTerm = filtroNome.value.toLowerCase();
+        const tipoTerm = filtroTipo.value;
+        const sintomasTerm = filtroSintomas.value.toLowerCase();
+        
+        document.querySelectorAll('.doenca-item').forEach(item => {
+            const nomeMatch = item.dataset.nome.includes(nomeTerm);
+            const tipoMatch = tipoTerm === '' || item.dataset.tipo === tipoTerm;
+            const sintomasMatch = sintomasTerm === '' || item.dataset.sintomas.includes(sintomasTerm);
+            
+            item.style.display = (nomeMatch && tipoMatch && sintomasMatch) ? 'block' : 'none';
+        });
+    }
+    
+    // Event listeners para filtros
+    filtroNome.addEventListener('input', filtrarDoencas);
+    filtroTipo.addEventListener('change', filtrarDoencas);
+    filtroSintomas.addEventListener('input', filtrarDoencas);
+    
+    // Adicionar hipótese
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.add-hipotese')) {
+            e.preventDefault();
+            const button = e.target.closest('.add-hipotese');
+            const doencaId = button.dataset.id;
+            const doencaNome = button.dataset.nome;
+            
+            if (!hipoteses.includes(doencaId)) {
+                hipoteses.push(doencaId);
+                
+                // Criar tag de hipótese
+                const tag = document.createElement('span');
+                tag.className = 'tag is-info hipotese-tag';
+                tag.innerHTML = `
+                    ${doencaNome}
+                    <button class="delete is-small" data-id="${doencaId}"></button>
+                `;
+                
+                // Esconder mensagem "Nenhuma hipótese" se for a primeira
+                if (hipoteses.length === 1) {
+                    nenhumaHipoteseMsg.style.display = 'none';
+                }
+                
+                hipotesesSelecionadas.appendChild(tag);
+                hipotesesInput.value = hipoteses.join(',');
+            }
+        }
+        
+        // Remover hipótese
+        if (e.target.classList.contains('delete')) {
+            const doencaId = e.target.getAttribute('data-id');
+            hipoteses = hipoteses.filter(id => id !== doencaId);
+            e.target.parentElement.remove();
+            hipotesesInput.value = hipoteses.join(',');
+            
+            // Mostrar mensagem "Nenhuma hipótese" se não houver mais
+            if (hipoteses.length === 0) {
+                nenhumaHipoteseMsg.style.display = 'block';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

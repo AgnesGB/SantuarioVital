@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ relatorio.titulo }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="box">
+            <h1 class="title">{{ relatorio.titulo }}</h1>
+            <h2 class="subtitle">Expedição em {{ relatorio.localizacao }}</h2>
+            
+            <div class="content">
+                <p><strong>Data:</strong> {{ relatorio.data|date:"d/m/Y H:i" }}</p>
+                <p><strong>Autor:</strong> {{ relatorio.autor.username }}</p>
+                
+                <h3 class="title is-4 mt-5">Descobertas</h3>
+                <div class="box">
+                    {{ relatorio.descobertas|linebreaks }}
+                </div>
+                
+                {% if relatorio.observacoes %}
+                <h3 class="title is-4 mt-5">Observações</h3>
+                <div class="box">
+                    {{ relatorio.observacoes|linebreaks }}
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if user == relatorio.autor or user.is_superuser %}
+            <div class="buttons">
+                <!-- Corrigido: usando relatorio.pk em vez de object.pk -->
+                <a href="{% url 'relatorio-update' relatorio.pk %}" class="button is-warning">
+                    <span class="icon">
+                        <i class="fas fa-edit"></i>
+                    </span>
+                    <span>Editar</span>
+                </a>
+                <!-- Corrigido: usando relatorio.pk em vez de object.pk -->
+                <a href="{% url 'relatorio-delete' relatorio.pk %}" class="button is-danger">
+                    <span class="icon">
+                        <i class="fas fa-trash"></i>
+                    </span>
+                    <span>Excluir</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,32 +1,24 @@
 from django import forms
-from .models import Bunker, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, Sintoma
+from .models import Postagem, Usuario, RelatorioExpedicao, Bunker, Besta, Doenca, Paciente, Diagnostico, RegistroMedico
 from django.forms.widgets import DateInput
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import get_user_model
 
 class DoencaForm(forms.ModelForm):
-    sintomas = forms.ModelMultipleChoiceField(
-        queryset=Sintoma.objects.all(),
-        widget=forms.SelectMultiple(attrs={'class': 'select2'}),
-        required=False
-    )
-    
     class Meta:
         model = Doenca
         fields = '__all__'
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'input'}),
             'origem': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
-            'forma_contagio': forms.Textarea(attrs={'class': 'textarea', 'rows': 2}),
-            'tratamento': forms.Textarea(attrs={'class': 'textarea', 'rows': 4}),
-            'reacoes_esperadas': forms.Textarea(attrs={'class': 'textarea', 'rows': 4}),
-        }
-        help_texts = {
-            'sintomas': 'Segure Ctrl para selecionar múltiplos sintomas',
+            'tratamento': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'sintomas': forms.TextInput(attrs={'class': 'input'}),
         }
 
 class PacienteForm(forms.ModelForm):
     class Meta:
         model = Paciente
-        fields = '__all__'
+        fields = ['nome', 'idade', 'tipo_sanguineo', 'bunker', 'status', 'observacoes']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'input'}),
             'idade': forms.NumberInput(attrs={
@@ -41,23 +33,18 @@ class PacienteForm(forms.ModelForm):
         }
 
 class RegistroMedicoForm(forms.ModelForm):
-    sintomas_texto = forms.CharField(
-        label='Descrição dos Sintomas',
+    sintomas_observados = forms.CharField(
         widget=forms.Textarea(attrs={
+            'class': 'textarea',
             'rows': 3,
-            'placeholder': 'Descreva os sintomas observados (febre, dor de cabeça, etc.)'
+            'placeholder': 'Descreva os sintomas observados'
         }),
         required=True
     )
     
     class Meta:
         model = RegistroMedico
-        fields = ['paciente', 'sintomas_texto', 'observacoes', 'tratamento_aplicado']
-        widgets = {
-            'paciente': forms.HiddenInput(),
-            'observacoes': forms.Textarea(attrs={'rows': 3}),
-            'tratamento_aplicado': forms.Textarea(attrs={'rows': 3}),
-        }
+        fields = ['paciente', 'sintomas_observados', 'observacoes', 'tratamento_aplicado']
 
 class BunkerForm(forms.ModelForm):
     class Meta:
@@ -70,40 +57,55 @@ class BunkerForm(forms.ModelForm):
             'nome': 'Nome do Bunker',
         }
 
+class UsuarioCreationForm(UserCreationForm):
+    nickname = forms.CharField(max_length=100, required=True)
+    
+    class Meta:
+        model = Usuario
+        fields = ['username', 'nickname', 'password1', 'password2', 'tipo', 'bunker']
+        widgets = {
+            'tipo': forms.Select(attrs={'class': 'select'}),
+            'bunker': forms.Select(attrs={'class': 'select'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({'class': 'input'})
+        self.fields['nickname'].widget.attrs.update({'class': 'input'})
+        self.fields['password1'].widget.attrs.update({'class': 'input'})
+        self.fields['password2'].widget.attrs.update({'class': 'input'})
+        
+class PostagemForm(forms.ModelForm):
+    class Meta:
+        model = Postagem
+        fields = ['titulo', 'descricao', 'imagem']
+
+class RelatorioExpedicaoForm(forms.ModelForm):
+    class Meta:
+        model = RelatorioExpedicao
+        fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
+
 class DiagnosticoForm(forms.ModelForm):
-    sintomas = forms.ModelMultipleChoiceField(
-        queryset=Sintoma.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
+    class Meta:
+        model = Diagnostico
+        fields = ['sintomas', 'observacoes', 'hipoteses', 'doenca']
+        widgets = {
+            'hipoteses': forms.SelectMultiple(attrs={
+                'class': 'select is-multiple',
+                'style': 'width: 100%'  # Adiciona se necessário
+            }),
+            'doenca': forms.Select(attrs={'class': 'select'}),
+            'sintomas': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'observacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+        }
+
+class BestaForm(forms.ModelForm):
+    doenca_relacionada = forms.ModelMultipleChoiceField(
+        queryset=Doenca.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'select2'}),
+        required=False  # Isso permite que o campo fique em branco
     )
     
     class Meta:
-        model = Diagnostico
-        fields = ['doenca', 'observacoes']
-        
-    def __init__(self, *args, **kwargs):
-        paciente = kwargs.pop('paciente', None)
-        super().__init__(*args, **kwargs)
-        if paciente:
-            self.fields['doenca'].queryset = Doenca.objects.filter(
-                sintomas__in=paciente.sintomas_observados.all()
-            ).distinct()
-
-class SintomaForm(forms.Form):
-    sintoma = forms.ModelChoiceField(
-        queryset=Sintoma.objects.all(),
-        widget=forms.Select(attrs={'class': 'select'}),
-        label="Adicionar Sintoma"
-    )
-
-class BestaForm(forms.ModelForm):
-    class Meta:
         model = Besta
         fields = '__all__'
-        widgets = {
-            'nome': forms.TextInput(attrs={'class': 'input'}),
-            'titulo': forms.TextInput(attrs={'class': 'input'}),
-            'aparencia': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
-            'habilidades': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
-            'anotacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
-        }

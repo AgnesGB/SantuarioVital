@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Relatórios de Expedição{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="level">
+            <div class="level-left">
+                <h1 class="title">Relatórios de Expedição</h1>
+            </div>
+            <div class="level-right">
+                <a href="{% url 'relatorio-create' %}" class="button is-primary">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>Novo Relatório</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Localização</th>
+                        <th>Data</th>
+                        <th>Descobertas</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for relatorio in object_list %}
+                    <tr>
+                        <td>{{ relatorio.titulo }}</td>
+                        <td>{{ relatorio.localizacao }}</td>
+                        <td>{{ relatorio.data|date:"d/m/Y" }}</td>
+                        <td>{{ relatorio.descobertas }}</td>
+                        <td>
+                            <div class="buttons">
+                                <a href="{% url 'relatorio-detail' relatorio.pk %}" class="button is-small is-info">
+                                    <span class="icon">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </a>
+                                <a href="{% url 'relatorio-update' relatorio.pk %}" class="button is-small is-warning">
+                                    <span class="icon">
+                                        <i class="fas fa-edit"></i>
+                                    </span>
+                                </a>
+                                <a href="{% url 'relatorio-delete' relatorio.pk %}" class="button is-small is-danger">
+                                    <span class="icon">
+                                        <i class="fas fa-trash"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="has-text-centered">Nenhum relatório encontrado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

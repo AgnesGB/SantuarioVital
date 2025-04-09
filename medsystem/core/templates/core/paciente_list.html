@@ -25,12 +25,6 @@
             </div>
             <div class="level-right">
                 <div class="buttons">
-                    <a href="{% url 'bunker-create' %}" class="button is-info">
-                        <span class="icon">
-                            <i class="fas fa-warehouse"></i>
-                        </span>
-                        <span>Adicionar Bunker</span>
-                    </a>
                     <a href="{% url 'paciente-create' %}" class="button is-primary">
                         <span class="icon">
                             <i class="fas fa-user-plus"></i>
@@ -131,7 +125,7 @@
                             <div class="card-content">
                                 <div class="media">
                                     <div class="media-content">
-                                        <p class="title is-5">{{ paciente.nome }}</p>
+                                        <p class="title is-5">{{ paciente.nome }}</p> <hr>
                                         <p class="subtitle is-6">
                                             {{ paciente.idade }} anos
                                             {% if paciente.tipo_sanguineo %}
