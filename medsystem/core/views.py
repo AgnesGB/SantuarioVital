@@ -266,32 +266,68 @@ class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.paciente = get_object_or_404(Paciente, pk=self.kwargs['paciente_id'])
         form.instance.responsavel = self.request.user
+        response = super().form_valid(form)
         
-        # Primeiro salva o diagnóstico para obter um ID
-        self.object = form.save()
-        
-        # Depois do save, podemos adicionar as hipóteses
-        hipoteses_ids = [int(id) for id in self.request.POST.get('hipoteses', '').split(',') if id]
+        # Hipóteses agora são opcionais
+        hipoteses_ids = self.request.POST.getlist('hipoteses')  # Usar getlist para pegar múltiplos valores
         if hipoteses_ids:
             self.object.hipoteses.set(hipoteses_ids)
         
         messages.success(self.request, 'Diagnóstico salvo com sucesso!')
-        return redirect(self.get_success_url())
+        return response
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Erro ao salvar diagnóstico. Verifique os dados.')
+        return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse('paciente-detail', kwargs={'pk': self.kwargs['paciente_id']})
     
 class DiagnosticoUpdateView(MedicoRequiredMixin, UpdateView):
     model = Diagnostico
-    fields = ['sintomas', 'observacoes', 'hipoteses', 'doenca']
+    form_class = DiagnosticoForm
     template_name = 'core/diagnostico_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Garante que o paciente está disponível no formulário
+        kwargs['paciente'] = self.object.paciente
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        # Carrega as hipóteses existentes
+        initial['hipoteses'] = self.object.hipoteses.all()
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['paciente'] = self.object.paciente
+        context['doencas'] = Doenca.objects.all()
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Atualiza as hipóteses
+        hipoteses_ids = self.request.POST.getlist('hipoteses')
+        self.object.hipoteses.set(hipoteses_ids)
+        messages.success(self.request, 'Diagnóstico atualizado com sucesso!')
+        return response
 
     def get_success_url(self):
         return reverse('paciente-detail', kwargs={'pk': self.object.paciente.pk})
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Erro ao salvar diagnóstico. Verifique os dados.')
+        return super().form_invalid(form)
 
 class DiagnosticoDeleteView(MedicoRequiredMixin, DeleteView):
     model = Diagnostico
     template_name = 'core/diagnostico_confirm_delete.html'
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Diagnóstico excluído com sucesso!')
+        return super().delete(request, *args, **kwargs)
 
     def get_success_url(self):
         paciente_id = self.object.paciente.pk

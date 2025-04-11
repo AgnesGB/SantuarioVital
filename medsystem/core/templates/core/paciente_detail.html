@@ -68,16 +68,18 @@
                     </a>
                 </div>
             </div>
-
+        
             {% if paciente.diagnostico_set.all %}
             <div class="table-container">
                 <table class="table is-fullwidth is-striped">
                     <thead>
                         <tr>
                             <th>Data</th>
+                            <th>Responsável</th>
                             <th>Doença</th>
-                            <th>Sintomas</th>
+                            <th>Sintomas Observados</th>
                             <th>Observações</th>
+                            <th>Hipóteses</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -85,6 +87,13 @@
                         {% for diagnostico in paciente.diagnostico_set.all %}
                         <tr>
                             <td>{{ diagnostico.data|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if diagnostico.responsavel %}
+                                    {{ diagnostico.responsavel.nickname|default:diagnostico.responsavel.username }}
+                                {% else %}
+                                    <span class="has-text-grey">Não informado</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if diagnostico.doenca %}
                                 <a href="{% url 'doenca-detail' diagnostico.doenca.id %}">
@@ -95,13 +104,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="tags">
-                                    {% for sintoma in diagnostico.sintomas.all %}
-                                    <span class="tag is-info is-light">{{ sintoma.nome }}</span>
-                                    {% empty %}
-                                    <span class="tag is-light">Sem sintomas</span>
-                                    {% endfor %}
-                                </div>
+                                {{ diagnostico.sintomas|linebreaksbr|truncatechars:50 }}
                             </td>
                             <td>
                                 {% if diagnostico.observacoes %}
@@ -109,6 +112,17 @@
                                 {% else %}
                                 <span class="has-text-grey">Nenhuma</span>
                                 {% endif %}
+                            </td>
+                            <td>
+                                <div class="tags">
+                                    {% for doenca in diagnostico.hipoteses.all %}
+                                    <a href="{% url 'doenca-detail' doenca.id %}" class="tag is-info is-light">
+                                        {{ doenca.nome }}
+                                    </a>
+                                    {% empty %}
+                                    <span class="tag is-light">Nenhuma</span>
+                                    {% endfor %}
+                                </div>
                             </td>
                             <td>
                                 <div class="buttons are-small">

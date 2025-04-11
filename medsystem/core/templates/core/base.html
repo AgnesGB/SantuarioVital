@@ -131,6 +131,16 @@
 
     <section class="section">
         <div class="container">
+            <!-- Botão Voltar -->
+            <div class="mb-4">
+                <button onclick="window.history.back();" class="button is-light">
+                    <span class="icon">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                    <span>Voltar</span>
+                </button>
+            </div>
+            
             {% block content %}{% endblock %}
         </div>
     </section>

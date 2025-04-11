@@ -92,12 +92,44 @@ class DiagnosticoForm(forms.ModelForm):
         widgets = {
             'hipoteses': forms.SelectMultiple(attrs={
                 'class': 'select is-multiple',
-                'style': 'width: 100%'  # Adiciona se necessário
+                'style': 'width: 100%'
             }),
             'doenca': forms.Select(attrs={'class': 'select'}),
-            'sintomas': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
-            'observacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'sintomas': forms.Textarea(attrs={
+                'class': 'textarea', 
+                'rows': 3,
+                'placeholder': 'Descreva os sintomas observados'
+            }),
+            'observacoes': forms.Textarea(attrs={
+                'class': 'textarea', 
+                'rows': 3,
+                'placeholder': 'Anotações adicionais'
+            }),
         }
+    
+    def __init__(self, *args, **kwargs):
+        paciente = kwargs.pop('paciente', None)
+        super().__init__(*args, **kwargs)
+        
+        # Torna os campos opcionais
+        self.fields['hipoteses'].required = False
+        self.fields['doenca'].required = False
+        
+        # Configura o queryset para as hipóteses
+        if paciente:
+            self.fields['hipoteses'].queryset = Doenca.objects.all()
+        
+        # Se for uma instância existente, seleciona as hipóteses atuais
+        if self.instance.pk:
+            self.fields['hipoteses'].initial = self.instance.hipoteses.all()
+    
+    def __init__(self, *args, **kwargs):
+        paciente = kwargs.pop('paciente', None)
+        super().__init__(*args, **kwargs)
+        self.fields['hipoteses'].required = False
+        self.fields['doenca'].required = False
+        if paciente:
+            self.fields['hipoteses'].queryset = Doenca.objects.all()
 
 class BestaForm(forms.ModelForm):
     doenca_relacionada = forms.ModelMultipleChoiceField(

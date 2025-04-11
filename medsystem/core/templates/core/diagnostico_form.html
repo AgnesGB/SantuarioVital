@@ -44,14 +44,14 @@
                 <div class="field">
                     <label class="label">Descrição dos Sintomas</label>
                     <div class="control">
-                        <textarea class="textarea" name="sintomas" placeholder="Descreva os sintomas observados..." required></textarea>
+                        <textarea class="textarea" name="sintomas" placeholder="Descreva os sintomas observados..." required>{{ form.instance.sintomas }}</textarea>
                     </div>
                 </div>
                 
                 <div class="field">
                     <label class="label">Observações Adicionais</label>
                     <div class="control">
-                        <textarea class="textarea" name="observacoes" placeholder="Observações relevantes..."></textarea>
+                        <textarea class="textarea" name="observacoes" placeholder="Observações relevantes...">{{ form.instance.observacoes }}</textarea>
                     </div>
                 </div>
             </div>
@@ -155,7 +155,9 @@
                             <select name="doenca">
                                 <option value="">-- Selecione uma doença --</option>
                                 {% for doenca in doencas %}
-                                <option value="{{ doenca.id }}">{{ doenca.nome }}</option>
+                                <option value="{{ doenca.id }}" {% if form.instance.doenca.id == doenca.id %}selected{% endif %}>
+                                    {{ doenca.nome }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>
