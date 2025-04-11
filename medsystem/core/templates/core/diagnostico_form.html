@@ -138,10 +138,18 @@
                 
                 <!-- Hipóteses Selecionadas -->
                 <div class="selected-hipoteses" id="hipoteses-selecionadas">
-                    <p class="has-text-grey" id="nenhuma-hipotese">Nenhuma hipótese selecionada</p>
-                    <!-- Hipóteses serão adicionadas aqui -->
+                    <p class="has-text-grey" id="nenhuma-hipotese" {% if form.instance.hipoteses.exists %}style="display:none;"{% endif %}>
+                        Nenhuma hipótese selecionada
+                    </p>
+                    {% for hipotese in form.instance.hipoteses.all %}
+                    <span class="tag is-info hipotese-tag">
+                        {{ hipotese.nome }}
+                        <button class="delete is-small" data-id="{{ hipotese.id }}"></button>
+                    </span>
+                    {% endfor %}
                 </div>
-                <input type="hidden" name="hipoteses" id="hipoteses-input">
+                <input type="hidden" name="hipoteses" id="hipoteses-input" 
+                       value="{% for hipotese in form.instance.hipoteses.all %}{{ hipotese.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
             </div>
             
             <!-- Diagnóstico Final -->
@@ -201,7 +209,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const filtroTipo = document.getElementById('filtro-tipo');
     const filtroSintomas = document.getElementById('filtro-sintomas');
     
-    let hipoteses = [];
+    // Inicializa com as hipóteses existentes
+    let hipoteses = document.getElementById('hipoteses-input').value ? 
+                   document.getElementById('hipoteses-input').value.split(',') : [];
     
     // Função para filtrar doenças
     function filtrarDoencas() {

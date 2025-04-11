@@ -285,20 +285,8 @@ class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
     
 class DiagnosticoUpdateView(MedicoRequiredMixin, UpdateView):
     model = Diagnostico
-    form_class = DiagnosticoForm
     template_name = 'core/diagnostico_form.html'
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Garante que o paciente está disponível no formulário
-        kwargs['paciente'] = self.object.paciente
-        return kwargs
-
-    def get_initial(self):
-        initial = super().get_initial()
-        # Carrega as hipóteses existentes
-        initial['hipoteses'] = self.object.hipoteses.all()
-        return initial
+    fields = ['sintomas', 'observacoes', 'doenca']  # Campos básicos
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -306,20 +294,27 @@ class DiagnosticoUpdateView(MedicoRequiredMixin, UpdateView):
         context['doencas'] = Doenca.objects.all()
         return context
 
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
+
     def form_valid(self, form):
         response = super().form_valid(form)
-        # Atualiza as hipóteses
-        hipoteses_ids = self.request.POST.getlist('hipoteses')
+        
+        # Processa as hipóteses
+        hipoteses_ids = self.request.POST.get('hipoteses', '').split(',')
+        hipoteses_ids = [int(id) for id in hipoteses_ids if id]  # Remove valores vazios
         self.object.hipoteses.set(hipoteses_ids)
+        
         messages.success(self.request, 'Diagnóstico atualizado com sucesso!')
         return response
 
     def get_success_url(self):
         return reverse('paciente-detail', kwargs={'pk': self.object.paciente.pk})
-    
-    def form_invalid(self, form):
-        messages.error(self.request, 'Erro ao salvar diagnóstico. Verifique os dados.')
-        return super().form_invalid(form)
 
 class DiagnosticoDeleteView(MedicoRequiredMixin, DeleteView):
     model = Diagnostico
