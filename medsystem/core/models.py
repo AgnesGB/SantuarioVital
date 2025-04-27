@@ -12,7 +12,7 @@ class Usuario(AbstractUser):
     bunker = models.ForeignKey('Bunker', on_delete=models.SET_NULL, null=True, blank=True)
     
     def __str__(self):
-        return f"{self.username} ({self.get_tipo_display()})"
+        return self.nickname
 
 PARTES_CORPO = [
     ('CAB', 'Cabeça'),
@@ -197,3 +197,18 @@ class RelatorioExpedicao(models.Model):
     
     def __str__(self):
         return self.titulo
+
+class AnotacaoPessoal(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='anotacoes')
+    titulo = models.CharField(max_length=100)
+    conteudo = models.TextField()
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+    tags = models.CharField(max_length=255, blank=True, help_text="Palavras-chave separadas por vírgula")
+
+    class Meta:
+        ordering = ['-data_atualizacao']
+        verbose_name_plural = 'Anotações Pessoais'
+
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario.nickname}"

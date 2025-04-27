@@ -2,8 +2,8 @@ from django.views.generic import DeleteView, ListView, DetailView, CreateView, U
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Doenca, RelatorioExpedicao, Postagem, Comentario, Usuario, Besta, Bunker, Paciente, RegistroMedico, Diagnostico
-from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, BunkerForm, DiagnosticoForm
+from .models import Doenca, RelatorioExpedicao, Postagem, Comentario, Usuario, Besta, Bunker, Paciente, RegistroMedico, Diagnostico, AnotacaoPessoal
+from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, BunkerForm, DiagnosticoForm, AnotacaoPessoalForm
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,7 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from datetime import datetime
 from .mixins import MedicoRequiredMixin 
+from django.contrib.auth import get_user_model
 
 def registrar(request):
     if request.method == 'POST':
@@ -254,8 +256,8 @@ class BestaDeleteView(LoginRequiredMixin, DeleteView):
 # diagnostico
 class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
     model = Diagnostico
-    form_class = DiagnosticoForm  # Use seu form personalizado
-    template_name = 'core/diagnostico_form.html'  # Seu template original
+    form_class = DiagnosticoForm
+    template_name = 'core/diagnostico_form.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -266,19 +268,16 @@ class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.paciente = get_object_or_404(Paciente, pk=self.kwargs['paciente_id'])
         form.instance.responsavel = self.request.user
+        
+        # Salva o diagnóstico primeiro
         response = super().form_valid(form)
         
-        # Hipóteses agora são opcionais
-        hipoteses_ids = self.request.POST.getlist('hipoteses')  # Usar getlist para pegar múltiplos valores
-        if hipoteses_ids:
-            self.object.hipoteses.set(hipoteses_ids)
+        # Processa as hipóteses (enviadas como string separada por vírgulas)
+        hipoteses_ids = [int(id) for id in self.request.POST.get('hipoteses', '').split(',') if id]
+        self.object.hipoteses.set(hipoteses_ids)
         
         messages.success(self.request, 'Diagnóstico salvo com sucesso!')
         return response
-    
-    def form_invalid(self, form):
-        messages.error(self.request, 'Erro ao salvar diagnóstico. Verifique os dados.')
-        return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse('paciente-detail', kwargs={'pk': self.kwargs['paciente_id']})
@@ -447,3 +446,91 @@ class RelatorioExpedicaoDeleteView(LoginRequiredMixin, DeleteView):
     model = RelatorioExpedicao
     template_name = 'core/relatorio_confirm_delete.html'
     success_url = reverse_lazy('relatorio-list')
+
+class AnotacaoListView(LoginRequiredMixin, ListView):
+    model = AnotacaoPessoal
+    template_name = 'core/anotacao_list.html'
+    context_object_name = 'anotacoes'
+
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(usuario=self.request.user)
+        
+        # Filtros
+        search = self.request.GET.get('search')
+        tags = self.request.GET.get('tags')
+        data = self.request.GET.get('data')
+        
+        if search:
+            queryset = queryset.filter(
+                Q(titulo__icontains=search) |
+                Q(conteudo__icontains=search)
+            )
+        
+        if tags:
+            tags_list = [tag.strip() for tag in tags.split(',')]
+            for tag in tags_list:
+                queryset = queryset.filter(tags__icontains=tag)
+        
+        if data:
+            try:
+                date_obj = datetime.strptime(data, '%Y-%m-%d').date()
+                queryset = queryset.filter(
+                    Q(data_criacao__date=date_obj) |
+                    Q(data_atualizacao__date=date_obj))
+            except ValueError:
+                pass
+                
+        return queryset
+
+class AnotacaoCreateView(LoginRequiredMixin, CreateView):
+    model = AnotacaoPessoal
+    form_class = AnotacaoPessoalForm
+    template_name = 'core/anotacao_form.html'
+    success_url = reverse_lazy('anotacao-list')
+
+    def form_valid(self, form):
+        form.instance.usuario = self.request.user
+        messages.success(self.request, 'Anotação criada com sucesso!')
+        return super().form_valid(form)
+
+class AnotacaoUpdateView(LoginRequiredMixin, UpdateView):
+    model = AnotacaoPessoal
+    form_class = AnotacaoPessoalForm
+    template_name = 'core/anotacao_form.html'
+    success_url = reverse_lazy('anotacao-list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(usuario=self.request.user)
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Anotação atualizada com sucesso!')
+        return super().form_valid(form)
+
+class AnotacaoDeleteView(LoginRequiredMixin, DeleteView):
+    model = AnotacaoPessoal
+    template_name = 'core/anotacao_confirm_delete.html'
+    success_url = reverse_lazy('anotacao-list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(usuario=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Anotação excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
+
+def recuperar_senha(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        new_password = request.POST.get('new_password')
+        
+        User = get_user_model()
+        try:
+            user = User.objects.get(username=username)
+            user.set_password(new_password)
+            user.save()
+            messages.success(request, "Senha alterada com sucesso!")
+            return redirect('login')
+        except User.DoesNotExist:
+            messages.error(request, "Usuário não encontrado!")
+    
+    return render(request, 'core/recuperar_senha.html')

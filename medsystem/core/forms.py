@@ -1,5 +1,5 @@
 from django import forms
-from .models import Postagem, Usuario, RelatorioExpedicao, Bunker, Besta, Doenca, Paciente, Diagnostico, RegistroMedico
+from .models import Postagem, Usuario, RelatorioExpedicao, Bunker, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, AnotacaoPessoal
 from django.forms.widgets import DateInput
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
@@ -88,48 +88,28 @@ class RelatorioExpedicaoForm(forms.ModelForm):
 class DiagnosticoForm(forms.ModelForm):
     class Meta:
         model = Diagnostico
-        fields = ['sintomas', 'observacoes', 'hipoteses', 'doenca']
+        fields = ['sintomas', 'observacoes', 'doenca']  # Removi 'hipoteses' (já é tratado na view)
         widgets = {
-            'hipoteses': forms.SelectMultiple(attrs={
-                'class': 'select is-multiple',
-                'style': 'width: 100%'
-            }),
-            'doenca': forms.Select(attrs={'class': 'select'}),
             'sintomas': forms.Textarea(attrs={
-                'class': 'textarea', 
+                'class': 'textarea',
                 'rows': 3,
                 'placeholder': 'Descreva os sintomas observados'
             }),
             'observacoes': forms.Textarea(attrs={
-                'class': 'textarea', 
+                'class': 'textarea',
                 'rows': 3,
                 'placeholder': 'Anotações adicionais'
             }),
+            'doenca': forms.Select(attrs={'class': 'select'}),
         }
-    
+
     def __init__(self, *args, **kwargs):
-        paciente = kwargs.pop('paciente', None)
         super().__init__(*args, **kwargs)
-        
-        # Torna os campos opcionais
-        self.fields['hipoteses'].required = False
-        self.fields['doenca'].required = False
-        
-        # Configura o queryset para as hipóteses
-        if paciente:
-            self.fields['hipoteses'].queryset = Doenca.objects.all()
-        
-        # Se for uma instância existente, seleciona as hipóteses atuais
-        if self.instance.pk:
-            self.fields['hipoteses'].initial = self.instance.hipoteses.all()
-    
-    def __init__(self, *args, **kwargs):
-        paciente = kwargs.pop('paciente', None)
-        super().__init__(*args, **kwargs)
-        self.fields['hipoteses'].required = False
-        self.fields['doenca'].required = False
-        if paciente:
-            self.fields['hipoteses'].queryset = Doenca.objects.all()
+        # Torna apenas 'sintomas' obrigatório
+        self.fields['sintomas'].required = True
+        self.fields['observacoes'].required = False  # Opcional
+        self.fields['doenca'].required = False  # Opcional
+        self.fields['doenca'].queryset = Doenca.objects.all()  # Lista todas as doenças
 
 class BestaForm(forms.ModelForm):
     doenca_relacionada = forms.ModelMultipleChoiceField(
@@ -141,3 +121,16 @@ class BestaForm(forms.ModelForm):
     class Meta:
         model = Besta
         fields = '__all__'
+ 
+class AnotacaoPessoalForm(forms.ModelForm):
+    class Meta:
+        model = AnotacaoPessoal
+        fields = ['titulo', 'conteudo', 'tags']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'input'}),
+            'conteudo': forms.Textarea(attrs={'class': 'textarea', 'rows': 5}),
+            'tags': forms.TextInput(attrs={
+                'class': 'input',
+                'placeholder': 'palavra-chave1, palavra-chave2, ...'
+            }),
+        }

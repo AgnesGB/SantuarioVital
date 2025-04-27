@@ -1,0 +1,110 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Minhas Anotações{% endblock %}
+
+{% block content %}
+<div class="columns">
+    <div class="column is-3">
+        <div class="box">
+            <h2 class="title is-5">Filtrar Anotações</h2>
+            <form method="get">
+                <div class="field">
+                    <label class="label">Pesquisar</label>
+                    <div class="control">
+                        <input class="input" type="text" name="search" 
+                               value="{{ request.GET.search }}" 
+                               placeholder="Título ou conteúdo">
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Tags</label>
+                    <div class="control">
+                        <input class="input" type="text" name="tags" 
+                               value="{{ request.GET.tags }}" 
+                               placeholder="tag1, tag2">
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Data</label>
+                    <div class="control">
+                        <input class="input" type="date" name="data" 
+                               value="{{ request.GET.data }}">
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <button type="submit" class="button is-primary is-fullwidth">
+                        <span class="icon">
+                            <i class="fas fa-filter"></i>
+                        </span>
+                        <span>Filtrar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <a href="{% url 'anotacao-create' %}" class="button is-success is-fullwidth">
+            <span class="icon">
+                <i class="fas fa-plus"></i>
+            </span>
+            <span>Nova Anotação</span>
+        </a>
+    </div>
+    
+    <div class="column is-9">
+        <h1 class="title">Minhas Anotações</h1>
+        
+        {% if anotacoes %}
+        <div class="columns is-multiline">
+            {% for anotacao in anotacoes %}
+            <div class="column is-4">
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">{{ anotacao.titulo }}</p>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            <p>{{ anotacao.conteudo|truncatechars:100 }}</p>
+                            
+                            {% if anotacao.tags %}
+                            <div class="tags">
+                                {% for tag in anotacao.tags.split %}
+                                <span class="tag is-light">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <p class="has-text-grey is-size-7 mt-2">
+                                Criado em: {{ anotacao.data_criacao|date:"d/m/Y H:i" }}<br>
+                                Atualizado em: {{ anotacao.data_atualizacao|date:"d/m/Y H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                    <footer class="card-footer">
+                        <a href="{% url 'anotacao-update' anotacao.pk %}" class="card-footer-item">
+                            <span class="icon">
+                                <i class="fas fa-edit"></i>
+                            </span>
+                            <span>Editar</span>
+                        </a>
+                        <a href="{% url 'anotacao-delete' anotacao.pk %}" class="card-footer-item has-text-danger">
+                            <span class="icon">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                            <span>Excluir</span>
+                        </a>
+                    </footer>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="notification is-warning">
+            Nenhuma anotação encontrada. Crie sua primeira anotação!
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="columns is-centered">
+    <div class="column is-half">
+        <div class="box">
+            <h1 class="title">Confirmar Exclusão</h1>
+            <p>Tem certeza que deseja excluir a anotação "{{ object.titulo }}"?</p>
+            
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="field is-grouped">
+                    <div class="control">
+                        <button type="submit" class="button is-danger">Confirmar</button>
+                    </div>
+                    <div class="control">
+                        <a href="{% url 'anotacao-list' %}" class="button is-light">Cancelar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

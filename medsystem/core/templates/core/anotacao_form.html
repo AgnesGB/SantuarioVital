@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if object %}Editar Anotação{% else %}Nova Anotação{% endif %}{% endblock %}
+
+{% block content %}
+<div class="columns is-centered">
+    <div class="column is-two-thirds">
+        <div class="box">
+            <h1 class="title">{% if object %}Editar Anotação{% else %}Nova Anotação{% endif %}</h1>
+            <form method="post">
+                {% csrf_token %}
+                <div class="field">
+                    <label class="label">Título</label>
+                    <div class="control">
+                        {{ form.titulo }}
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Conteúdo</label>
+                    <div class="control">
+                        {{ form.conteudo }}
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Palavras-chave</label>
+                    <div class="control">
+                        {{ form.tags }}
+                    </div>
+                    <p class="help">Separe as palavras-chave por vírgula</p>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button type="submit" class="button is-primary">Salvar</button>
+                        <a href="{% url 'anotacao-list' %}" class="button is-light">Cancelar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

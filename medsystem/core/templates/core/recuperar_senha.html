@@ -1,30 +1,32 @@
 {% extends 'core/base.html' %}
 
+{% block title %}Recuperar Senha{% endblock %}
+
 {% block content %}
 <div class="columns is-centered">
     <div class="column is-one-third">
         <div class="box">
-            <h1 class="title">Login</h1>
+            <h1 class="title">Recuperar Senha</h1>
             <form method="post">
                 {% csrf_token %}
                 <div class="field">
-                    <label class="label">Usuário</label>
+                    <label class="label">Nome de usuário</label>
                     <div class="control">
                         <input class="input" type="text" name="username" required>
                     </div>
                 </div>
                 <div class="field">
-                    <label class="label">Senha</label>
+                    <label class="label">Nova senha</label>
                     <div class="control">
-                        <input class="input" type="password" name="password" required>
+                        <input class="input" type="password" name="new_password" required>
                     </div>
                 </div>
                 <div class="field">
-                    <button type="submit" class="button is-primary is-fullwidth">Entrar</button>
+                    <button type="submit" class="button is-primary is-fullwidth">Alterar Senha</button>
                 </div>
             </form>
             <div class="has-text-centered mt-3">
-                <a href="{% url 'recuperar_senha' %}" class="is-size-7">Esqueceu a senha?</a>
+                <a href="{% url 'login' %}" class="is-size-7">Voltar ao login</a>
             </div>
         </div>
     </div>
