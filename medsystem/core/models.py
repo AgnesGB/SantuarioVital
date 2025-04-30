@@ -6,21 +6,44 @@ class Usuario(AbstractUser):
         ('MED', 'Médico'),
         ('OUT', 'Outro'),
     ]
-    
+
     nickname = models.CharField(max_length=100)
     tipo = models.CharField(max_length=3, choices=TIPO_CHOICES, default='OUT')
     bunker = models.ForeignKey('Bunker', on_delete=models.SET_NULL, null=True, blank=True)
-    
+
     def __str__(self):
         return self.nickname
 
 PARTES_CORPO = [
     ('CAB', 'Cabeça'),
+    ('OLH', 'Olhos'),
+    ('OUV', 'Ouvidos'),
+    ('NAR', 'Nariz'),
+    ('BOC', 'Boca'),
+    ('DEN', 'Dentes'),
+    ('PES', 'Pescoço'),
+    ('OMB', 'Ombros'),
+    ('BRA', 'Braços'),
+    ('COT', 'Cotovelos'),
+    ('MAO', 'Mãos'),
+    ('DED', 'Dedos'),
+    ('TOR', 'Tórax'),
     ('COR', 'Coração'),
     ('PUL', 'Pulmões'),
+    ('VAS', 'Vasos sanguíneos'),
     ('EST', 'Estômago'),
-    ('PEL', 'Pele'),
+    ('FIG', 'Fígado'),
+    ('BEX', 'Bexiga'),
+    ('RIM', 'Rins'),
+    ('INT', 'Intestinos'),
+    ('ESP', 'Esôfago'),
+    ('COL', 'Coluna vertebral'),
     ('OSS', 'Ossos'),
+    ('MUS', 'Músculos'),
+    ('JOE', 'Joelhos'),
+    ('TOR', 'Tornozelos'),
+    ('PES', 'Pés'),
+    ('PEL', 'Pele'),
     ('MEN', 'Mente'),
 ]
 
@@ -47,19 +70,19 @@ class Doenca(models.Model):
     sintomas = models.TextField('Sintomas', blank=True, help_text="Descreva os sintomas, separados por vírgula")
     tratamento = models.TextField(blank=True, help_text="Protocolo de tratamento recomendado")
     reacoes_esperadas = models.TextField(blank=True, help_text="Reações esperadas ao tratamento")
-    
+
     class Meta:
         verbose_name = "Doença"
         verbose_name_plural = "Doenças"
         ordering = ['nome']
-    
+
     def __str__(self):
         return self.nome
 
 class Bunker(models.Model):
     nome = models.CharField(max_length=100)
     funcao = models.CharField(max_length=100, default=None)
-    
+
     def __str__(self):
         return self.nome
 
@@ -70,7 +93,7 @@ class Paciente(models.Model):
         ('CRONICO', 'Tratamento Crônico'),
         ('OBITO', 'Óbito'),
     ]
-    
+
     TIPO_SANGUINEO_CHOICES = [
         ('A+', 'A+'),
         ('A-', 'A-'),
@@ -81,7 +104,7 @@ class Paciente(models.Model):
         ('O+', 'O+'),
         ('O-', 'O-'),
     ]
-    
+
     nome = models.CharField(max_length=100)
     idade = models.PositiveIntegerField(verbose_name="Idade")
     tipo_sanguineo = models.CharField(max_length=3, choices=TIPO_SANGUINEO_CHOICES, blank=True)
@@ -89,10 +112,10 @@ class Paciente(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ESTAVEL')
     observacoes = models.TextField(blank=True)
     doencas = models.ManyToManyField(Doenca, through='Diagnostico', related_name='pacientes')
-    
+
     def __str__(self):
         return f"{self.nome} ({self.idade} anos, {self.get_status_display()})"
-    
+
     class Meta:
         ordering = ['bunker__nome', 'nome']
         verbose_name_plural = "Pacientes"
@@ -105,10 +128,10 @@ class Diagnostico(models.Model):
     doenca = models.ForeignKey(Doenca, on_delete=models.SET_NULL, null=True, blank=True)
     data = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     responsavel = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
-    
+
     class Meta:
         ordering = ['-data']
-    
+
     def __str__(self):
         return f"Diagnóstico para {self.paciente} em {self.data}"
 
@@ -119,12 +142,12 @@ class RegistroMedico(models.Model):
     sintomas_observados = models.TextField(help_text="Descrição detalhada dos sintomas observados")
     observacoes = models.TextField(blank=True, help_text="Anotações adicionais sobre o diagnóstico")
     tratamento_aplicado = models.TextField(blank=True, help_text="Tratamento aplicado")
-    
+
     class Meta:
         ordering = ['-data']
         verbose_name = "Registro Médico"
         verbose_name_plural = "Registros Médicos"
-    
+
     def __str__(self):
         return f"{self.paciente.nome} - {self.doenca.nome if self.doenca else 'Sem diagnóstico'} - {self.data.strftime('%d/%m/%Y')}"
 
@@ -142,7 +165,7 @@ class Besta(models.Model):
         ('09', '9/10'),
         ('10', '10/10'),
     ]
-    
+
     nome = models.CharField(max_length=100)
     titulo = models.CharField(max_length=200, blank=True)
     imagem = models.ImageField(upload_to='bestas/', null=True, blank=True)
@@ -154,7 +177,7 @@ class Besta(models.Model):
         related_name='bestas'
     )
     anotacoes = models.TextField(blank=True)
-    
+
     def __str__(self):
         return f"{self.nome} - {self.get_nivel_ameaca_display()}"
 
@@ -165,10 +188,10 @@ class Postagem(models.Model):
     data = models.DateTimeField(auto_now_add=True)
     imagem = models.ImageField(upload_to='postagens/', null=True, blank=True)
     autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    
+
     class Meta:
         ordering = ['-data']
-    
+
     def __str__(self):
         return self.titulo
 
@@ -177,10 +200,10 @@ class Comentario(models.Model):
     autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     texto = models.TextField()
     data = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['data']
-    
+
     def __str__(self):
         return f"Comentário de {self.autor} em {self.postagem}"
 
@@ -191,10 +214,10 @@ class RelatorioExpedicao(models.Model):
     descobertas = models.TextField()
     observacoes = models.TextField(blank=True)
     autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    
+
     class Meta:
         ordering = ['-data']
-    
+
     def __str__(self):
         return self.titulo
 

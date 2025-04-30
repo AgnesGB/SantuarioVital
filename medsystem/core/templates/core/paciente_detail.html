@@ -37,7 +37,7 @@
                     </div>
                     <div class="column">
                         <p><strong>Bunker:</strong> {{ paciente.bunker.nome }}</p>
-                        <p><strong>Status:</strong> 
+                        <p><strong>Status:</strong>
                             <span class="tag {% if paciente.status == 'GRAVE' %}is-danger{% elif paciente.status == 'ESTAVEL' %}is-success{% else %}is-warning{% endif %}">
                                 {{ paciente.get_status_display }}
                             </span>
@@ -47,7 +47,7 @@
                 {% if paciente.observacoes %}
                 <div class="notification is-light">
                     <strong>Observações:</strong>
-                    <p>{{ paciente.observacoes }}</p>
+                    <p>{{ paciente.observacoes|linebreaksbr }}</p>
                 </div>
                 {% endif %}
             </div>
@@ -68,7 +68,7 @@
                     </a>
                 </div>
             </div>
-        
+
             {% if paciente.diagnostico_set.all %}
             <div class="table-container">
                 <table class="table is-fullwidth is-striped">
@@ -104,11 +104,11 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {{ diagnostico.sintomas|linebreaksbr|truncatechars:50 }}
+                                {{ diagnostico.sintomas|linebreaksbr|truncatechars:200 }}
                             </td>
                             <td>
                                 {% if diagnostico.observacoes %}
-                                {{ diagnostico.observacoes|truncatechars:30 }}
+                                {{ diagnostico.observacoes|truncatechars:200 }}
                                 {% else %}
                                 <span class="has-text-grey">Nenhuma</span>
                                 {% endif %}
@@ -155,7 +155,7 @@
         <div class="box mt-4">
             <h3 class="title is-4">Doenças Sugeridas</h3>
             <p class="subtitle is-6">Baseado nos sintomas observados</p>
-            
+
             <div class="columns is-multiline">
                 {% for doenca in doencas_sugeridas %}
                 <div class="column is-4">
@@ -171,7 +171,7 @@
                             </div>
                         </div>
                         <div class="buttons is-centered">
-                            <a href="{% url 'diagnostico-create' paciente.id %}?doenca={{ doenca.id }}" 
+                            <a href="{% url 'diagnostico-create' paciente.id %}?doenca={{ doenca.id }}"
                                class="button is-small is-primary">
                                 <span class="icon">
                                     <i class="fas fa-plus"></i>
@@ -218,14 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const modal = document.getElementById('deleteModal');
             const confirmBtn = modal.querySelector('.is-danger');
-            
+
             modal.classList.add('is-active');
-            
+
             // Configura ação do botão confirmar
             confirmBtn.onclick = () => {
                 window.location.href = button.href;
             };
-            
+
             // Fechar modal
             modal.querySelector('.modal-background, .delete').addEventListener('click', () => {
                 modal.classList.remove('is-active');

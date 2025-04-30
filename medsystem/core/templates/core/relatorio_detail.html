@@ -8,16 +8,16 @@
         <div class="box">
             <h1 class="title">{{ relatorio.titulo }}</h1>
             <h2 class="subtitle">Expedição em {{ relatorio.localizacao }}</h2>
-            
+
             <div class="content">
                 <p><strong>Data:</strong> {{ relatorio.data|date:"d/m/Y H:i" }}</p>
-                <p><strong>Autor:</strong> {{ relatorio.autor.username }}</p>
-                
+                <p><strong>Autor:</strong> {{ relatorio.autor.nickname }}</p>
+
                 <h3 class="title is-4 mt-5">Descobertas</h3>
                 <div class="box">
                     {{ relatorio.descobertas|linebreaks }}
                 </div>
-                
+
                 {% if relatorio.observacoes %}
                 <h3 class="title is-4 mt-5">Observações</h3>
                 <div class="box">
@@ -25,7 +25,7 @@
                 </div>
                 {% endif %}
             </div>
-            
+
             {% if user == relatorio.autor or user.is_superuser %}
             <div class="buttons">
                 <!-- Corrigido: usando relatorio.pk em vez de object.pk -->
