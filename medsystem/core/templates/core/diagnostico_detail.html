@@ -1,0 +1,166 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Diagnóstico - {{ diagnostico.paciente.nome }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="box">
+            <div class="level">
+                <div class="level-left">
+                    <h1 class="title">Diagnóstico</h1>
+                    <h2 class="subtitle ml-3">
+                        <a href="{% url 'paciente-detail' diagnostico.paciente.pk %}">
+                            {{ diagnostico.paciente.nome }}
+                        </a>
+                    </h2>
+                </div>
+                {% if is_medico %}
+                <div class="level-right">
+                    <div class="buttons">
+                        <a href="{% url 'diagnostico-update' diagnostico.pk %}" class="button is-warning">
+                            <span class="icon">
+                                <i class="fas fa-edit"></i>
+                            </span>
+                            <span>Editar</span>
+                        </a>
+                        <a href="{% url 'diagnostico-delete' diagnostico.pk %}" class="button is-danger">
+                            <span class="icon">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                            <span>Excluir</span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="columns">
+                <div class="column">
+                    <div class="content">
+                        <div class="columns">
+                            <div class="column">
+                                <h3 class="title is-4">Informações Básicas</h3>
+                                <p><strong>Data:</strong> {{ diagnostico.data|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Responsável:</strong> 
+                                    {% if diagnostico.responsavel %}
+                                        {{ diagnostico.responsavel.nickname|default:diagnostico.responsavel.username }}
+                                    {% else %}
+                                        <span class="has-text-grey">Não informado</span>
+                                    {% endif %}
+                                </p>
+                                
+                                <h3 class="title is-4 mt-5">Doença Diagnosticada</h3>
+                                {% if diagnostico.doenca %}
+                                <div class="box">
+                                    <a href="{% url 'doenca-detail' diagnostico.doenca.pk %}">
+                                        <h4 class="title is-5">{{ diagnostico.doenca.nome }}</h4>
+                                    </a>
+                                    <p><strong>Tipo:</strong> {{ diagnostico.doenca.get_tipo_display }}</p>
+                                    <p><strong>Tratamento:</strong> {{ diagnostico.doenca.tratamento|linebreaksbr }}</p>
+                                </div>
+                                {% else %}
+                                <div class="notification is-light">
+                                    Nenhuma doença específica diagnosticada
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="column">
+                                <h3 class="title is-4">Hipóteses Consideradas</h3>
+                                {% if diagnostico.hipoteses.exists %}
+                                <div class="tags are-medium">
+                                    {% for doenca in diagnostico.hipoteses.all %}
+                                    <a href="{% url 'doenca-detail' doenca.pk %}" class="tag is-info is-light">
+                                        {{ doenca.nome }}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="notification is-light">
+                                    Nenhuma hipótese adicional registrada
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="columns mt-3">
+                            <div class="column">
+                                <h3 class="title is-4">Sintomas Observados</h3>
+                                <div class="box">
+                                    {{ diagnostico.sintomas|linebreaksbr }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="columns">
+                            <div class="column">
+                                <h3 class="title is-4">Observações</h3>
+                                {% if diagnostico.observacoes %}
+                                <div class="box">
+                                    {{ diagnostico.observacoes|linebreaksbr }}
+                                </div>
+                                {% else %}
+                                <div class="notification is-light">
+                                    Nenhuma observação adicional
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Seção de Registros Médicos - REMOVIDA -->
+                        <!-- Como não há relacionamento direto, esta seção foi removida -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal de confirmação para exclusão -->
+<div class="modal" id="deleteModal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Confirmar Exclusão</p>
+            <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            <p>Tem certeza que deseja excluir este diagnóstico? Esta ação não pode ser desfeita.</p>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-danger">Confirmar</button>
+            <button class="button">Cancelar</button>
+        </footer>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Modal de confirmação
+    const deleteButtons = document.querySelectorAll('[href*="delete"]');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const modal = document.getElementById('deleteModal');
+            const confirmBtn = modal.querySelector('.is-danger');
+
+            modal.classList.add('is-active');
+
+            // Configura ação do botão confirmar
+            confirmBtn.onclick = () => {
+                window.location.href = button.href;
+            };
+
+            // Fechar modal
+            modal.querySelector('.modal-background, .delete').addEventListener('click', () => {
+                modal.classList.remove('is-active');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

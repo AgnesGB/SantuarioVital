@@ -11,6 +11,7 @@
                 <div class="level-left">
                     <h1 class="title">{{ paciente.nome }}</h1>
                 </div>
+                {% if is_medico %}
                 <div class="level-right">
                     <div class="buttons">
                         <a href="{% url 'paciente-update' paciente.id %}" class="button is-info">
@@ -27,6 +28,7 @@
                         </a>
                     </div>
                 </div>
+                {% endif %}
             </div>
 
             <div class="content">
@@ -59,6 +61,7 @@
                 <div class="level-left">
                     <h2 class="title is-4">Diagnósticos</h2>
                 </div>
+                {% if is_medico %}
                 <div class="level-right">
                     <a href="{% url 'diagnostico-create' paciente.id %}" class="button is-primary">
                         <span class="icon">
@@ -67,6 +70,7 @@
                         <span>Novo Diagnóstico</span>
                     </a>
                 </div>
+                {% endif %}
             </div>
 
             {% if paciente.diagnostico_set.all %}
@@ -104,11 +108,11 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {{ diagnostico.sintomas|linebreaksbr|truncatechars:200 }}
+                                {{ diagnostico.sintomas|linebreaksbr|truncatechars:100 }}
                             </td>
                             <td>
                                 {% if diagnostico.observacoes %}
-                                {{ diagnostico.observacoes|truncatechars:200 }}
+                                {{ diagnostico.observacoes|truncatechars:100 }}
                                 {% else %}
                                 <span class="has-text-grey">Nenhuma</span>
                                 {% endif %}
@@ -126,7 +130,13 @@
                             </td>
                             <td>
                                 <div class="buttons are-small">
-                                    <a href="{% url 'diagnostico-update' diagnostico.id %}" class="button is-info is-light" title="Editar">
+                                    <a href="{% url 'diagnostico-detail' diagnostico.id %}" class="button is-info is-light" title="Detalhes">
+                                        <span class="icon">
+                                            <i class="fas fa-eye"></i>
+                                        </span>
+                                    </a>
+                                    {% if is_medico %}
+                                    <a href="{% url 'diagnostico-update' diagnostico.id %}" class="button is-warning is-light" title="Editar">
                                         <span class="icon">
                                             <i class="fas fa-edit"></i>
                                         </span>
@@ -136,6 +146,7 @@
                                             <i class="fas fa-trash"></i>
                                         </span>
                                     </a>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

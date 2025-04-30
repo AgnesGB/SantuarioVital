@@ -10,7 +10,7 @@ from .views import (
     BestaUpdateView, AdicionarDiagnosticoView, HomeView, RelatorioExpedicaoCreateView,
     RelatorioExpedicaoListView, registrar, RelatorioExpedicaoDeleteView, 
     RelatorioExpedicaoDetailView, RelatorioExpedicao, RelatorioExpedicaoUpdateView, BestaDeleteView,
-    AnotacaoListView, AnotacaoCreateView, AnotacaoUpdateView, AnotacaoDeleteView, recuperar_senha
+    AnotacaoListView, AnotacaoCreateView, AnotacaoUpdateView, AnotacaoDeleteView, recuperar_senha, DiagnosticoDetailView
 )
 from django.contrib.auth import views as auth_views
 from django.conf import settings
@@ -65,5 +65,7 @@ urlpatterns = [
     path('anotacoes/excluir/<int:pk>/', AnotacaoDeleteView.as_view(), name='anotacao-delete'),
 
     path('recuperar-senha/', recuperar_senha, name='recuperar_senha'),
+
+    path('diagnostico/<int:pk>/', DiagnosticoDetailView.as_view(), name='diagnostico-detail'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

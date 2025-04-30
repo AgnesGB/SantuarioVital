@@ -23,6 +23,7 @@
             <div class="level-left">
                 <h1 class="title">Lista de Pacientes</h1>
             </div>
+            {% if is_medico %}
             <div class="level-right">
                 <div class="buttons">
                     <a href="{% url 'paciente-create' %}" class="button is-primary">
@@ -33,6 +34,7 @@
                     </a>
                 </div>
             </div>
+            {% endif %}
         </div>
 
         <div class="columns">
@@ -160,12 +162,14 @@
                                     </span>
                                     <span>Detalhes</span>
                                 </a>
+                                {% if is_medico %}
                                 <a href="{% url 'paciente-update' paciente.id %}" class="card-footer-item">
                                     <span class="icon">
                                         <i class="fas fa-edit"></i>
                                     </span>
                                     <span>Editar</span>
                                 </a>
+                                {% endif %}
                             </footer>
                         </div>
                     </div>

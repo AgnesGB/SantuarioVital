@@ -48,7 +48,6 @@
 
         {% if user.is_authenticated %}
         <div class="navbar-menu">
-            {% if is_medico %}
             <div class="navbar-start">
                 <a class="navbar-item" href="{% url 'paciente-list' %}">
                     <span class="icon">
@@ -62,7 +61,6 @@
                     </span>
                     <span>Doenças</span>
                 </a>
-            {% endif %}
                 <a class="navbar-item" href="{% url 'besta-list' %}">
                     <span class="icon">
                         <i class="fas fa-paw"></i>
@@ -82,7 +80,6 @@
                     <span>Minhas Anotações</span>
                 </a>
             </div>
-
             {% endif %}
 
             <div class="navbar-end">

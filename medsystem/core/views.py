@@ -64,7 +64,7 @@ class BunkertListView(ListView):
     template_name = 'core/bunker_list.html'
     context_object_name = 'bunkers'
 
-class DoencaListView(MedicoRequiredMixin, ListView):
+class DoencaListView(LoginRequiredMixin, ListView):
     model = Doenca
     template_name = 'core/doenca_list.html'
     context_object_name = 'doencas'
@@ -90,7 +90,7 @@ class DoencaListView(MedicoRequiredMixin, ListView):
             
         return queryset
 
-class DoencaDetailView(MedicoRequiredMixin, DetailView):
+class DoencaDetailView(LoginRequiredMixin, DetailView):
     model = Doenca
     template_name = 'core/doenca_detail.html'
     context_object_name = 'doenca'
@@ -327,6 +327,16 @@ class DiagnosticoDeleteView(MedicoRequiredMixin, DeleteView):
         paciente_id = self.object.paciente.pk
         return reverse('paciente-detail', kwargs={'pk': paciente_id})
 
+class DiagnosticoDetailView(LoginRequiredMixin, DetailView):
+    model = Diagnostico
+    template_name = 'core/diagnostico_detail.html'
+    context_object_name = 'diagnostico'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adiciona os registros médicos do paciente (não do diagnóstico diretamente)
+        context['registros_paciente'] = self.object.paciente.registros.all()
+        return context
 
 #paciente
 class PacienteDeleteView(MedicoRequiredMixin, DeleteView):
@@ -364,7 +374,7 @@ class PacienteUpdateView(MedicoRequiredMixin, UpdateView):
         messages.error(self.request, 'Erro ao atualizar paciente. Verifique os dados.')
         return super().form_invalid(form)
     
-class PacienteListView(MedicoRequiredMixin, ListView):
+class PacienteListView(LoginRequiredMixin, ListView):
     model = Paciente
     template_name = 'core/paciente_list.html'
     context_object_name = 'pacientes'
@@ -405,7 +415,7 @@ class PacienteListView(MedicoRequiredMixin, ListView):
         
         return context
 
-class PacienteDetailView(MedicoRequiredMixin, DetailView):
+class PacienteDetailView(LoginRequiredMixin, DetailView):
     model = Paciente
     template_name = 'core/paciente_detail.html'
     
