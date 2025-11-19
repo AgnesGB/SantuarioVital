@@ -8,7 +8,7 @@
     <div class="flex-1">
         <!-- Hero Section -->
         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl p-8 mb-6 text-white">
-            <h1 class="text-4xl font-bold mb-2">Bem-vindo ao Santuário Vital</h1>
+            <h1 class="text-4xl font-bold mb-2">Bem-vinde ao Gerenciamento de Edda</h1>
             <p class="text-indigo-100 text-lg">Sistema de gerenciamento médico e informações</p>
         </div>
 
@@ -124,7 +124,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <!-- Card Raças -->
                 <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                     <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-2"></div>
@@ -255,6 +255,34 @@
                                 <span class="text-xs text-gray-500">{{ usuario.cidade.nome|default:"Sem cidade" }}</span>
                             </div>
                         </div>
+                        {% if is_admin and usuario.id != user.id %}
+                        <div class="relative">
+                            <button onclick="toggleUserMenu({{ usuario.id }})" class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                            <div id="user-menu-{{ usuario.id }}" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                                <div class="py-1">
+                                    <form method="post" action="{% url 'alterar-tipo-usuario' usuario.id %}" class="px-4 py-2">
+                                        {% csrf_token %}
+                                        <p class="text-xs font-medium text-gray-500 mb-2">Alterar tipo:</p>
+                                        <div class="space-y-1">
+                                            <button type="submit" name="tipo" value="MED" class="w-full text-left px-3 py-2 text-sm rounded hover:bg-green-50 text-green-700 {% if usuario.tipo == 'MED' %}bg-green-100 font-medium{% endif %}">
+                                                ✓ Médico
+                                            </button>
+                                            <button type="submit" name="tipo" value="OUT" class="w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-50 text-gray-700 {% if usuario.tipo == 'OUT' %}bg-gray-100 font-medium{% endif %}">
+                                                ✓ Outro
+                                            </button>
+                                            <button type="submit" name="tipo" value="ADM" class="w-full text-left px-3 py-2 text-sm rounded hover:bg-yellow-50 text-yellow-700 {% if usuario.tipo == 'ADM' %}bg-yellow-100 font-medium{% endif %}">
+                                                ✓ Administrador
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -272,4 +300,30 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleUserMenu(userId) {
+    const menu = document.getElementById(`user-menu-${userId}`);
+    const allMenus = document.querySelectorAll('[id^="user-menu-"]');
+    
+    // Fecha todos os outros menus
+    allMenus.forEach(m => {
+        if (m.id !== `user-menu-${userId}`) {
+            m.classList.add('hidden');
+        }
+    });
+    
+    // Toggle do menu clicado
+    menu.classList.toggle('hidden');
+}
+
+// Fecha menus ao clicar fora
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('button[onclick^="toggleUserMenu"]') && !event.target.closest('[id^="user-menu-"]')) {
+        document.querySelectorAll('[id^="user-menu-"]').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    }
+});
+</script>
 {% endblock %}

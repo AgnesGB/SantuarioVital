@@ -67,9 +67,8 @@ class UsuarioCreationForm(UserCreationForm):
     
     class Meta:
         model = Usuario
-        fields = ['username', 'nickname', 'password1', 'password2', 'tipo', 'cidade']
+        fields = ['username', 'nickname', 'password1', 'password2', 'cidade']
         widgets = {
-            'tipo': forms.Select(attrs={'class': 'select'}),
             'cidade': forms.Select(attrs={'class': 'select'}),
         }
     
@@ -145,6 +144,8 @@ class RacaForm(forms.ModelForm):
             'longevidade': forms.TextInput(attrs={'class': 'input'}),
             'caracteristicas_fisicas': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
             'cor_sangue': forms.TextInput(attrs={'class': 'input'}),
+            'pressao_arterial': forms.TextInput(attrs={'class': 'input'}),
+            'bpm': forms.TextInput(attrs={'class': 'input'}),
             'afinidade_magica': forms.TextInput(attrs={'class': 'input'}),
             'cuidados_especiais': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
             'alimentacao': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),

@@ -27,25 +27,68 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome da Raça <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="inline-block w-4 h-4 text-indigo-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        Nome da Raça <span class="text-red-500">*</span>
+                    </label>
                     {{ form.nome }}
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Longevidade</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="inline-block w-4 h-4 text-blue-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Longevidade
+                    </label>
                     {{ form.longevidade }}
                     <p class="text-xs text-gray-500 mt-1">Ex: 80-100 anos</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Cor do Sangue</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="inline-block w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                        </svg>
+                        Cor do Sangue
+                    </label>
                     {{ form.cor_sangue }}
+                    <p class="text-xs text-gray-500 mt-1">Ex: Vermelho, Azul, Verde...</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="inline-block w-4 h-4 text-pink-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        Pressão Arterial
+                    </label>
+                    {{ form.pressao_arterial }}
+                    <p class="text-xs text-gray-500 mt-1">Ex: 120/80 mmHg</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="inline-block w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        BPM (Batimentos por Minuto)
+                    </label>
+                    {{ form.bpm }}
+                    <p class="text-xs text-gray-500 mt-1">Ex: 60-100 bpm</p>
                 </div>
                 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Afinidade Mágica</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="inline-block w-4 h-4 text-purple-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Afinidade Mágica
+                    </label>
                     {{ form.afinidade_magica }}
-                    <p class="text-xs text-gray-500 mt-1">Ex: Fogo, Água, Terra, Ar, Luz, Trevas</p>
+                    <p class="text-xs text-gray-500 mt-1">Ex: 180~200, 150~170...</p>
                 </div>
             </div>
         </div>

@@ -13,7 +13,7 @@ from .views import (
     AnotacaoListView, AnotacaoCreateView, AnotacaoUpdateView, AnotacaoDeleteView, recuperar_senha, DiagnosticoDetailView,
     RacaListView, RacaDetailView, RacaCreateView, RacaUpdateView, RacaDeleteView,
     IngredienteListView, IngredienteDetailView, IngredienteCreateView, IngredienteUpdateView, IngredienteDeleteView,
-    RemedioListView, RemedioDetailView, RemedioCreateView, RemedioUpdateView, RemedioDeleteView
+    RemedioListView, RemedioDetailView, RemedioCreateView, RemedioUpdateView, RemedioDeleteView, alterar_tipo_usuario
 )
 from django.contrib.auth import views as auth_views
 from django.conf import settings
@@ -25,6 +25,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
     path('recuperar-senha/', recuperar_senha, name='recuperar_senha'),
+    path('usuario/<int:usuario_id>/alterar-tipo/', alterar_tipo_usuario, name='alterar-tipo-usuario'),
     
     # Doenças
     path('doencas/', DoencaListView.as_view(), name='doenca-list'),

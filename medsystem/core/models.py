@@ -95,6 +95,8 @@ class Raca(models.Model):
     longevidade = models.CharField(max_length=200, blank=True, verbose_name="Longevidade", help_text="Ex: 80-100 anos")
     caracteristicas_fisicas = models.TextField(blank=True, verbose_name="Características físicas")
     cor_sangue = models.CharField(max_length=100, blank=True, verbose_name="Cor do sangue")
+    pressao_arterial = models.CharField(max_length=200, blank=True, verbose_name="Pressão arterial", help_text="Ex: 120/80 mmHg")
+    bpm = models.CharField(max_length=200, blank=True, verbose_name="Batimentos por minuto", help_text="Ex: 60-100 bpm")
     afinidade_magica = models.CharField(max_length=200, blank=True, verbose_name="Afinidade mágica")
     cuidados_especiais = models.TextField(blank=True, verbose_name="Cuidados especiais")
     alimentacao = models.TextField(blank=True, verbose_name="Alimentação")

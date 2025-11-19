@@ -137,7 +137,7 @@
                         {% endif %}
                         
                         {% if raca.cor_sangue %}
-                        <div class="bg-red-50 p-3 rounded-lg mb-4">
+                        <div class="bg-red-50 p-3 rounded-lg mb-3">
                             <p class="text-red-800 text-xs font-medium mb-1 flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
@@ -147,7 +147,7 @@
                             <p class="text-red-900 text-sm">{{ raca.cor_sangue }}</p>
                         </div>
                         {% else %}
-                        <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                        <div class="bg-gray-50 p-3 rounded-lg mb-3">
                             <p class="text-gray-500 text-xs font-medium mb-1 flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
@@ -158,8 +158,52 @@
                         </div>
                         {% endif %}
                         
+                        {% if raca.pressao_arterial %}
+                        <div class="bg-pink-50 p-3 rounded-lg mb-3">
+                            <p class="text-pink-800 text-xs font-medium mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                Pressão Arterial
+                            </p>
+                            <p class="text-pink-900 text-sm">{{ raca.pressao_arterial }}</p>
+                        </div>
+                        {% else %}
+                        <div class="bg-gray-50 p-3 rounded-lg mb-3">
+                            <p class="text-gray-500 text-xs font-medium mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                Pressão Arterial
+                            </p>
+                            <p class="text-gray-400 text-sm italic">Não informada</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if raca.bpm %}
+                        <div class="bg-green-50 p-3 rounded-lg mb-3">
+                            <p class="text-green-800 text-xs font-medium mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                BPM
+                            </p>
+                            <p class="text-green-900 text-sm">{{ raca.bpm }}</p>
+                        </div>
+                        {% else %}
+                        <div class="bg-gray-50 p-3 rounded-lg mb-3">
+                            <p class="text-gray-500 text-xs font-medium mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                BPM
+                            </p>
+                            <p class="text-gray-400 text-sm italic">Não informado</p>
+                        </div>
+                        {% endif %}
+                        
                         {% if raca.afinidade_magica %}
-                        <div class="bg-purple-50 p-3 rounded-lg mb-4">
+                        <div class="bg-purple-50 p-3 rounded-lg mb-3">
                             <p class="text-purple-800 text-xs font-medium mb-1 flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -169,7 +213,7 @@
                             <p class="text-purple-900 text-sm">{{ raca.afinidade_magica }}</p>
                         </div>
                         {% else %}
-                        <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                        <div class="bg-gray-50 p-3 rounded-lg mb-3">
                             <p class="text-gray-500 text-xs font-medium mb-1 flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -177,12 +221,6 @@
                                 Afinidade Mágica
                             </p>
                             <p class="text-gray-400 text-sm italic">Não informada</p>
-                        </div>
-                        {% endif %}
-                        
-                        {% if raca.caracteristicas_fisicas %}
-                        <div class="bg-gray-50 p-3 rounded-lg mb-4">
-                            <p class="text-gray-700 text-sm leading-relaxed">{{ raca.caracteristicas_fisicas|truncatewords:20 }}</p>
                         </div>
                         {% endif %}
                     </div>

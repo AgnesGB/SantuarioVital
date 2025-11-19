@@ -26,6 +26,26 @@ def registrar(request):
         form = UsuarioCreationForm()
     return render(request, 'core/registrar.html', {'form': form})
 
+@login_required
+@require_POST
+def alterar_tipo_usuario(request, usuario_id):
+    # Verifica se o usuário logado é admin
+    if request.user.tipo != 'ADM':
+        messages.error(request, 'Apenas administradores podem alterar o tipo de usuário.')
+        return redirect('home')
+    
+    usuario = get_object_or_404(Usuario, id=usuario_id)
+    novo_tipo = request.POST.get('tipo')
+    
+    if novo_tipo in ['MED', 'OUT', 'ADM']:
+        usuario.tipo = novo_tipo
+        usuario.save()
+        messages.success(request, f'Tipo de usuário de {usuario.nickname} alterado para {usuario.get_tipo_display()}.')
+    else:
+        messages.error(request, 'Tipo de usuário inválido.')
+    
+    return redirect('home')
+
 class HomeView(TemplateView):
     template_name = 'core/home.html'
     

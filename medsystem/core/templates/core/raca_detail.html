@@ -174,6 +174,20 @@
                     </div>
                     {% endif %}
                     
+                    {% if raca.pressao_arterial %}
+                    <div>
+                        <p class="text-indigo-100 text-sm">Pressão Arterial</p>
+                        <p class="font-bold">{{ raca.pressao_arterial }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if raca.bpm %}
+                    <div>
+                        <p class="text-indigo-100 text-sm">BPM</p>
+                        <p class="font-bold">{{ raca.bpm }}</p>
+                    </div>
+                    {% endif %}
+                    
                     {% if raca.afinidade_magica %}
                     <div>
                         <p class="text-indigo-100 text-sm">Afinidade Mágica</p>
