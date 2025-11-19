@@ -53,23 +53,24 @@
 
                 {% if user.is_authenticated %}
                 <div class="hidden md:flex items-center space-x-1">
+                    {% if is_medico_or_admin %}
                     <a href="{% url 'paciente-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
                         <i class="fas fa-user-injured"></i>
                         <span>Pacientes</span>
                     </a>
+                    {% endif %}
                     <a href="{% url 'doenca-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
                         <i class="fas fa-disease"></i>
                         <span>Doenças</span>
-                    </a>
-                    <a href="{% url 'besta-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
-                        <i class="fas fa-paw"></i>
-                        <span>Bestiário</span>
                     </a>
                     <a href="{% url 'raca-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
                         <i class="fas fa-users mr-2"></i>
                         <span>Raças</span>
                     </a>
-                    {% if is_medico_or_admin %}
+                    <a href="{% url 'besta-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
+                        <i class="fas fa-paw"></i>
+                        <span>Bestiário</span>
+                    </a>
                     <div class="relative">
                         <button onclick="toggleDropdown('farmacia-dropdown')" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition flex items-center gap-2">
                             <i class="fas fa-flask"></i>
@@ -85,7 +86,6 @@
                             </a>
                         </div>
                     </div>
-                    {% endif %}
                     <a href="{% url 'relatorio-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
                         <i class="fas fa-file-alt"></i>
                         <span>Expedições</span>

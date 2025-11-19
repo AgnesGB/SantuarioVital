@@ -1,47 +1,44 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Pacientes{% endblock %}
+{% block title %}Pacientes - SantuarioVital{% endblock %}
 
 {% block content %}
-<div class="flex gap-6">
+<div class="flex flex-col lg:flex-row gap-6">
     <!-- Sidebar de Filtros -->
-    <div class="w-80 flex-shrink-0">
-        <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-            <div class="flex items-center gap-2 mb-6">
-                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+    <aside class="lg:w-64 flex-shrink-0">
+        <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
-                <h2 class="text-lg font-semibold text-gray-800">Filtros</h2>
-                <button id="clearFilters" class="ml-auto text-sm text-indigo-600 hover:text-indigo-700 font-medium hidden">
-                    Limpar
-                </button>
-            </div>
+                Filtros
+            </h3>
             
-            <div class="space-y-4">
+            <form method="get" class="space-y-4">
                 <!-- Busca por Nome -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Paciente</label>
-                    <div class="relative">
-                        <input 
-                            type="text" 
-                            id="filterNome" 
-                            placeholder="Buscar..." 
-                            value="{{ request.GET.nome }}"
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                        >
-                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <label for="nome" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                    </div>
+                        Nome do Paciente
+                    </label>
+                    <input type="text" id="nome" name="nome" value="{{ request.GET.nome }}" 
+                           placeholder="Buscar..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
                 </div>
 
                 <!-- Filtro por Status -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select 
-                        id="filterStatus" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    >
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Status
+                    </label>
+                    <select id="status" name="status" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
                         <option value="">Todos</option>
                         {% for value, label in status_choices %}
                         <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
@@ -51,11 +48,14 @@
 
                 <!-- Filtro por Afinidade -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Afinidade</label>
-                    <select 
-                        id="filterAfinidade" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    >
+                    <label for="afinidade" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Afinidade
+                    </label>
+                    <select id="afinidade" name="afinidade" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
                         <option value="">Todas</option>
                         {% for value, label in afinidade_choices %}
                         <option value="{{ value }}" {% if request.GET.afinidade == value %}selected{% endif %}>{{ label }}</option>
@@ -65,474 +65,186 @@
 
                 <!-- Filtro por Cidade -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
-                    <select 
-                        id="filterCidade" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    >
+                    <label for="cidade" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Cidade
+                    </label>
+                    <select id="cidade" name="cidade" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
                         <option value="">Todas</option>
                         {% for cidade in cidades %}
                         <option value="{{ cidade.id }}" {% if request.GET.cidade == cidade.id|stringformat:"s" %}selected{% endif %}>{{ cidade.nome }}</option>
                         {% endfor %}
                     </select>
                 </div>
-
-                <!-- Tags de filtros ativos -->
-                <div id="activeTags" class="pt-4 border-t border-gray-200 hidden">
-                    <span class="text-xs text-gray-600 font-medium mb-2 block">Filtros ativos:</span>
-                    <div class="flex flex-wrap gap-2" id="tagsContainer"></div>
+                
+                <!-- Botões -->
+                <div class="flex gap-2">
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-lg hover:from-indigo-600 hover:to-blue-600 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg">
+                        Filtrar
+                    </button>
+                    <a href="{% url 'paciente-list' %}" 
+                       class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium">
+                        Limpar
+                    </a>
                 </div>
-
-                <!-- Contador de Resultados -->
-                <div class="pt-4 border-t border-gray-200">
-                    <p class="text-sm text-gray-600">
-                        <span id="resultCount" class="font-bold text-indigo-600 text-lg">{{ pacientes|length }}</span> 
-                        <span class="text-gray-500">paciente{{ pacientes|length|pluralize }} encontrado{{ pacientes|length|pluralize }}</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Conteúdo Principal -->
-    <div class="flex-1">
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Pacientes</h1>
-                <p class="text-gray-600 mt-1">Gerenciamento de registros médicos</p>
-            </div>
+            </form>
+            
             {% if is_medico_or_admin %}
-            <a href="{% url 'paciente-create' %}" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Novo Paciente</span>
-            </a>
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <a href="{% url 'paciente-create' %}" 
+                   class="block w-full px-4 py-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-lg hover:from-indigo-600 hover:to-blue-600 transition-all duration-200 text-center font-medium shadow-md hover:shadow-lg">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Novo Paciente
+                </a>
+            </div>
             {% endif %}
         </div>
+    </aside>
 
-        <!-- Grid de Cards -->
-        <div id="pacientesGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {% for paciente in pacientes %}
-            <div class="paciente-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col" 
-                 data-nome="{{ paciente.nome|lower }}"
-                 data-status="{{ paciente.status }}"
-                 data-afinidade="{{ paciente.afinidade }}"
-                 data-cidade="{{ paciente.cidade.id }}">
-                
-                <!-- Header colorido baseado no status -->
-                <div class="h-2 {% if paciente.status == 'ESTAVEL' %}bg-green-500{% elif paciente.status == 'TRATAMENTO' %}bg-yellow-500{% elif paciente.status == 'CRONICO' %}bg-orange-500{% else %}bg-gray-800{% endif %}"></div>
-                
-                <div class="p-6 flex-1">
-                    <!-- Cabeçalho do Card -->
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-gradient-to-br from-indigo-500 to-purple-500 w-12 h-12 min-w-[3rem] rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md flex-shrink-0">
-                                {{ paciente.nome|slice:":1"|upper }}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-xl font-bold text-gray-800 break-words">{{ paciente.nome }}</h3>
-                                <p class="text-sm text-gray-500">{{ paciente.idade }} anos</p>
+    
+    <!-- Conteúdo Principal -->
+    <main class="flex-1">
+        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-white mb-2">Pacientes</h1>
+            <p class="text-indigo-100">Gerenciamento de registros médicos</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% if pacientes %}
+                {% for paciente in pacientes %}
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
+                    <div class="h-2 {% if paciente.status == 'ESTAVEL' %}bg-green-500{% elif paciente.status == 'TRATAMENTO' %}bg-yellow-500{% elif paciente.status == 'CRONICO' %}bg-orange-500{% else %}bg-gray-800{% endif %}"></div>
+                    <div class="p-6 flex-1">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-gradient-to-br from-indigo-500 to-blue-500 w-12 h-12 min-w-[3rem] rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md flex-shrink-0">
+                                    {{ paciente.nome|slice:":1"|upper }}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-xl font-bold text-gray-800 break-words">{{ paciente.nome }}</h3>
+                                    <p class="text-sm text-gray-500">{{ paciente.idade }} anos</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Informações -->
-                    <div class="space-y-3">
-                        <!-- Status -->
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600 font-medium">Status:</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-medium 
-                                {% if paciente.status == 'ESTAVEL' %}bg-green-100 text-green-700
-                                {% elif paciente.status == 'TRATAMENTO' %}bg-yellow-100 text-yellow-700
-                                {% elif paciente.status == 'CRONICO' %}bg-orange-100 text-orange-700
-                                {% else %}bg-gray-800 text-white{% endif %}">
-                                {{ paciente.get_status_display }}
-                            </span>
-                        </div>
+                        <!-- Informações -->
+                        <div class="space-y-3">
+                            <!-- Status -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600 font-medium">Status:</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium 
+                                    {% if paciente.status == 'ESTAVEL' %}bg-green-100 text-green-700
+                                    {% elif paciente.status == 'TRATAMENTO' %}bg-yellow-100 text-yellow-700
+                                    {% elif paciente.status == 'CRONICO' %}bg-orange-100 text-orange-700
+                                    {% else %}bg-gray-800 text-white{% endif %}">
+                                    {{ paciente.get_status_display }}
+                                </span>
+                            </div>
 
-                        <!-- Raças -->
-                        <div class="flex items-start justify-between">
-                            <span class="text-sm text-gray-600 font-medium">Raça:</span>
-                            <div class="flex flex-wrap gap-1 justify-end max-w-[65%]">
-                                {% if paciente.raca.all %}
-                                    {% for raca in paciente.raca.all %}
-                                    <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                                        {{ raca.nome }}
-                                    </span>
-                                    {% endfor %}
+                            <!-- Raças -->
+                            <div class="flex items-start justify-between">
+                                <span class="text-sm text-gray-600 font-medium">Raça:</span>
+                                <div class="flex flex-wrap gap-1 justify-end max-w-[65%]">
+                                    {% if paciente.raca.all %}
+                                        {% for raca in paciente.raca.all %}
+                                        <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                            {{ raca.nome }}
+                                        </span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-gray-400 text-sm italic">Não informado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Afinidade -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600 font-medium">Afinidade:</span>
+                                {% if paciente.afinidade %}
+                                <span class="px-3 py-1 rounded-full text-xs font-medium
+                                    {% if paciente.afinidade == 'fo' %}bg-red-100 text-red-700
+                                    {% elif paciente.afinidade == 'ag' %}bg-blue-100 text-blue-700
+                                    {% elif paciente.afinidade == 'ra' %}bg-yellow-100 text-yellow-700
+                                    {% elif paciente.afinidade == 'cu' %}bg-green-100 text-green-700
+                                    {% elif paciente.afinidade == 'ge' %}bg-cyan-100 text-cyan-700
+                                    {% elif paciente.afinidade == 'sa' %}bg-rose-100 text-rose-700
+                                    {% elif paciente.afinidade == 'na' %}bg-emerald-100 text-emerald-700
+                                    {% elif paciente.afinidade == 'ev' %}bg-purple-100 text-purple-700
+                                    {% elif paciente.afinidade == 'va' %}bg-gray-100 text-gray-700
+                                    {% else %}bg-gray-100 text-gray-500{% endif %}">
+                                    {{ paciente.get_afinidade_display }}
+                                </span>
                                 {% else %}
-                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">--</span>
+                                <span class="text-gray-400 text-sm italic">Não informado</span>
                                 {% endif %}
                             </div>
-                        </div>
 
-                        <!-- Afinidade -->
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600 font-medium">Afinidade:</span>
-                            {% if paciente.afinidade %}
-                            <span class="px-3 py-1 rounded-full text-xs font-medium
-                                {% if paciente.afinidade == 'fo' %}bg-red-100 text-red-700
-                                {% elif paciente.afinidade == 'ag' %}bg-blue-100 text-blue-700
-                                {% elif paciente.afinidade == 'ra' %}bg-yellow-100 text-yellow-700
-                                {% elif paciente.afinidade == 'cu' %}bg-green-100 text-green-700
-                                {% elif paciente.afinidade == 'ge' %}bg-cyan-100 text-cyan-700
-                                {% elif paciente.afinidade == 'sa' %}bg-rose-100 text-rose-700
-                                {% elif paciente.afinidade == 'na' %}bg-emerald-100 text-emerald-700
-                                {% elif paciente.afinidade == 'ev' %}bg-purple-100 text-purple-700
-                                {% elif paciente.afinidade == 'va' %}bg-gray-100 text-gray-700
-                                {% else %}bg-gray-100 text-gray-500{% endif %}">
-                                {{ paciente.get_afinidade_display }}
-                            </span>
-                            {% else %}
-                            <span class="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">--</span>
+                            <!-- Cidade -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600 font-medium">Cidade:</span>
+                                <span class="text-sm font-medium text-gray-800">{{ paciente.cidade.nome }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de ação fixos no rodapé do card -->
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <div class="flex gap-2">
+                            <a href="{% url 'paciente-detail' paciente.id %}" 
+                               class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-center text-sm font-medium">
+                                Ver Detalhes
+                            </a>
+                            {% if is_medico_or_admin %}
+                            <a href="{% url 'paciente-update' paciente.id %}" 
+                               class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </a>
+                            <a href="{% url 'paciente-delete' paciente.id %}" 
+                               class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </a>
                             {% endif %}
-                        </div>
-
-                        <!-- Cidade -->
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600 font-medium">Cidade:</span>
-                            <span class="text-sm font-medium text-gray-800">{{ paciente.cidade.nome }}</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Botões de Ação (Fixos no Rodapé) -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex gap-2">
-                    <a href="{% url 'paciente-detail' paciente.id %}" 
-                       class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-center text-sm font-medium">
-                        Detalhes
+                {% endfor %}
+            {% else %}
+                <div class="col-span-full bg-white rounded-lg shadow-md p-12 text-center">
+                    {% if request.GET %}
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhum resultado encontrado</h3>
+                    <p class="text-gray-500 mb-4">Tente ajustar os filtros para encontrar pacientes.</p>
+                    <a href="{% url 'paciente-list' %}" class="inline-block px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors duration-200">
+                        Limpar Filtros
                     </a>
+                    {% else %}
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhum paciente encontrado</h3>
+                    <p class="text-gray-500">Não há pacientes cadastrados no momento.</p>
                     {% if is_medico_or_admin %}
-                    <a href="{% url 'paciente-update' paciente.id %}" 
-                       class="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-center text-sm font-medium">
-                        Editar
-                    </a>
-                    <a href="{% url 'paciente-delete' paciente.id %}" 
-                       class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-center text-sm font-medium">
-                        Excluir
+                    <a href="{% url 'paciente-create' %}" class="inline-block mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors duration-200">
+                        Adicionar Primeiro Paciente
                     </a>
                     {% endif %}
+                    {% endif %}
                 </div>
-            </div>
-            {% empty %}
-            <div class="col-span-full">
-                <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8 text-center">
-                    <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                    </svg>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Nenhum paciente cadastrado</h3>
-                    <p class="text-gray-600">Adicione o primeiro paciente ao sistema.</p>
-                </div>
-            </div>
-            {% endfor %}
+            {% endif %}
         </div>
-
-        <!-- Mensagem quando filtros não retornam resultados -->
-        <div id="noResults" class="hidden">
-            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8 text-center">
-                <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">Nenhum resultado encontrado</h3>
-                <p class="text-gray-600">Tente ajustar os filtros para encontrar pacientes.</p>
-            </div>
-        </div>
-    </div>
+    </main>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const filterNome = document.getElementById('filterNome');
-    const filterStatus = document.getElementById('filterStatus');
-    const filterAfinidade = document.getElementById('filterAfinidade');
-    const filterCidade = document.getElementById('filterCidade');
-    const clearFiltersBtn = document.getElementById('clearFilters');
-    const activeTags = document.getElementById('activeTags');
-    const tagsContainer = document.getElementById('tagsContainer');
-    const pacientesGrid = document.getElementById('pacientesGrid');
-    const noResults = document.getElementById('noResults');
-    const resultCount = document.getElementById('resultCount');
-    
-    let debounceTimer;
-
-    function applyFilters() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            const nome = filterNome.value.toLowerCase().trim();
-            const status = filterStatus.value;
-            const afinidade = filterAfinidade.value;
-            const cidade = filterCidade.value;
-            
-            const cards = document.querySelectorAll('.paciente-card');
-            let visibleCount = 0;
-            
-            cards.forEach(card => {
-                const cardNome = card.dataset.nome;
-                const cardStatus = card.dataset.status;
-                const cardAfinidade = card.dataset.afinidade;
-                const cardCidade = card.dataset.cidade;
-                
-                const matchNome = !nome || cardNome.includes(nome);
-                const matchStatus = !status || cardStatus === status;
-                const matchAfinidade = !afinidade || cardAfinidade === afinidade;
-                const matchCidade = !cidade || cardCidade === cidade;
-                
-                if (matchNome && matchStatus && matchAfinidade && matchCidade) {
-                    card.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-            
-            // Atualiza contador
-            resultCount.textContent = visibleCount;
-            
-            // Mostra/esconde mensagem de sem resultados
-            if (visibleCount === 0 && cards.length > 0) {
-                noResults.classList.remove('hidden');
-                pacientesGrid.classList.add('hidden');
-            } else {
-                noResults.classList.add('hidden');
-                pacientesGrid.classList.remove('hidden');
-            }
-            
-            // Atualiza tags de filtros ativos
-            updateActiveTags(nome, status, afinidade, cidade);
-            
-            // Atualiza URL sem recarregar página
-            updateURL(nome, status, afinidade, cidade);
-        }, 300);
-    }
-    
-    function updateActiveTags(nome, status, afinidade, cidade) {
-        const tags = [];
-        
-        if (nome) tags.push({ label: `"${nome}"`, filter: 'nome' });
-        if (status) tags.push({ label: filterStatus.options[filterStatus.selectedIndex].text, filter: 'status' });
-        if (afinidade) tags.push({ label: filterAfinidade.options[filterAfinidade.selectedIndex].text, filter: 'afinidade' });
-        if (cidade) tags.push({ label: filterCidade.options[filterCidade.selectedIndex].text, filter: 'cidade' });
-        
-        if (tags.length > 0) {
-            activeTags.classList.remove('hidden');
-            clearFiltersBtn.classList.remove('hidden');
-            
-            // Limpa tags antigas
-            tagsContainer.innerHTML = '';
-            
-            // Adiciona novas tags
-            tags.forEach(tag => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium flex items-center gap-1';
-                tagEl.innerHTML = `
-                    ${tag.label}
-                    <button class="hover:text-indigo-900" onclick="clearFilter('${tag.filter}')">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                `;
-                tagsContainer.appendChild(tagEl);
-            });
-        } else {
-            activeTags.classList.add('hidden');
-            clearFiltersBtn.classList.add('hidden');
-        }
-    }
-    
-    function updateURL(nome, status, afinidade, cidade) {
-        const params = new URLSearchParams();
-        if (nome) params.set('nome', nome);
-        if (status) params.set('status', status);
-        if (afinidade) params.set('afinidade', afinidade);
-        if (cidade) params.set('cidade', cidade);
-        
-        const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
-        window.history.replaceState({}, '', newURL);
-    }
-    
-    window.clearFilter = function(filterType) {
-        if (filterType === 'nome') filterNome.value = '';
-        if (filterType === 'status') filterStatus.value = '';
-        if (filterType === 'afinidade') filterAfinidade.value = '';
-        if (filterType === 'cidade') filterCidade.value = '';
-        applyFilters();
-    };
-    
-    clearFiltersBtn.addEventListener('click', function() {
-        filterNome.value = '';
-        filterStatus.value = '';
-        filterAfinidade.value = '';
-        filterCidade.value = '';
-        applyFilters();
-    });
-    
-    // Event listeners
-    filterNome.addEventListener('input', applyFilters);
-    filterStatus.addEventListener('change', applyFilters);
-    filterAfinidade.addEventListener('change', applyFilters);
-    filterCidade.addEventListener('change', applyFilters);
-    
-    // Aplica filtros iniciais se houver parâmetros na URL
-    if (filterNome.value || filterStatus.value || filterAfinidade.value || filterCidade.value) {
-        applyFilters();
-    }
-});
-</script>
 {% endblock %}
-
-    <!-- Grid de Cards -->
-        }
-});
-</script>
-
-    <!-- Mensagem quando filtros não retornam resultados -->
-    <div id="noResults" class="hidden col-span-full">
-        <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8 text-center">
-            <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">Nenhum resultado encontrado</h3>
-            <p class="text-gray-600">Tente ajustar os filtros para encontrar pacientes.</p>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const filterNome = document.getElementById('filterNome');
-    const filterStatus = document.getElementById('filterStatus');
-    const filterAfinidade = document.getElementById('filterAfinidade');
-    const filterCidade = document.getElementById('filterCidade');
-    const clearFiltersBtn = document.getElementById('clearFilters');
-    const activeTags = document.getElementById('activeTags');
-    const pacientesGrid = document.getElementById('pacientesGrid');
-    const noResults = document.getElementById('noResults');
-    const resultCount = document.getElementById('resultCount');
-    
-    let debounceTimer;
-
-    function applyFilters() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            const nome = filterNome.value.toLowerCase().trim();
-            const status = filterStatus.value;
-            const afinidade = filterAfinidade.value;
-            const cidade = filterCidade.value;
-            
-            const cards = document.querySelectorAll('.paciente-card');
-            let visibleCount = 0;
-            
-            cards.forEach(card => {
-                const cardNome = card.dataset.nome;
-                const cardStatus = card.dataset.status;
-                const cardAfinidade = card.dataset.afinidade;
-                const cardCidade = card.dataset.cidade;
-                
-                const matchNome = !nome || cardNome.includes(nome);
-                const matchStatus = !status || cardStatus === status;
-                const matchAfinidade = !afinidade || cardAfinidade === afinidade;
-                const matchCidade = !cidade || cardCidade === cidade;
-                
-                if (matchNome && matchStatus && matchAfinidade && matchCidade) {
-                    card.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-            
-            // Atualiza contador
-            resultCount.textContent = visibleCount;
-            
-            // Mostra/esconde mensagem de sem resultados
-            if (visibleCount === 0 && cards.length > 0) {
-                noResults.classList.remove('hidden');
-            } else {
-                noResults.classList.add('hidden');
-            }
-            
-            // Atualiza tags de filtros ativos
-            updateActiveTags(nome, status, afinidade, cidade);
-            
-            // Atualiza URL sem recarregar página
-            updateURL(nome, status, afinidade, cidade);
-        }, 300);
-    }
-    
-    function updateActiveTags(nome, status, afinidade, cidade) {
-        const tags = [];
-        
-        if (nome) tags.push({ label: `Nome: "${nome}"`, filter: 'nome' });
-        if (status) tags.push({ label: `Status: ${filterStatus.options[filterStatus.selectedIndex].text}`, filter: 'status' });
-        if (afinidade) tags.push({ label: `Afinidade: ${filterAfinidade.options[filterAfinidade.selectedIndex].text}`, filter: 'afinidade' });
-        if (cidade) tags.push({ label: `Cidade: ${filterCidade.options[filterCidade.selectedIndex].text}`, filter: 'cidade' });
-        
-        if (tags.length > 0) {
-            activeTags.classList.remove('hidden');
-            clearFiltersBtn.classList.remove('hidden');
-            
-            // Remove tags antigas exceto o label
-            const oldTags = activeTags.querySelectorAll('.filter-tag');
-            oldTags.forEach(tag => tag.remove());
-            
-            // Adiciona novas tags
-            tags.forEach(tag => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'filter-tag px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium flex items-center gap-2';
-                tagEl.innerHTML = `
-                    ${tag.label}
-                    <button class="hover:text-indigo-900" onclick="clearFilter('${tag.filter}')">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                `;
-                activeTags.appendChild(tagEl);
-            });
-        } else {
-            activeTags.classList.add('hidden');
-            clearFiltersBtn.classList.add('hidden');
-        }
-    }
-    
-    function updateURL(nome, status, afinidade, cidade) {
-        const params = new URLSearchParams();
-        if (nome) params.set('nome', nome);
-        if (status) params.set('status', status);
-        if (afinidade) params.set('afinidade', afinidade);
-        if (cidade) params.set('cidade', cidade);
-        
-        const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
-        window.history.replaceState({}, '', newURL);
-    }
-    
-    window.clearFilter = function(filterType) {
-        if (filterType === 'nome') filterNome.value = '';
-        if (filterType === 'status') filterStatus.value = '';
-        if (filterType === 'afinidade') filterAfinidade.value = '';
-        if (filterType === 'cidade') filterCidade.value = '';
-        applyFilters();
-    };
-    
-    clearFiltersBtn.addEventListener('click', function() {
-        filterNome.value = '';
-        filterStatus.value = '';
-        filterAfinidade.value = '';
-        filterCidade.value = '';
-        applyFilters();
-    });
-    
-    // Event listeners
-    filterNome.addEventListener('input', applyFilters);
-    filterStatus.addEventListener('change', applyFilters);
-    filterAfinidade.addEventListener('change', applyFilters);
-    filterCidade.addEventListener('change', applyFilters);
-    
-    // Aplica filtros iniciais se houver parâmetros na URL
-    if (filterNome.value || filterStatus.value || filterAfinidade.value || filterCidade.value) {
-        applyFilters();
-    }
-});
-</script>

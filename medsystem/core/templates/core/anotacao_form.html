@@ -1,41 +1,143 @@
 {% extends 'core/base.html' %}
 
-{% block title %}{% if object %}Editar Anotação{% else %}Nova Anotação{% endif %}{% endblock %}
+{% block title %}{% if object %}Editar{% else %}Nova{% endif %} Anotação - SantuarioVital{% endblock %}
 
 {% block content %}
-<div class="columns is-centered">
-    <div class="column is-two-thirds">
-        <div class="box">
-            <h1 class="title">{% if object %}Editar Anotação{% else %}Nova Anotação{% endif %}</h1>
-            <form method="post">
-                {% csrf_token %}
-                <div class="field">
-                    <label class="label">Título</label>
-                    <div class="control">
-                        {{ form.titulo }}
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Conteúdo</label>
-                    <div class="control">
-                        {{ form.conteudo }}
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Palavras-chave</label>
-                    <div class="control">
-                        {{ form.tags }}
-                    </div>
-                    <p class="help">Separe as palavras-chave por vírgula</p>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <button type="submit" class="button is-primary">Salvar</button>
-                        <a href="{% url 'anotacao-list' %}" class="button is-light">Cancelar</a>
-                    </div>
-                </div>
-            </form>
+<div class="max-w-4xl mx-auto">
+    <!-- Header com Gradient -->
+    <div class="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-lg shadow-lg p-6 mb-6">
+        <div class="flex items-center gap-3">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            <div>
+                <h1 class="text-3xl font-bold text-white">{% if object %}Editar{% else %}Nova{% endif %} Anotação</h1>
+                <p class="text-teal-100">Suas anotações pessoais e privadas</p>
+            </div>
         </div>
     </div>
+
+    <!-- Formulário -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <form method="post" class="p-6">
+            {% csrf_token %}
+            
+            <!-- Seção: Informações da Anotação -->
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-4 pb-2 border-b-2 border-teal-500">
+                    <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-800">Informações</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Título -->
+                    <div>
+                        <label for="id_titulo" class="block text-sm font-medium text-gray-700 mb-2">
+                            <svg class="w-4 h-4 inline-block mr-1 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            Título *
+                        </label>
+                        {{ form.titulo }}
+                        {% if form.titulo.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.titulo.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Tags -->
+                    <div>
+                        <label for="id_tags" class="block text-sm font-medium text-gray-700 mb-2">
+                            <svg class="w-4 h-4 inline-block mr-1 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                            </svg>
+                            Tags/Palavras-chave
+                        </label>
+                        {{ form.tags }}
+                        <p class="mt-1 text-sm text-gray-500">Separe as palavras-chave por vírgula (Ex: paciente, tratamento, pesquisa)</p>
+                        {% if form.tags.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.tags.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Conteúdo -->
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-4 pb-2 border-b-2 border-cyan-500">
+                    <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-800">Conteúdo da Anotação</h2>
+                </div>
+
+                <div>
+                    <label for="id_conteudo" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                        </svg>
+                        Escreva suas anotações *
+                    </label>
+                    {{ form.conteudo }}
+                    <p class="mt-1 text-sm text-gray-500">Escreva livremente suas observações, ideias e anotações</p>
+                    {% if form.conteudo.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.conteudo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="flex gap-3 pt-6 border-t border-gray-200">
+                <button 
+                    type="submit" 
+                    class="flex-1 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>{% if object %}Atualizar{% else %}Salvar{% endif %} Anotação</span>
+                </button>
+                <a 
+                    href="{% url 'anotacao-list' %}" 
+                    class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>Cancelar</span>
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+
+<style>
+    /* Estilização dos campos do formulário Django */
+    #id_titulo,
+    #id_tags {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: 1px solid #D1D5DB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    #id_titulo:focus,
+    #id_tags:focus,
+    #id_conteudo:focus {
+        outline: none;
+        ring: 2px;
+        ring-color: #14B8A6;
+        border-color: transparent;
+    }
+    
+    #id_conteudo {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: 1px solid #D1D5DB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        min-height: 200px;
+        font-family: inherit;
+    }
+</style>
 {% endblock %}

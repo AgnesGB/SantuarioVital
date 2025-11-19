@@ -1,47 +1,44 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Doenças{% endblock %}
+{% block title %}Doenças - SantuarioVital{% endblock %}
 
 {% block content %}
-<div class="flex gap-6">
+<div class="flex flex-col lg:flex-row gap-6">
     <!-- Sidebar de Filtros -->
-    <div class="w-80 flex-shrink-0">
-        <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-            <div class="flex items-center gap-2 mb-6">
-                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+    <aside class="lg:w-64 flex-shrink-0">
+        <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
-                <h2 class="text-lg font-semibold text-gray-800">Filtros</h2>
-                <button id="clearFilters" class="ml-auto text-sm text-indigo-600 hover:text-indigo-700 font-medium hidden">
-                    Limpar
-                </button>
-            </div>
+                Filtros
+            </h3>
             
-            <div class="space-y-4">
+            <form method="get" class="space-y-4">
                 <!-- Busca por Nome -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome da Doença</label>
-                    <div class="relative">
-                        <input 
-                            type="text" 
-                            id="filterNome" 
-                            placeholder="Buscar..." 
-                            value="{{ request.GET.nome }}"
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                        >
-                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <label for="nome" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                    </div>
+                        Nome da Doença
+                    </label>
+                    <input type="text" id="nome" name="nome" value="{{ request.GET.nome }}" 
+                           placeholder="Buscar..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm">
                 </div>
 
                 <!-- Filtro por Tipo -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
-                    <select 
-                        id="filterTipo" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    >
+                    <label for="tipo" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        Tipo
+                    </label>
+                    <select id="tipo" name="tipo" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm">
                         <option value="">Todos</option>
                         <option value="F" {% if request.GET.tipo == 'F' %}selected{% endif %}>Física</option>
                         <option value="M" {% if request.GET.tipo == 'M' %}selected{% endif %}>Mental</option>
@@ -51,272 +48,163 @@
 
                 <!-- Filtro por Contagiosa -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Contagiosa</label>
-                    <select 
-                        id="filterContagiosa" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    >
+                    <label for="contagiosa" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        Contagiosa
+                    </label>
+                    <select id="contagiosa" name="contagiosa" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm">
                         <option value="">Todas</option>
-                        <option value="sim">Sim</option>
-                        <option value="nao">Não</option>
+                        <option value="sim" {% if request.GET.contagiosa == 'sim' %}selected{% endif %}>Sim</option>
+                        <option value="nao" {% if request.GET.contagiosa == 'nao' %}selected{% endif %}>Não</option>
                     </select>
                 </div>
-
-                <!-- Tags de filtros ativos -->
-                <div id="activeTags" class="pt-4 border-t border-gray-200 hidden">
-                    <span class="text-xs text-gray-600 font-medium mb-2 block">Filtros ativos:</span>
-                    <div class="flex flex-wrap gap-2" id="tagsContainer"></div>
+                
+                <!-- Botões -->
+                <div class="flex gap-2">
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg">
+                        Filtrar
+                    </button>
+                    <a href="{% url 'doenca-list' %}" 
+                       class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium">
+                        Limpar
+                    </a>
                 </div>
-
-                <!-- Contador de Resultados -->
-                <div class="pt-4 border-t border-gray-200">
-                    <p class="text-sm text-gray-600">
-                        <span id="resultCount" class="font-bold text-indigo-600 text-lg">{{ doencas|length }}</span> 
-                        <span class="text-gray-500">doença{{ doencas|length|pluralize:"s" }} encontrada{{ doencas|length|pluralize:"s" }}</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Conteúdo Principal -->
-    <div class="flex-1">
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Doenças</h1>
-                <p class="text-gray-600 mt-1">Catálogo de doenças registradas</p>
-            </div>
+            </form>
+            
             {% if is_medico_or_admin %}
-            <a href="{% url 'doenca-create' %}" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Nova Doença</span>
-            </a>
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <a href="{% url 'doenca-create' %}" 
+                   class="block w-full px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 text-center font-medium shadow-md hover:shadow-lg">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Nova Doença
+                </a>
+            </div>
             {% endif %}
         </div>
-
-        <!-- Grid de Cards -->
-        <div id="doencasGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {% for doenca in doencas %}
-            <div class="doenca-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
-                 data-nome="{{ doenca.nome|lower }}"
-                 data-tipo="{{ doenca.tipo }}"
-                 data-contagiosa="{{ doenca.contagiosa|yesno:'sim,nao' }}">
-                
-                <!-- Header colorido baseado no tipo -->
-                <div class="h-2 {% if doenca.tipo == 'F' %}bg-red-500{% elif doenca.tipo == 'M' %}bg-purple-500{% else %}bg-orange-500{% endif %}"></div>
-                
-                <div class="p-6 flex-1">
-                    <!-- Título -->
-                    <div class="mb-4">
-                        <h3 class="text-xl font-bold text-gray-800 break-words">{{ doenca.nome }}</h3>
-                        <div class="flex gap-2 flex-wrap mt-2">
-                            <span class="px-3 py-1 {% if doenca.tipo == 'F' %}bg-red-100 text-red-700{% elif doenca.tipo == 'M' %}bg-purple-100 text-purple-700{% else %}bg-orange-100 text-orange-700{% endif %} rounded-full text-xs font-medium">
-                                {{ doenca.get_tipo_display }}
-                            </span>
-                            <span class="px-3 py-1 {% if doenca.contagiosa %}bg-yellow-100 text-yellow-700{% else %}bg-green-100 text-green-700{% endif %} rounded-full text-xs font-medium">
-                                {% if doenca.contagiosa %}Contagiosa{% else %}Não Contagiosa{% endif %}
-                            </span>
+    </aside>
+    
+    <!-- Conteúdo Principal -->
+    <main class="flex-1">
+        <div class="bg-gradient-to-r from-red-600 to-pink-600 rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-white mb-2">Doenças</h1>
+            <p class="text-red-100">Catálogo de doenças registradas</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% if doencas %}
+                {% for doenca in doencas %}
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
+                    <div class="h-2 {% if doenca.tipo == 'F' %}bg-red-500{% elif doenca.tipo == 'M' %}bg-purple-500{% else %}bg-orange-500{% endif %}"></div>
+                    <div class="p-6 flex-1">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ doenca.nome }}</h3>
+                                <div class="flex gap-2 flex-wrap">
+                                    <span class="px-3 py-1 {% if doenca.tipo == 'F' %}bg-red-100 text-red-700{% elif doenca.tipo == 'M' %}bg-purple-100 text-purple-700{% else %}bg-orange-100 text-orange-700{% endif %} rounded-full text-xs font-medium">
+                                        {{ doenca.get_tipo_display }}
+                                    </span>
+                                    <span class="px-3 py-1 {% if doenca.contagiosa %}bg-yellow-100 text-yellow-700{% else %}bg-green-100 text-green-700{% endif %} rounded-full text-xs font-medium">
+                                        {% if doenca.contagiosa %}Contagiosa{% else %}Não Contagiosa{% endif %}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Informações -->
-                    <div class="space-y-3">
+                        
                         <!-- Parte Afetada -->
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-600 font-medium">Parte Afetada:</span>
-                            <span class="text-sm font-medium text-gray-800">{{ doenca.get_parte_afetada_display }}</span>
+                        <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                            <p class="text-gray-700 text-xs font-medium mb-1">Parte Afetada</p>
+                            <p class="text-gray-800 text-sm">{{ doenca.get_parte_afetada_display }}</p>
                         </div>
                         
                         {% if doenca.contagiosa and doenca.forma_contagio %}
                         <!-- Forma de Contágio -->
-                        <div class="pt-2 border-t border-gray-100">
-                            <p class="text-xs text-gray-600 font-medium mb-1">Forma de Contágio:</p>
-                            <p class="text-xs text-gray-700">{{ doenca.forma_contagio|truncatewords:12 }}</p>
+                        <div class="bg-yellow-50 p-3 rounded-lg mb-4">
+                            <p class="text-yellow-800 text-xs font-medium mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                Forma de Contágio
+                            </p>
+                            <p class="text-yellow-900 text-sm">{{ doenca.forma_contagio|truncatewords:12 }}</p>
                         </div>
                         {% endif %}
                         
                         <!-- Sintomas -->
-                        <div class="pt-2 border-t border-gray-100">
-                            <p class="text-xs text-gray-600 font-medium mb-1">Sintomas:</p>
-                            <p class="text-xs text-gray-700">{{ doenca.sintomas|truncatewords:15 }}</p>
+                        {% if doenca.sintomas %}
+                        <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                            <p class="text-blue-800 text-xs font-medium mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Sintomas
+                            </p>
+                            <p class="text-blue-900 text-sm">{{ doenca.sintomas|truncatewords:15 }}</p>
+                        </div>
+                        {% else %}
+                        <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                            <p class="text-gray-500 text-xs font-medium mb-1">Sintomas</p>
+                            <p class="text-gray-400 text-sm italic">Não informado</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Botões de ação fixos no rodapé do card -->
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <div class="flex gap-2">
+                            <a href="{% url 'doenca-detail' doenca.pk %}" 
+                               class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-center text-sm font-medium">
+                                Ver Detalhes
+                            </a>
+                            {% if is_medico_or_admin %}
+                            <a href="{% url 'doenca-update' doenca.pk %}" 
+                               class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </a>
+                            <a href="{% url 'doenca-delete' doenca.pk %}" 
+                               class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                
-                <!-- Botões de Ação (Fixos no Rodapé) -->
-                <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex gap-2">
-                    <a href="{% url 'doenca-detail' doenca.pk %}" 
-                       class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-center text-sm font-medium">
-                        Detalhes
+                {% endfor %}
+            {% else %}
+                <div class="col-span-full bg-white rounded-lg shadow-md p-12 text-center">
+                    {% if request.GET %}
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhum resultado encontrado</h3>
+                    <p class="text-gray-500 mb-4">Tente ajustar os filtros para encontrar doenças.</p>
+                    <a href="{% url 'doenca-list' %}" class="inline-block px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
+                        Limpar Filtros
                     </a>
+                    {% else %}
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhuma doença encontrada</h3>
+                    <p class="text-gray-500">Não há doenças cadastradas no momento.</p>
                     {% if is_medico_or_admin %}
-                    <a href="{% url 'doenca-update' doenca.pk %}" 
-                       class="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-center text-sm font-medium">
-                        Editar
-                    </a>
-                    <a href="{% url 'doenca-delete' doenca.pk %}" 
-                       class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-center text-sm font-medium">
-                        Excluir
+                    <a href="{% url 'doenca-create' %}" class="inline-block mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
+                        Adicionar Primeira Doença
                     </a>
                     {% endif %}
+                    {% endif %}
                 </div>
-            </div>
-            {% empty %}
-            <div class="col-span-full">
-                <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8 text-center">
-                    <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Nenhuma doença cadastrada</h3>
-                    <p class="text-gray-600">Adicione a primeira doença ao sistema.</p>
-                </div>
-            </div>
-            {% endfor %}
+            {% endif %}
         </div>
-
-        <!-- Mensagem quando filtros não retornam resultados -->
-        <div id="noResults" class="hidden">
-            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8 text-center">
-                <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">Nenhum resultado encontrado</h3>
-                <p class="text-gray-600">Tente ajustar os filtros para encontrar doenças.</p>
-            </div>
-        </div>
-    </div>
+    </main>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const filterNome = document.getElementById('filterNome');
-    const filterTipo = document.getElementById('filterTipo');
-    const filterContagiosa = document.getElementById('filterContagiosa');
-    const clearFiltersBtn = document.getElementById('clearFilters');
-    const activeTags = document.getElementById('activeTags');
-    const tagsContainer = document.getElementById('tagsContainer');
-    const doencasGrid = document.getElementById('doencasGrid');
-    const noResults = document.getElementById('noResults');
-    const resultCount = document.getElementById('resultCount');
-    
-    let debounceTimer;
-
-    function applyFilters() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            const nome = filterNome.value.toLowerCase().trim();
-            const tipo = filterTipo.value;
-            const contagiosa = filterContagiosa.value;
-            
-            const cards = document.querySelectorAll('.doenca-card');
-            let visibleCount = 0;
-            
-            cards.forEach(card => {
-                const cardNome = card.dataset.nome;
-                const cardTipo = card.dataset.tipo;
-                const cardContagiosa = card.dataset.contagiosa;
-                
-                const matchNome = !nome || cardNome.includes(nome);
-                const matchTipo = !tipo || cardTipo === tipo;
-                const matchContagiosa = !contagiosa || cardContagiosa === contagiosa;
-                
-                if (matchNome && matchTipo && matchContagiosa) {
-                    card.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-            
-            // Atualiza contador
-            resultCount.textContent = visibleCount;
-            
-            // Mostra/esconde mensagem de sem resultados
-            if (visibleCount === 0 && cards.length > 0) {
-                noResults.classList.remove('hidden');
-                doencasGrid.classList.add('hidden');
-            } else {
-                noResults.classList.add('hidden');
-                doencasGrid.classList.remove('hidden');
-            }
-            
-            // Atualiza tags de filtros ativos
-            updateActiveTags(nome, tipo, contagiosa);
-            
-            // Atualiza URL sem recarregar página
-            updateURL(nome, tipo, contagiosa);
-        }, 300);
-    }
-    
-    function updateActiveTags(nome, tipo, contagiosa) {
-        const tags = [];
-        
-        if (nome) tags.push({ label: `"${nome}"`, filter: 'nome' });
-        if (tipo) tags.push({ label: filterTipo.options[filterTipo.selectedIndex].text, filter: 'tipo' });
-        if (contagiosa) tags.push({ label: filterContagiosa.options[filterContagiosa.selectedIndex].text, filter: 'contagiosa' });
-        
-        if (tags.length > 0) {
-            activeTags.classList.remove('hidden');
-            clearFiltersBtn.classList.remove('hidden');
-            
-            // Limpa tags antigas
-            tagsContainer.innerHTML = '';
-            
-            // Adiciona novas tags
-            tags.forEach(tag => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium flex items-center gap-1';
-                tagEl.innerHTML = `
-                    ${tag.label}
-                    <button class="hover:text-indigo-900" onclick="clearFilter('${tag.filter}')">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                `;
-                tagsContainer.appendChild(tagEl);
-            });
-        } else {
-            activeTags.classList.add('hidden');
-            clearFiltersBtn.classList.add('hidden');
-        }
-    }
-    
-    function updateURL(nome, tipo, contagiosa) {
-        const params = new URLSearchParams();
-        if (nome) params.set('nome', nome);
-        if (tipo) params.set('tipo', tipo);
-        if (contagiosa) params.set('contagiosa', contagiosa);
-        
-        const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
-        window.history.replaceState({}, '', newURL);
-    }
-    
-    window.clearFilter = function(filterType) {
-        if (filterType === 'nome') filterNome.value = '';
-        if (filterType === 'tipo') filterTipo.value = '';
-        if (filterType === 'contagiosa') filterContagiosa.value = '';
-        applyFilters();
-    };
-    
-    clearFiltersBtn.addEventListener('click', function() {
-        filterNome.value = '';
-        filterTipo.value = '';
-        filterContagiosa.value = '';
-        applyFilters();
-    });
-    
-    // Event listeners
-    filterNome.addEventListener('input', applyFilters);
-    filterTipo.addEventListener('change', applyFilters);
-    filterContagiosa.addEventListener('change', applyFilters);
-    
-    // Aplica filtros iniciais se houver parâmetros na URL
-    if (filterNome.value || filterTipo.value || filterContagiosa.value) {
-        applyFilters();
-    }
-});
-</script>
 {% endblock %}

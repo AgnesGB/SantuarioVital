@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Expedições - SantuarioVital{% endblock %}
+{% block title %}Relatórios de Expedição - SantuarioVital{% endblock %}
 
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6">
@@ -15,39 +15,82 @@
                 Filtros
             </h3>
             
-            <div class="space-y-4">
+            <form method="get" class="space-y-4">
+                <!-- Busca Geral -->
+                <div>
+                    <label for="busca" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Busca Geral
+                    </label>
+                    <input type="text" id="busca" name="busca" value="{{ request.GET.busca }}" 
+                           placeholder="Título, descobertas..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm">
+                </div>
+                
                 <!-- Filtro Título -->
                 <div>
-                    <label for="filterTitulo" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
-                    <input type="text" id="filterTitulo" placeholder="Filtrar por título..."
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <label for="titulo" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        Título
+                    </label>
+                    <input type="text" id="titulo" name="titulo" value="{{ request.GET.titulo }}" 
+                           placeholder="Filtrar por título..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm">
                 </div>
                 
                 <!-- Filtro Localização -->
                 <div>
-                    <label for="filterLocalizacao" class="block text-sm font-medium text-gray-700 mb-2">Localização</label>
-                    <input type="text" id="filterLocalizacao" placeholder="Filtrar por localização..."
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <label for="localizacao" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Localização
+                    </label>
+                    <input type="text" id="localizacao" name="localizacao" value="{{ request.GET.localizacao }}" 
+                           placeholder="Filtrar por localização..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm">
                 </div>
                 
-                <!-- Botão Limpar -->
-                <button onclick="clearFilters()" 
-                        class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
-                    Limpar Filtros
-                </button>
-            </div>
+                <!-- Filtro Autor -->
+                <div>
+                    <label for="autor" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Autor
+                    </label>
+                    <input type="text" id="autor" name="autor" value="{{ request.GET.autor }}" 
+                           placeholder="Nome do autor..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm">
+                </div>
+                
+                <!-- Botões -->
+                <div class="flex gap-2">
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg">
+                        Filtrar
+                    </button>
+                    <a href="{% url 'relatorio-list' %}" 
+                       class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium">
+                        Limpar
+                    </a>
+                </div>
+            </form>
             
-            {% if is_medico_or_admin %}
             <div class="mt-6 pt-6 border-t border-gray-200">
                 <a href="{% url 'relatorio-create' %}" 
-                   class="block w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-200 text-center font-medium shadow-md hover:shadow-lg">
+                   class="block w-full px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-200 text-center font-medium shadow-md hover:shadow-lg">
                     <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
                     Nova Expedição
                 </a>
             </div>
-            {% endif %}
         </div>
     </aside>
     
@@ -58,128 +101,109 @@
             <p class="text-amber-100">Registro de expedições e descobertas em campo</p>
         </div>
         
-        <div id="relatoriosList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {% for relatorio in object_list %}
-            <div class="relatorio-card bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
-                 data-titulo="{{ relatorio.titulo|lower }}"
-                 data-localizacao="{{ relatorio.localizacao|lower }}">
-                <div class="h-2 bg-gradient-to-r from-amber-500 to-orange-500"></div>
-                <div class="p-6">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ relatorio.titulo }}</h3>
-                            <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% if object_list %}
+                {% for relatorio in object_list %}
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
+                    <div class="h-2 bg-gradient-to-r from-amber-600 to-orange-600"></div>
+                    <div class="p-6 flex-1">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ relatorio.titulo }}</h3>
+                            </div>
+                        </div>
+                        
+                        {% if relatorio.localizacao %}
+                        <div class="bg-amber-50 p-3 rounded-lg mb-4">
+                            <p class="text-amber-800 text-xs font-medium mb-1 flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
-                                <span>{{ relatorio.localizacao }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                                Localização
+                            </p>
+                            <p class="text-amber-900 text-sm">{{ relatorio.localizacao }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if relatorio.data %}
+                        <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                            <p class="text-blue-800 text-xs font-medium mb-1 flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
-                                <span>{{ relatorio.data|date:"d/m/Y" }}</span>
-                            </div>
+                                Data
+                            </p>
+                            <p class="text-blue-900 text-sm">{{ relatorio.data|date:"d/m/Y" }}</p>
                         </div>
-                    </div>
-                    
-                    {% if relatorio.descobertas %}
-                    <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ relatorio.descobertas|truncatewords:25 }}</p>
-                    {% endif %}
-                    
-                    {% if relatorio.autor %}
-                    <div class="bg-amber-50 p-3 rounded-lg mb-4">
-                        <p class="text-amber-800 text-xs font-medium mb-1">Relatado por</p>
-                        <p class="text-amber-900 text-sm font-semibold">{{ relatorio.autor.username }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="flex gap-2 pt-4 border-t border-gray-200">
-                        <a href="{% url 'relatorio-detail' relatorio.pk %}" 
-                           class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-center text-sm font-medium">
-                            Ver Detalhes
-                        </a>
-                        {% if is_medico_or_admin %}
-                        <a href="{% url 'relatorio-update' relatorio.pk %}" 
-                           class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                        </a>
-                        <a href="{% url 'relatorio-delete' relatorio.pk %}" 
-                           class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </a>
+                        {% endif %}
+                        
+                        {% if relatorio.descobertas %}
+                        <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                            <p class="text-gray-700 text-sm leading-relaxed">{{ relatorio.descobertas|truncatewords:25 }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if relatorio.autor %}
+                        <div class="bg-green-50 p-3 rounded-lg mb-4">
+                            <p class="text-green-800 text-xs font-medium mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Relatado por
+                            </p>
+                            <p class="text-green-900 text-sm font-semibold">{{ relatorio.autor.nickname }}</p>
+                        </div>
                         {% endif %}
                     </div>
+                    
+                    <!-- Botões de ação fixos no rodapé do card -->
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <div class="flex gap-2">
+                            <a href="{% url 'relatorio-detail' relatorio.pk %}" 
+                               class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-center text-sm font-medium">
+                                Ver Detalhes
+                            </a>
+                            <a href="{% url 'relatorio-update' relatorio.pk %}" 
+                               class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </a>
+                            <a href="{% url 'relatorio-delete' relatorio.pk %}" 
+                               class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            {% empty %}
-            <div class="col-span-full bg-white rounded-lg shadow-md p-12 text-center">
-                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhuma expedição encontrada</h3>
-                <p class="text-gray-500">Não há relatórios de expedição cadastrados no momento.</p>
-            </div>
-            {% endfor %}
-        </div>
-        
-        <div id="noResults" class="hidden bg-white rounded-lg shadow-md p-12 text-center">
-            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhum resultado encontrado</h3>
-            <p class="text-gray-500">Tente ajustar os filtros para encontrar expedições.</p>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-full bg-white rounded-lg shadow-md p-12 text-center">
+                    {% if request.GET %}
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhum resultado encontrado</h3>
+                    <p class="text-gray-500 mb-4">Tente ajustar os filtros para encontrar expedições.</p>
+                    <a href="{% url 'relatorio-list' %}" class="inline-block px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200">
+                        Limpar Filtros
+                    </a>
+                    {% else %}
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhuma expedição encontrada</h3>
+                    <p class="text-gray-500">Não há relatórios de expedição cadastrados no momento.</p>
+                    <a href="{% url 'relatorio-create' %}" class="inline-block mt-4 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200">
+                        Criar Primeira Expedição
+                    </a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </main>
 </div>
-
-<script>
-    let debounceTimer;
-    
-    function applyFilters() {
-        const titulo = document.getElementById('filterTitulo').value.toLowerCase();
-        const localizacao = document.getElementById('filterLocalizacao').value.toLowerCase();
-        
-        const cards = document.querySelectorAll('.relatorio-card');
-        let visibleCount = 0;
-        
-        cards.forEach(card => {
-            const cardTitulo = card.dataset.titulo;
-            const cardLocalizacao = card.dataset.localizacao;
-            
-            const tituloMatch = !titulo || cardTitulo.includes(titulo);
-            const localizacaoMatch = !localizacao || cardLocalizacao.includes(localizacao);
-            
-            if (tituloMatch && localizacaoMatch) {
-                card.classList.remove('hidden');
-                visibleCount++;
-            } else {
-                card.classList.add('hidden');
-            }
-        });
-        
-        document.getElementById('noResults').classList.toggle('hidden', visibleCount > 0);
-    }
-    
-    function clearFilters() {
-        document.getElementById('filterTitulo').value = '';
-        document.getElementById('filterLocalizacao').value = '';
-        applyFilters();
-    }
-    
-    document.getElementById('filterTitulo').addEventListener('input', () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(applyFilters, 300);
-    });
-    
-    document.getElementById('filterLocalizacao').addEventListener('input', () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(applyFilters, 300);
-    });
-</script>
 {% endblock %}

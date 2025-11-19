@@ -126,6 +126,97 @@
             </div>
         </div>
 
+        <!-- Remédios Prescritos -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                </svg>
+                Remédios Prescritos
+            </h2>
+
+            <!-- Filtros de Remédios -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Nome</label>
+                    <input type="text" id="filtro-remedio-nome" placeholder="Buscar remédio..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Doença</label>
+                    <input type="text" id="filtro-remedio-doenca" placeholder="Ex: gripe, febre..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+                </div>
+            </div>
+
+            <!-- Grid de Cards de Remédios -->
+            <div id="remedios-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                {% for remedio in remedios %}
+                <div class="remedio-card bg-white border-2 border-gray-200 rounded-lg hover:border-purple-400 transition-all cursor-pointer"
+                     data-id="{{ remedio.id }}"
+                     data-nome="{{ remedio.nome|lower }}"
+                     data-doencas="{% for doenca in remedio.doencas.all %}{{ doenca.nome|lower }} {% endfor %}">
+                    
+                    <!-- Header roxo -->
+                    <div class="h-2 bg-purple-500 rounded-t-lg"></div>
+                    
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800 text-sm mb-2">{{ remedio.nome }}</h3>
+                            </div>
+                            <input type="checkbox" name="remedios" value="{{ remedio.id }}"
+                                   {% if remedio in form.instance.remedios.all %}checked{% endif %}
+                                   class="remedio-checkbox w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 mt-1">
+                        </div>
+                        
+                        <div class="text-xs text-gray-600 space-y-1">
+                            {% if remedio.descricao %}
+                            <p><span class="font-medium">Descrição:</span> {{ remedio.descricao|truncatewords:8 }}</p>
+                            {% endif %}
+                            
+                            {% if remedio.modo_uso %}
+                            <p><span class="font-medium">Modo de uso:</span> {{ remedio.modo_uso|truncatewords:8 }}</p>
+                            {% endif %}
+                            
+                            {% if remedio.doencas.all %}
+                            <div class="mt-2">
+                                <span class="font-medium">Doenças:</span>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    {% for doenca in remedio.doencas.all|slice:":3" %}
+                                    <span class="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full">{{ doenca.nome }}</span>
+                                    {% endfor %}
+                                    {% if remedio.doencas.count > 3 %}
+                                    <span class="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">+{{ remedio.doencas.count|add:"-3" }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <a href="{% url 'remedio-detail' remedio.pk %}" target="_blank" 
+                               class="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Ver detalhes completos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Contador de Remédios -->
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 text-sm">
+                <p class="text-purple-800">
+                    <span class="font-bold" id="remedios-count">0</span> remédio(s) prescrito(s) 
+                    | <span class="font-bold" id="remedios-visiveis">{{ remedios|length }}</span> remédio(s) visível(is)
+                </p>
+            </div>
+        </div>
+
         <!-- Diagnóstico Final -->
         <div class="bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -266,6 +357,86 @@ document.addEventListener('DOMContentLoaded', function() {
     // Marcar cards já selecionados
     document.querySelectorAll('.doenca-checkbox:checked').forEach(checkbox => {
         checkbox.closest('.doenca-card').classList.add('border-indigo-500', 'bg-indigo-50');
+    });
+    
+    // === SEÇÃO DE REMÉDIOS ===
+    const filtroRemedioNome = document.getElementById('filtro-remedio-nome');
+    const filtroRemedioDoenca = document.getElementById('filtro-remedio-doenca');
+    const remediosContainer = document.getElementById('remedios-container');
+    const remediosCount = document.getElementById('remedios-count');
+    const remediosVisiveis = document.getElementById('remedios-visiveis');
+    
+    // Atualizar contador de remédios
+    function atualizarContadorRemedios() {
+        const checkboxes = document.querySelectorAll('.remedio-checkbox:checked');
+        remediosCount.textContent = checkboxes.length;
+    }
+    
+    // Filtrar remédios
+    function filtrarRemedios() {
+        const nomeTerm = filtroRemedioNome.value.toLowerCase();
+        const doencaTerm = filtroRemedioDoenca.value.toLowerCase();
+        
+        const cards = document.querySelectorAll('.remedio-card');
+        let visiveis = 0;
+        
+        cards.forEach(card => {
+            const nome = card.dataset.nome;
+            const doencas = card.dataset.doencas;
+            
+            const nomeMatch = !nomeTerm || nome.includes(nomeTerm);
+            const doencaMatch = !doencaTerm || doencas.includes(doencaTerm);
+            
+            if (nomeMatch && doencaMatch) {
+                card.style.display = 'block';
+                visiveis++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        remediosVisiveis.textContent = visiveis;
+    }
+    
+    // Click no card de remédio marca/desmarca
+    document.addEventListener('click', function(e) {
+        const card = e.target.closest('.remedio-card');
+        if (card && !e.target.classList.contains('remedio-checkbox') && !e.target.closest('a')) {
+            const checkbox = card.querySelector('.remedio-checkbox');
+            checkbox.checked = !checkbox.checked;
+            atualizarContadorRemedios();
+            
+            if (checkbox.checked) {
+                card.classList.add('border-purple-500', 'bg-purple-50');
+            } else {
+                card.classList.remove('border-purple-500', 'bg-purple-50');
+            }
+        }
+    });
+    
+    // Checkbox de remédio direto
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('remedio-checkbox')) {
+            atualizarContadorRemedios();
+            const card = e.target.closest('.remedio-card');
+            if (e.target.checked) {
+                card.classList.add('border-purple-500', 'bg-purple-50');
+            } else {
+                card.classList.remove('border-purple-500', 'bg-purple-50');
+            }
+        }
+    });
+    
+    // Event listeners para filtros de remédios
+    filtroRemedioNome.addEventListener('input', filtrarRemedios);
+    filtroRemedioDoenca.addEventListener('input', filtrarRemedios);
+    
+    // Inicializar remédios
+    atualizarContadorRemedios();
+    
+    // Marcar cards de remédios já selecionados
+    document.querySelectorAll('.remedio-checkbox:checked').forEach(checkbox => {
+        checkbox.closest('.remedio-card').classList.add('border-purple-500', 'bg-purple-50');
     });
 });
 </script>
