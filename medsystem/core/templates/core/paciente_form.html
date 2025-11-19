@@ -241,15 +241,12 @@
                         </svg>
                         Raça(s)
                     </label>
-                    
-                    <!-- Container para inputs hidden das raças selecionadas -->
-                    <div id="raca-hidden-container"></div>
-                    
                     <!-- Grid de Cards de Raças -->
                     <div id="racas-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {% for raca in form.raca.field.queryset %}
                         <div class="raca-card bg-white border-2 border-gray-200 rounded-xl hover:border-indigo-400 hover:shadow-md transition-all duration-200 cursor-pointer"
-                             data-id="{{ raca.id }}">
+                             data-id="{{ raca.id }}"
+                             data-nome="{{ raca.nome|lower }}">
                             
                             <!-- Header gradiente -->
                             <div class="h-3 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-t-xl"></div>
@@ -259,10 +256,9 @@
                                     <div class="flex-1">
                                         <h3 class="font-bold text-gray-800 text-base mb-2">{{ raca.nome }}</h3>
                                     </div>
-                                    <input type="checkbox" 
-                                           class="raca-checkbox w-6 h-6 text-indigo-600 border-gray-300 rounded-lg focus:ring-indigo-500 focus:ring-4 focus:ring-indigo-500/20 mt-1 cursor-pointer"
-                                           value="{{ raca.id }}"
-                                           {% if raca.id in form.raca.value %}checked{% endif %}>
+                                    <input type="checkbox" name="raca" value="{{ raca.id }}"
+                                           {% if raca in form.instance.raca.all %}checked{% endif %}
+                                           class="raca-checkbox w-6 h-6 text-indigo-600 border-gray-300 rounded-lg focus:ring-indigo-500 focus:ring-4 focus:ring-indigo-500/20 mt-1 cursor-pointer">
                                 </div>
                                 
                                 <div class="text-xs text-gray-600 space-y-2">
@@ -473,7 +469,7 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <style>
     /* Estilização aprimorada dos campos */
     select, input[type="text"], input[type="number"], textarea {
@@ -547,116 +543,56 @@
     }
 </style>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Auto-fechar mensagens de erro após 10 segundos
-    const errorMessages = document.querySelectorAll('.bg-red-50');
-    errorMessages.forEach(msg => {
-        setTimeout(() => {
-            msg.style.transition = 'all 0.5s ease-out';
-            msg.style.opacity = '0';
-            msg.style.transform = 'translateX(100%)';
-            setTimeout(() => msg.remove(), 500);
-        }, 10000);
-    });
-    
-    // Adicionar contador de caracteres para textarea
-    const textareas = document.querySelectorAll('textarea');
-    textareas.forEach(textarea => {
-        const maxLength = textarea.getAttribute('maxlength');
-        if (maxLength) {
-            const counter = document.createElement('div');
-            counter.className = 'text-xs text-gray-500 text-right mt-1';
-            counter.textContent = `0 / ${maxLength}`;
-            textarea.parentNode.appendChild(counter);
-            
-            textarea.addEventListener('input', () => {
-                const length = textarea.value.length;
-                counter.textContent = `${length} / ${maxLength}`;
-                counter.className = length > maxLength * 0.9 
-                    ? 'text-xs text-red-500 text-right mt-1 font-bold'
-                    : 'text-xs text-gray-500 text-right mt-1';
-            });
-        }
-    });
-    
-    // Validação em tempo real
-    const requiredFields = document.querySelectorAll('input[required], select[required]');
-    requiredFields.forEach(field => {
-        field.addEventListener('blur', () => {
-            if (!field.value) {
-                field.classList.add('border-red-500', 'bg-red-50');
-            } else {
-                field.classList.remove('border-red-500', 'bg-red-50');
-                field.classList.add('border-green-500');
-                setTimeout(() => field.classList.remove('border-green-500'), 2000);
-            }
-        });
-    });
-    
-    // Gerenciamento de seleção de raças com checkboxes
-    const racaCheckboxes = document.querySelectorAll('.raca-checkbox');
-    const racaHiddenContainer = document.getElementById('raca-hidden-container');
+document.addEventListener('DOMContentLoaded', function() {
     const racasCount = document.getElementById('racas-count');
     
-    // Função para atualizar os campos hidden com as raças selecionadas
-    function updateRacaSelection() {
-        // Limpar container
-        racaHiddenContainer.innerHTML = '';
-        
-        let count = 0;
-        // Criar um input hidden para cada raça selecionada
-        racaCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                count++;
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'raca';
-                hiddenInput.value = checkbox.value;
-                racaHiddenContainer.appendChild(hiddenInput);
-            }
-        });
-        
-        // Atualizar contador
-        if (racasCount) {
-            racasCount.textContent = count;
-        }
+    // Atualizar contador de raças
+    function atualizarContadorRacas() {
+        const checkboxes = document.querySelectorAll('.raca-checkbox:checked');
+        racasCount.textContent = checkboxes.length;
     }
     
-    // Adicionar evento de mudança para cada checkbox
-    racaCheckboxes.forEach(checkbox => {
-        const card = checkbox.closest('.raca-card');
-        
-        // Atualizar estilo do card ao marcar/desmarcar
-        checkbox.addEventListener('change', function() {
-            updateRacaSelection();
-            
+    // Inicializar
+    atualizarContadorRacas();
+    
+    // Marcar cards já selecionados
+    document.querySelectorAll('.raca-checkbox:checked').forEach(checkbox => {
+        checkbox.closest('.raca-card').classList.add('!border-indigo-500', '!bg-indigo-50', 'shadow-xl');
+    });
+    
+    // Checkbox direto - processar ANTES do click no card
+    document.querySelectorAll('.raca-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function(e) {
+            e.stopPropagation(); // Impede que o click no card seja acionado
+            atualizarContadorRacas();
+            const card = this.closest('.raca-card');
             if (this.checked) {
-                card.classList.add('border-indigo-600', 'bg-indigo-50', 'shadow-lg', 'scale-105');
-                card.classList.remove('border-gray-200');
+                card.classList.add('!border-indigo-500', '!bg-indigo-50', 'shadow-xl');
             } else {
-                card.classList.remove('border-indigo-600', 'bg-indigo-50', 'shadow-lg', 'scale-105');
-                card.classList.add('border-gray-200');
+                card.classList.remove('!border-indigo-500', '!bg-indigo-50', 'shadow-xl');
             }
         });
         
-        // Permitir clicar no card inteiro para marcar/desmarcar
-        card.addEventListener('click', function(e) {
-            // Não fazer nada se clicou diretamente no checkbox
-            if (e.target === checkbox) return;
-            
-            checkbox.checked = !checkbox.checked;
-            checkbox.dispatchEvent(new Event('change'));
+        checkbox.addEventListener('click', function(e) {
+            e.stopPropagation(); // Impede que o click no card seja acionado
         });
-        
-        // Aplicar estilo inicial para checkboxes já marcados
-        if (checkbox.checked) {
-            card.classList.add('border-indigo-600', 'bg-indigo-50', 'shadow-lg');
-            card.classList.remove('border-gray-200');
-        }
     });
     
-    // Inicializar seleção ao carregar a página
-    updateRacaSelection();
+    // Click no card marca/desmarca
+    document.querySelectorAll('.raca-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Ignora se clicou no checkbox ou em um link
+            if (e.target.classList.contains('raca-checkbox') || e.target.closest('a')) {
+                return;
+            }
+            
+            const checkbox = this.querySelector('.raca-checkbox');
+            checkbox.checked = !checkbox.checked;
+            
+            // Dispara evento change manualmente
+            checkbox.dispatchEvent(new Event('change'));
+        });
+    });
 });
 </script>
 {% endblock %}
