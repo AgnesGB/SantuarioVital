@@ -1,8 +1,9 @@
 from django import forms
-from .models import Usuario, RelatorioExpedicao, Cidade, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, AnotacaoPessoal, Raca, Ingrediente, Remedio
+from .models import Usuario, RelatorioExpedicao, Cidade, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente
 from django.forms.widgets import DateInput
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from django.forms import inlineformset_factory
 
 class DoencaForm(forms.ModelForm):
     class Meta:
@@ -18,7 +19,7 @@ class DoencaForm(forms.ModelForm):
 class PacienteForm(forms.ModelForm):
     class Meta:
         model = Paciente
-        fields = ['nome', 'idade', 'raca', 'afinidade', 'cidade', 'status', 'observacoes']
+        fields = ['nome', 'idade', 'raca', 'afinidade', 'cidade', 'status', 'contatos_emergencia', 'observacoes']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'input'}),
             'idade': forms.NumberInput(attrs={
@@ -30,6 +31,7 @@ class PacienteForm(forms.ModelForm):
             'afinidade': forms.Select(attrs={'class': 'select'}),
             'cidade': forms.Select(attrs={'class': 'select'}),
             'status': forms.Select(attrs={'class': 'select'}),
+            'contatos_emergencia': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
             'observacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
         }
 
@@ -176,3 +178,28 @@ class RemedioForm(forms.ModelForm):
             'doencas': forms.SelectMultiple(attrs={'class': 'select'}),
             'observacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
         }
+
+
+class RemedioIngredienteForm(forms.ModelForm):
+    class Meta:
+        model = RemedioIngrediente
+        fields = ['ingrediente', 'quantidade']
+        widgets = {
+            'ingrediente': forms.Select(attrs={'class': 'select'}),
+            'quantidade': forms.TextInput(attrs={
+                'class': 'input',
+                'placeholder': 'Ex: 2 colheres, 100g, 5 gotas'
+            }),
+        }
+
+
+# Formset para adicionar ingredientes ao remédio
+RemedioIngredienteFormSet = inlineformset_factory(
+    Remedio,
+    RemedioIngrediente,
+    form=RemedioIngredienteForm,
+    extra=1,
+    can_delete=True,
+    min_num=0,
+    validate_min=False
+)

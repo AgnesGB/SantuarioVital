@@ -3,7 +3,7 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.http import JsonResponse
 from .models import Doenca, RelatorioExpedicao, Usuario, Besta, Cidade, Paciente, RegistroMedico, Diagnostico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente
-from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, CidadeForm, DiagnosticoForm, AnotacaoPessoalForm, RacaForm, IngredienteForm, RemedioForm
+from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, CidadeForm, DiagnosticoForm, AnotacaoPessoalForm, RacaForm, IngredienteForm, RemedioForm, RemedioIngredienteFormSet
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -248,6 +248,7 @@ class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['paciente'] = get_object_or_404(Paciente, pk=self.kwargs['paciente_id'])
         context['doencas'] = Doenca.objects.all()
+        context['remedios'] = Remedio.objects.all()
         return context
 
     def form_valid(self, form):
@@ -265,6 +266,11 @@ class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
         hipoteses_ids = [int(id) for id in hipoteses_ids if id]
         self.object.hipoteses.set(hipoteses_ids)
         
+        # Processa os remédios prescritos
+        remedios_ids = self.request.POST.getlist('remedios')
+        remedios_ids = [int(id) for id in remedios_ids if id]
+        self.object.remedios.set(remedios_ids)
+        
         messages.success(self.request, 'Diagnóstico salvo com sucesso!')
         return response
 
@@ -280,6 +286,7 @@ class DiagnosticoUpdateView(MedicoRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['paciente'] = self.object.paciente
         context['doencas'] = Doenca.objects.all()
+        context['remedios'] = Remedio.objects.all()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -300,6 +307,11 @@ class DiagnosticoUpdateView(MedicoRequiredMixin, UpdateView):
         hipoteses_ids = self.request.POST.getlist('hipoteses')
         hipoteses_ids = [int(id) for id in hipoteses_ids if id]
         self.object.hipoteses.set(hipoteses_ids)
+        
+        # Processa os remédios prescritos
+        remedios_ids = self.request.POST.getlist('remedios')
+        remedios_ids = [int(id) for id in remedios_ids if id]
+        self.object.remedios.set(remedios_ids)
         
         messages.success(self.request, 'Diagnóstico atualizado com sucesso!')
         return response
@@ -366,7 +378,7 @@ class PacienteUpdateView(MedicoRequiredMixin, UpdateView):
         messages.error(self.request, 'Erro ao atualizar paciente. Verifique os dados.')
         return super().form_invalid(form)
     
-class PacienteListView(LoginRequiredMixin, ListView):
+class PacienteListView(MedicoRequiredMixin, ListView):
     model = Paciente
     template_name = 'core/paciente_list.html'
     context_object_name = 'pacientes'
@@ -407,7 +419,7 @@ class PacienteListView(LoginRequiredMixin, ListView):
         
         return context
 
-class PacienteDetailView(LoginRequiredMixin, DetailView):
+class PacienteDetailView(MedicoRequiredMixin, DetailView):
     model = Paciente
     template_name = 'core/paciente_detail.html'
     
@@ -429,8 +441,38 @@ class RelatorioExpedicaoListView(LoginRequiredMixin, ListView):
     template_name = 'core/relatorio_list.html'
     context_object_name = 'relatorios'
     ordering = ['-data']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filtro por título
+        titulo = self.request.GET.get('titulo')
+        if titulo:
+            queryset = queryset.filter(titulo__icontains=titulo)
+        
+        # Filtro por localização
+        localizacao = self.request.GET.get('localizacao')
+        if localizacao:
+            queryset = queryset.filter(localizacao__icontains=localizacao)
+        
+        # Filtro por autor
+        autor = self.request.GET.get('autor')
+        if autor:
+            queryset = queryset.filter(autor__nickname__icontains=autor)
+        
+        # Busca geral
+        busca = self.request.GET.get('busca')
+        if busca:
+            queryset = queryset.filter(
+                Q(titulo__icontains=busca) |
+                Q(localizacao__icontains=busca) |
+                Q(descobertas__icontains=busca) |
+                Q(observacoes__icontains=busca)
+            )
+        
+        return queryset
 
-class RelatorioExpedicaoCreateView(MedicoRequiredMixin, CreateView):
+class RelatorioExpedicaoCreateView(LoginRequiredMixin, CreateView):
     model = RelatorioExpedicao
     fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
     template_name = 'core/relatorio_form.html'
@@ -446,7 +488,7 @@ class RelatorioExpedicaoDetailView(LoginRequiredMixin, DetailView):
     template_name = 'core/relatorio_detail.html'
     context_object_name = 'relatorio'  # Isso define o nome da variável no template
 
-class RelatorioExpedicaoUpdateView(MedicoRequiredMixin, UpdateView):
+class RelatorioExpedicaoUpdateView(LoginRequiredMixin, UpdateView):
     model = RelatorioExpedicao
     fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
     template_name = 'core/relatorio_form.html'
@@ -456,13 +498,13 @@ class RelatorioExpedicaoUpdateView(MedicoRequiredMixin, UpdateView):
         messages.success(self.request, 'Relatório atualizado com sucesso!')
         return super().form_valid(form)
 
-class RelatorioExpedicaoDeleteView(MedicoRequiredMixin, DeleteView):
+class RelatorioExpedicaoDeleteView(LoginRequiredMixin, DeleteView):
     model = RelatorioExpedicao
     template_name = 'core/relatorio_confirm_delete.html'
     success_url = reverse_lazy('relatorio-list')
     
     def delete(self, request, *args, **kwargs):
-        messages.success(request, 'Relatório excluído com sucesso!')
+        messages.success(self.request, 'Relatório excluído com sucesso!')
         return super().delete(request, *args, **kwargs)
 
 class AnotacaoListView(LoginRequiredMixin, ListView):
@@ -473,16 +515,22 @@ class AnotacaoListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super().get_queryset().filter(usuario=self.request.user)
         
-        # Filtros
-        search = self.request.GET.get('search')
+        # Busca geral
+        busca = self.request.GET.get('busca')
+        if busca:
+            queryset = queryset.filter(
+                Q(titulo__icontains=busca) |
+                Q(conteudo__icontains=busca) |
+                Q(tags__icontains=busca)
+            )
+        
+        # Filtros específicos
+        titulo = self.request.GET.get('titulo')
+        if titulo:
+            queryset = queryset.filter(titulo__icontains=titulo)
+        
         tags = self.request.GET.get('tags')
         data = self.request.GET.get('data')
-        
-        if search:
-            queryset = queryset.filter(
-                Q(titulo__icontains=search) |
-                Q(conteudo__icontains=search)
-            )
         
         if tags:
             tags_list = [tag.strip() for tag in tags.split(',')]
@@ -562,9 +610,33 @@ class RacaListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self):
         queryset = super().get_queryset()
+        
+        # Filtro por nome
         nome = self.request.GET.get('nome')
         if nome:
             queryset = queryset.filter(nome__icontains=nome)
+        
+        # Filtro por longevidade
+        longevidade = self.request.GET.get('longevidade')
+        if longevidade:
+            queryset = queryset.filter(longevidade__icontains=longevidade)
+        
+        # Filtro por afinidade mágica
+        afinidade = self.request.GET.get('afinidade')
+        if afinidade:
+            queryset = queryset.filter(afinidade_magica__icontains=afinidade)
+        
+        # Busca geral
+        busca = self.request.GET.get('busca')
+        if busca:
+            queryset = queryset.filter(
+                Q(nome__icontains=busca) |
+                Q(longevidade__icontains=busca) |
+                Q(caracteristicas_fisicas__icontains=busca) |
+                Q(afinidade_magica__icontains=busca) |
+                Q(cor_sangue__icontains=busca)
+            )
+        
         return queryset
 
 class RacaDetailView(LoginRequiredMixin, DetailView):
@@ -680,19 +752,48 @@ class RemedioListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self):
         queryset = super().get_queryset().prefetch_related('ingredientes', 'doencas')
-        nome = self.request.GET.get('nome')
-        doenca = self.request.GET.get('doenca')
         
+        # Filtro por nome
+        nome = self.request.GET.get('nome')
         if nome:
             queryset = queryset.filter(nome__icontains=nome)
+        
+        # Filtro por doença
+        doenca = self.request.GET.get('doenca')
         if doenca:
             queryset = queryset.filter(doencas__id=doenca)
+        
+        # Filtro por descrição
+        descricao = self.request.GET.get('descricao')
+        if descricao:
+            queryset = queryset.filter(descricao__icontains=descricao)
+        
+        # Filtro por modo de uso
+        modo_uso = self.request.GET.get('modo_uso')
+        if modo_uso:
+            queryset = queryset.filter(modo_uso__icontains=modo_uso)
+        
+        # Filtro por ingrediente
+        ingrediente = self.request.GET.get('ingrediente')
+        if ingrediente:
+            queryset = queryset.filter(ingredientes__id=ingrediente)
+        
+        # Busca geral
+        busca = self.request.GET.get('busca')
+        if busca:
+            queryset = queryset.filter(
+                Q(nome__icontains=busca) |
+                Q(descricao__icontains=busca) |
+                Q(modo_uso__icontains=busca) |
+                Q(observacoes__icontains=busca)
+            )
             
-        return queryset
+        return queryset.distinct()
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['doencas'] = Doenca.objects.all()
+        context['ingredientes'] = Ingrediente.objects.all()
         return context
 
 class RemedioDetailView(LoginRequiredMixin, DetailView):
@@ -711,9 +812,26 @@ class RemedioCreateView(MedicoRequiredMixin, CreateView):
     template_name = 'core/remedio_form.html'
     success_url = reverse_lazy('remedio-list')
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['ingredientes_formset'] = RemedioIngredienteFormSet(self.request.POST, instance=self.object)
+        else:
+            context['ingredientes_formset'] = RemedioIngredienteFormSet(instance=self.object)
+        return context
+    
     def form_valid(self, form):
-        messages.success(self.request, 'Remédio criado com sucesso!')
-        return super().form_valid(form)
+        context = self.get_context_data()
+        ingredientes_formset = context['ingredientes_formset']
+        
+        if ingredientes_formset.is_valid():
+            self.object = form.save()
+            ingredientes_formset.instance = self.object
+            ingredientes_formset.save()
+            messages.success(self.request, 'Remédio criado com sucesso!')
+            return redirect(self.success_url)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
 class RemedioUpdateView(MedicoRequiredMixin, UpdateView):
     model = Remedio
@@ -721,9 +839,26 @@ class RemedioUpdateView(MedicoRequiredMixin, UpdateView):
     template_name = 'core/remedio_form.html'
     success_url = reverse_lazy('remedio-list')
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['ingredientes_formset'] = RemedioIngredienteFormSet(self.request.POST, instance=self.object)
+        else:
+            context['ingredientes_formset'] = RemedioIngredienteFormSet(instance=self.object)
+        return context
+    
     def form_valid(self, form):
-        messages.success(self.request, 'Remédio atualizado com sucesso!')
-        return super().form_valid(form)
+        context = self.get_context_data()
+        ingredientes_formset = context['ingredientes_formset']
+        
+        if ingredientes_formset.is_valid():
+            self.object = form.save()
+            ingredientes_formset.instance = self.object
+            ingredientes_formset.save()
+            messages.success(self.request, 'Remédio atualizado com sucesso!')
+            return redirect(self.success_url)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
 class RemedioDeleteView(MedicoRequiredMixin, DeleteView):
     model = Remedio

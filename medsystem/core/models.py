@@ -136,6 +136,7 @@ class Paciente(models.Model):
     afinidade = models.CharField(max_length=2, choices=AFINIDADE, blank=True)
     cidade = models.ForeignKey(Cidade, on_delete=models.CASCADE, related_name='pacientes')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ESTAVEL')
+    contatos_emergencia = models.TextField(blank=True, verbose_name="Contatos de Emergência", help_text="Nomes e informações de contato de emergência")
     observacoes = models.TextField(blank=True)
     doencas = models.ManyToManyField(Doenca, through='Diagnostico', related_name='pacientes')
 
