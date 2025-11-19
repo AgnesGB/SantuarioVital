@@ -1,108 +1,245 @@
 {% extends 'core/base.html' %}
 
-{% block title %}{{ remedio.nome }}{% endblock %}
+{% block title %}{{ remedio.nome }} - Detalhes{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8">
-            <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-pills text-3xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-4xl font-bold">{{ remedio.nome }}</h1>
-                    <p class="text-purple-100 mt-1">Remédio Medicinal</p>
-                </div>
-            </div>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">{{ remedio.nome }}</h1>
+            <p class="text-gray-600 mt-1">Informações detalhadas do remédio</p>
         </div>
+    </div>
 
-        <!-- Conteúdo -->
-        <div class="p-8 space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Coluna Principal -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Card: Descrição -->
             {% if remedio.descricao %}
-            <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
-                <h3 class="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                    <i class="fas fa-info-circle"></i>
-                    Descrição
-                </h3>
-                <p class="text-blue-800">{{ remedio.descricao }}</p>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Descrição
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ remedio.descricao }}</p>
+                </div>
             </div>
             {% endif %}
 
-            <!-- Ingredientes -->
-            <div class="bg-green-50 p-6 rounded-lg border border-green-100">
-                <h3 class="text-lg font-semibold text-green-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-leaf"></i>
-                    Ingredientes
-                </h3>
-                <div class="space-y-3">
-                    {% for ri in ingredientes_remedio %}
-                    <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-green-200">
-                        <span class="text-green-900 font-medium">{{ ri.ingrediente.nome }}</span>
-                        <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm">{{ ri.quantidade }}</span>
+            <!-- Card: Ingredientes -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        Ingredientes e Quantidades
+                    </h2>
+                </div>
+                <div class="p-6">
+                    {% if ingredientes_remedio %}
+                    <div class="space-y-3">
+                        {% for ri in ingredientes_remedio %}
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 hover:shadow-md transition-all duration-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-800">{{ ri.ingrediente.nome }}</p>
+                                        <p class="text-xs text-gray-500">Ingrediente medicinal</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-2 bg-green-600 text-white rounded-lg font-bold text-sm">
+                                    {{ ri.quantidade }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% empty %}
-                    <p class="text-green-700">Nenhum ingrediente adicionado</p>
-                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-8">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <p class="text-gray-600">Nenhum ingrediente adicionado</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
+            <!-- Card: Modo de Uso -->
             {% if remedio.modo_uso %}
-            <div class="bg-purple-50 p-6 rounded-lg border border-purple-100">
-                <h3 class="text-lg font-semibold text-purple-900 mb-3 flex items-center gap-2">
-                    <i class="fas fa-hand-holding-medical"></i>
-                    Modo de Uso
-                </h3>
-                <p class="text-purple-800">{{ remedio.modo_uso }}</p>
-            </div>
-            {% endif %}
-
-            {% if remedio.doencas.all %}
-            <div class="bg-red-50 p-6 rounded-lg border border-red-100">
-                <h3 class="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-disease"></i>
-                    Doenças Tratadas
-                </h3>
-                <div class="flex flex-wrap gap-2">
-                    {% for doenca in remedio.doencas.all %}
-                    <span class="px-4 py-2 bg-red-200 text-red-900 rounded-lg font-medium">{{ doenca.nome }}</span>
-                    {% endfor %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Modo de Uso
+                    </h2>
+                </div>
+                <div class="p-6 bg-blue-50">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ remedio.modo_uso }}</p>
                 </div>
             </div>
             {% endif %}
 
+            <!-- Card: Doenças Tratadas -->
+            {% if remedio.doencas.all %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-rose-600 to-pink-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Doenças Tratadas
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {% for doenca in remedio.doencas.all %}
+                        <a href="{% url 'doenca-detail' doenca.pk %}" class="group block p-4 bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-rose-200 rounded-xl hover:shadow-md hover:border-rose-400 transition-all duration-200">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-rose-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-rose-700 group-hover:text-rose-800 truncate">{{ doenca.nome }}</p>
+                                    <p class="text-xs text-rose-600">{{ doenca.get_tipo_display }}</p>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card: Observações -->
             {% if remedio.observacoes %}
-            <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-100">
-                <h3 class="text-lg font-semibold text-yellow-900 mb-3 flex items-center gap-2">
-                    <i class="fas fa-note-sticky"></i>
-                    Observações
-                </h3>
-                <p class="text-yellow-800">{{ remedio.observacoes }}</p>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-amber-600 to-orange-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                        </svg>
+                        Observações
+                    </h2>
+                </div>
+                <div class="p-6 bg-amber-50">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ remedio.observacoes }}</p>
+                </div>
             </div>
             {% endif %}
         </div>
 
-        <!-- Ações -->
-        {% if is_medico_or_admin %}
-        <div class="p-6 bg-gray-50 border-t flex gap-3">
-            <a href="{% url 'remedio-update' remedio.pk %}" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                <i class="fas fa-edit mr-2"></i>Editar
-            </a>
-            <a href="{% url 'remedio-delete' remedio.pk %}" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                <i class="fas fa-trash mr-2"></i>Excluir
-            </a>
-            <a href="{% url 'remedio-list' %}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                Voltar
-            </a>
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Ações Rápidas -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Ações Rápidas</h3>
+                <div class="space-y-2">
+                    <a href="{% url 'remedio-list' %}" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Voltar à Lista
+                    </a>
+                    {% if is_medico_or_admin %}
+                    <a href="{% url 'remedio-update' remedio.pk %}" class="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar Remédio
+                    </a>
+                    <a href="{% url 'remedio-delete' remedio.pk %}" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Excluir Remédio
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Card de Resumo -->
+            <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg p-6 text-white">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                    </svg>
+                    Resumo do Remédio
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center pb-3 border-b border-purple-400">
+                        <span class="text-purple-100">Ingredientes:</span>
+                        <span class="text-2xl font-bold">{{ ingredientes_remedio|length }}</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-purple-400">
+                        <span class="text-purple-100">Doenças tratadas:</span>
+                        <span class="text-2xl font-bold">{{ remedio.doencas.count }}</span>
+                    </div>
+                    <div class="flex items-start gap-2 pt-2">
+                        {% if remedio.modo_uso %}
+                        <svg class="w-5 h-5 text-purple-200 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-purple-100">Modo de uso definido</span>
+                        {% else %}
+                        <svg class="w-5 h-5 text-purple-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-purple-100">Sem modo de uso</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-start gap-2">
+                        {% if remedio.observacoes %}
+                        <svg class="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-purple-100">Com observações especiais</span>
+                        {% else %}
+                        <svg class="w-5 h-5 text-purple-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-purple-100">Sem observações especiais</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Ingredientes (Mini) -->
+            {% if ingredientes_remedio %}
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Composição
+                </h3>
+                <div class="space-y-2">
+                    {% for ri in ingredientes_remedio %}
+                    <div class="text-sm text-gray-700 flex items-center gap-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="font-medium">{{ ri.ingrediente.nome }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="p-6 bg-gray-50 border-t">
-            <a href="{% url 'remedio-list' %}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition inline-block">
-                Voltar
-            </a>
-        </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

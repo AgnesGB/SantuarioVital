@@ -1,155 +1,241 @@
 {% extends 'core/base.html' %}
 
-{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Relatório - SantuarioVital{% endblock %}
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Relatório{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <!-- Header com Gradient -->
-    <div class="bg-gradient-to-r from-amber-600 to-orange-600 rounded-lg shadow-lg p-6 mb-6">
-        <div class="flex items-center gap-3">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-6"> 
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
             <div>
-                <h1 class="text-3xl font-bold text-white">{% if object %}Editar{% else %}Novo{% endif %} Relatório de Expedição</h1>
-                <p class="text-amber-100">Documente descobertas e observações de campo</p>
+                <h1 class="text-4xl font-bold text-gray-900">
+                    {% if object %}Editar Relatório{% else %}Novo Relatório{% endif %}
+                </h1>
+                <p class="text-gray-600 mt-1">Documente descobertas e observações de expedições</p>
             </div>
         </div>
     </div>
 
     <!-- Formulário -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <form method="post" class="p-6">
-            {% csrf_token %}
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Seção 1: Informações Básicas -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-amber-600 to-orange-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Informações Básicas</h2>
+                        <p class="text-amber-100 text-sm mt-0.5">Identificação da expedição</p>
+                    </div>
+                </div>
+            </div>
             
-            <!-- Seção: Informações Básicas -->
-            <div class="mb-8">
-                <div class="flex items-center gap-2 mb-4 pb-2 border-b-2 border-amber-500">
-                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <h2 class="text-xl font-bold text-gray-800">Informações Básicas</h2>
+            <div class="p-6 space-y-5">
+                <!-- Título -->
+                <div class="group">
+                    <label for="id_titulo" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        Título da Expedição
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="titulo" id="id_titulo" value="{{ form.titulo.value|default:'' }}" required
+                           placeholder="📝 Ex: Exploração da Floresta Sombria, Estudo das Ruínas Antigas..."
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-200 group-hover:border-gray-400">
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Nome que identifica a expedição ou missão
+                    </p>
+                    {% if form.titulo.errors %}
+                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            {{ form.titulo.errors.0 }}
+                        </p>
+                    {% endif %}
                 </div>
+                
+                <!-- Localização -->
+                <div class="group">
+                    <label for="id_localizacao" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Localização
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="localizacao" id="id_localizacao" value="{{ form.localizacao.value|default:'' }}" required
+                           placeholder="📍 Ex: Região Norte, Vale das Sombras, Cordilheira de Gelo..."
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 group-hover:border-gray-400">
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Área geográfica ou região explorada
+                    </p>
+                    {% if form.localizacao.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.localizacao.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-                <div class="space-y-4">
-                    <!-- Título -->
-                    <div>
-                        <label for="id_titulo" class="block text-sm font-medium text-gray-700 mb-2">
-                            <svg class="w-4 h-4 inline-block mr-1 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                            Título da Expedição *
-                        </label>
-                        <input 
-                            type="text" 
-                            name="titulo" 
-                            id="id_titulo"
-                            value="{{ form.titulo.value|default:'' }}" 
-                            required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                            placeholder="Ex: Exploração da Floresta Sombria">
-                        {% if form.titulo.errors %}
-                            <p class="mt-1 text-sm text-red-600">{{ form.titulo.errors.0 }}</p>
-                        {% endif %}
+        <!-- Seção 2: Descobertas -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
                     </div>
-
-                    <!-- Localização -->
                     <div>
-                        <label for="id_localizacao" class="block text-sm font-medium text-gray-700 mb-2">
-                            <svg class="w-4 h-4 inline-block mr-1 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            Localização *
-                        </label>
-                        <input 
-                            type="text" 
-                            name="localizacao" 
-                            id="id_localizacao"
-                            value="{{ form.localizacao.value|default:'' }}" 
-                            required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                            placeholder="Ex: Região Norte, próximo ao Vale das Sombras">
-                        {% if form.localizacao.errors %}
-                            <p class="mt-1 text-sm text-red-600">{{ form.localizacao.errors.0 }}</p>
-                        {% endif %}
+                        <h2 class="text-2xl font-bold text-white">🔍 Descobertas</h2>
+                        <p class="text-emerald-100 text-sm mt-0.5">Principais achados da expedição</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Seção: Descobertas e Observações -->
-            <div class="mb-8">
-                <div class="flex items-center gap-2 mb-4 pb-2 border-b-2 border-orange-500">
-                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <h2 class="text-xl font-bold text-gray-800">Descobertas e Observações</h2>
+            
+            <div class="p-6">
+                <div class="group">
+                    <label for="id_descobertas" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Descrição das Descobertas
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="descobertas" id="id_descobertas" rows="8" required
+                              placeholder="🗺️ Descreva as principais descobertas:&#10;• Novas espécies encontradas&#10;• Recursos naturais identificados&#10;• Estruturas ou ruínas descobertas&#10;• Fenômenos observados&#10;• Perigos identificados..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.descobertas.value|default:'' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Relate as descobertas mais importantes realizadas durante a expedição
+                    </p>
+                    {% if form.descobertas.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.descobertas.errors.0 }}</p>
+                    {% endif %}
                 </div>
+            </div>
+        </div>
 
-                <div class="space-y-4">
-                    <!-- Descobertas -->
-                    <div>
-                        <label for="id_descobertas" class="block text-sm font-medium text-gray-700 mb-2">
-                            <svg class="w-4 h-4 inline-block mr-1 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                            Descobertas *
-                        </label>
-                        <textarea 
-                            name="descobertas" 
-                            id="id_descobertas"
-                            rows="6"
-                            required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                            placeholder="Descreva as principais descobertas da expedição...">{{ form.descobertas.value|default:'' }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Relate as descobertas mais importantes realizadas durante a expedição</p>
-                        {% if form.descobertas.errors %}
-                            <p class="mt-1 text-sm text-red-600">{{ form.descobertas.errors.0 }}</p>
-                        {% endif %}
+        <!-- Seção 3: Observações Adicionais -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
                     </div>
-
-                    <!-- Observações -->
                     <div>
-                        <label for="id_observacoes" class="block text-sm font-medium text-gray-700 mb-2">
-                            <svg class="w-4 h-4 inline-block mr-1 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                            Observações Adicionais
-                        </label>
-                        <textarea 
-                            name="observacoes" 
-                            id="id_observacoes"
-                            rows="4"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                            placeholder="Observações complementares, detalhes relevantes...">{{ form.observacoes.value|default:'' }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Informações adicionais que possam ser relevantes</p>
-                        {% if form.observacoes.errors %}
-                            <p class="mt-1 text-sm text-red-600">{{ form.observacoes.errors.0 }}</p>
-                        {% endif %}
+                        <h2 class="text-2xl font-bold text-white">Observações Adicionais</h2>
+                        <p class="text-blue-100 text-sm mt-0.5">Notas complementares e detalhes relevantes</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Botões de Ação -->
-            <div class="flex gap-3 pt-6 border-t border-gray-200">
-                <button 
-                    type="submit" 
-                    class="flex-1 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>{% if object %}Atualizar{% else %}Criar{% endif %} Relatório</span>
-                </button>
-                <a 
-                    href="{% url 'relatorio-list' %}" 
-                    class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    <span>Cancelar</span>
-                </a>
+            
+            <div class="p-6">
+                <div class="group">
+                    <label for="id_observacoes" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                        </svg>
+                        Observações
+                    </label>
+                    <textarea name="observacoes" id="id_observacoes" rows="6"
+                              placeholder="💭 Informações complementares:&#10;• Condições climáticas&#10;• Dificuldades encontradas&#10;• Recomendações para futuras expedições&#10;• Precauções necessárias&#10;• Outros detalhes relevantes..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.observacoes.value|default:'' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Informações adicionais que possam ser relevantes para registros futuros
+                    </p>
+                    {% if form.observacoes.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.observacoes.errors.0 }}</p>
+                    {% endif %}
+                </div>
             </div>
-        </form>
-    </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex gap-3 justify-end pb-6">
+            <a href="{% url 'relatorio-list' %}" class="group px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-md hover:shadow-lg">
+                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>Cancelar</span>
+            </a>
+            <button type="submit" class="group px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl hover:scale-105">
+                <svg class="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>{% if object %}Atualizar{% else %}Criar{% endif %} Relatório</span>
+            </button>
+        </div>
+    </form>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+    /* Animação de entrada */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    form > div {
+        animation: slideIn 0.4s ease-out backwards;
+    }
+    
+    form > div:nth-child(1) { animation-delay: 0.1s; }
+    form > div:nth-child(2) { animation-delay: 0.2s; }
+    form > div:nth-child(3) { animation-delay: 0.3s; }
+    form > div:nth-child(4) { animation-delay: 0.4s; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Validação em tempo real
+    const requiredFields = document.querySelectorAll('input[required], textarea[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', () => {
+            if (!field.value) {
+                field.classList.add('border-red-500', 'bg-red-50');
+            } else {
+                field.classList.remove('border-red-500', 'bg-red-50');
+                field.classList.add('border-green-500');
+                setTimeout(() => field.classList.remove('border-green-500'), 2000);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

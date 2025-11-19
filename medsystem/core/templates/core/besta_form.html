@@ -3,200 +3,566 @@
 {% block title %}{% if object %}Editar{% else %}Nova{% endif %} Criatura{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">
-            {% if object %}Editar Criatura{% else %}Nova Criatura{% endif %}
-        </h1>
-        <p class="text-gray-600 mt-1">Preencha as informações sobre a criatura</p>
+    <div class="mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd"/>
+                    <path d="M10 9a1 1 0 011-1h5a1 1 0 110 2h-5a1 1 0 01-1-1zm-1 4a1 1 0 100 2 1 1 0 000-2z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900">
+                    {% if object %}Editar Criatura{% else %}Nova Criatura{% endif %}
+                </h1>
+                <p class="text-gray-600 mt-1">Registre informações sobre criaturas perigosas do mundo</p>
+            </div>
+        </div>
     </div>
 
     <!-- Formulário -->
     <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
         
-        <!-- Informações Básicas -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Informações Básicas
-            </h2>
+        <!-- Seção 1: Informações Básicas -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Informações Básicas</h2>
+                        <p class="text-purple-100 text-sm mt-0.5">Identificação e classificação da criatura</p>
+                    </div>
+                </div>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome da Criatura <span class="text-red-500">*</span></label>
-                    {{ form.nome }}
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Título/Alcunha</label>
-                    {{ form.titulo }}
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nível de Ameaça <span class="text-red-500">*</span></label>
-                    {{ form.nivel_ameaca }}
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Nome -->
+                    <div class="group">
+                        <label for="id_nome" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                            </svg>
+                            Nome da Criatura
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="nome" id="id_nome" value="{{ form.nome.value|default:'' }}"
+                               required
+                               placeholder="🦎 Ex: Dragão, Basilisco, Wendigo..."
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 group-hover:border-gray-400">
+                        {% if form.nome.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.nome.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Título -->
+                    <div class="group">
+                        <label for="id_titulo" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            Título/Alcunha
+                        </label>
+                        <input type="text" name="titulo" id="id_titulo" value="{{ form.titulo.value|default:'' }}"
+                               placeholder="👑 Ex: O Devorador de Almas, Guardião das Sombras..."
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 transition-all duration-200 group-hover:border-gray-400">
+                        {% if form.titulo.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.titulo.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Nível de Ameaça -->
+                    <div class="group md:col-span-2">
+                        <label for="id_nivel_ameaca" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            Nível de Ameaça
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <select name="nivel_ameaca" id="id_nivel_ameaca" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 group-hover:border-gray-400">
+                            <option value="">⚠️ Selecione o nível de perigo</option>
+                            <option value="01" {% if form.nivel_ameaca.value == "01" %}selected{% endif %}>⭕ 1/10 - Risco Mínimo</option>
+                            <option value="02" {% if form.nivel_ameaca.value == "02" %}selected{% endif %}>🟢 2/10 - Risco Muito Baixo</option>
+                            <option value="03" {% if form.nivel_ameaca.value == "03" %}selected{% endif %}>🟢 3/10 - Risco Baixo</option>
+                            <option value="04" {% if form.nivel_ameaca.value == "04" %}selected{% endif %}>🟡 4/10 - Risco Moderado Baixo</option>
+                            <option value="05" {% if form.nivel_ameaca.value == "05" %}selected{% endif %}>🟡 5/10 - Risco Moderado</option>
+                            <option value="06" {% if form.nivel_ameaca.value == "06" %}selected{% endif %}>🟠 6/10 - Risco Moderado Alto</option>
+                            <option value="07" {% if form.nivel_ameaca.value == "07" %}selected{% endif %}>🟠 7/10 - Risco Alto</option>
+                            <option value="08" {% if form.nivel_ameaca.value == "08" %}selected{% endif %}>🔴 8/10 - Risco Muito Alto</option>
+                            <option value="09" {% if form.nivel_ameaca.value == "09" %}selected{% endif %}>🔴 9/10 - Risco Extremo</option>
+                            <option value="10" {% if form.nivel_ameaca.value == "10" %}selected{% endif %}>💀 10/10 - Risco Catastrófico</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            Classifique o quão perigosa é esta criatura (1 = baixo risco, 10 = extremamente perigoso)
+                        </p>
+                        {% if form.nivel_ameaca.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.nivel_ameaca.errors.0 }}</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Descrição -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-                Aparência e Características
-            </h2>
+        <!-- Seção 2: Aparência e Características -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Aparência e Características</h2>
+                        <p class="text-blue-100 text-sm mt-0.5">Descrição física e habilidades</p>
+                    </div>
+                </div>
+            </div>
             
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Aparência <span class="text-red-500">*</span></label>
-                    {{ form.aparencia }}
+            <div class="p-6 space-y-5">
+                <!-- Aparência -->
+                <div class="group">
+                    <label for="id_aparencia" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Aparência Física
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="aparencia" id="id_aparencia" rows="4" required
+                              placeholder="📝 Descreva a aparência da criatura:&#10;• Tamanho e estrutura corporal&#10;• Características marcantes&#10;• Cores e texturas&#10;• Traços distintivos..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.aparencia.value|default:'' }}</textarea>
+                    {% if form.aparencia.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.aparencia.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Habilidades <span class="text-red-500">*</span></label>
-                    {{ form.habilidades }}
+                <!-- Habilidades -->
+                <div class="group">
+                    <label for="id_habilidades" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Habilidades e Poderes
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="habilidades" id="id_habilidades" rows="4" required
+                              placeholder="⚡ Liste as habilidades da criatura:&#10;• Poderes especiais&#10;• Ataques característicos&#10;• Defesas naturais&#10;• Capacidades mágicas..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.habilidades.value|default:'' }}</textarea>
+                    {% if form.habilidades.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.habilidades.errors.0 }}</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Contágio -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                Informações de Contágio
-            </h2>
+        <!-- Seção 3: Contágio e Perigos -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-red-600 to-orange-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Contágio e Perigos</h2>
+                        <p class="text-red-100 text-sm mt-0.5">Riscos de contaminação e transmissão</p>
+                    </div>
+                </div>
+            </div>
             
-            <div class="space-y-4">
-                <div>
-                    <label class="flex items-center cursor-pointer">
-                        {{ form.pode_contaminar }}
-                        <span class="ml-2 text-sm font-medium text-gray-700">Esta criatura pode contaminar</span>
+            <div class="p-6 space-y-5">
+                <!-- Checkbox de contaminação -->
+                <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                    <label class="flex items-start cursor-pointer group">
+                        <div class="flex items-center h-6">
+                            <input type="checkbox" name="pode_contaminar" id="id_pode_contaminar"
+                                   {% if form.pode_contaminar.value %}checked{% endif %}
+                                   class="w-5 h-5 text-red-600 border-2 border-red-300 rounded focus:ring-4 focus:ring-red-500/20 cursor-pointer transition-all">
+                        </div>
+                        <div class="ml-3">
+                            <span class="text-sm font-bold text-red-900 group-hover:text-red-700 transition-colors">Esta criatura pode contaminar outros seres</span>
+                            <p class="text-xs text-red-700 mt-1">Marque se a criatura pode transmitir doenças ou corrupção</p>
+                        </div>
                     </label>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição do Contágio</label>
-                    {{ form.contagio }}
-                    <p class="text-xs text-gray-500 mt-1">Descreva como a criatura contamina outros (se aplicável)</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Essência -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-                Relação com Essência
-            </h2>
-            
-            <div class="space-y-3">
-                <div>
-                    <label class="flex items-center cursor-pointer">
-                        {{ form.relacionada_com_essencia }}
-                        <span class="ml-2 text-sm font-medium text-gray-700">Relacionada com essência</span>
+                <!-- Descrição do contágio -->
+                <div class="group">
+                    <label for="id_contagio" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Descrição do Contágio
                     </label>
+                    <textarea name="contagio" id="id_contagio" rows="4"
+                              placeholder="🦠 Se a criatura pode contaminar, descreva:&#10;• Forma de transmissão&#10;• Sintomas causados&#10;• Tempo de incubação&#10;• Gravidade da infecção..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.contagio.value|default:'' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Informação crítica para medidas de proteção e tratamento
+                    </p>
+                    {% if form.contagio.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.contagio.errors.0 }}</p>
+                    {% endif %}
                 </div>
-                
-                <div>
-                    <label class="flex items-center cursor-pointer">
-                        {{ form.corrompida_por_essencia }}
-                        <span class="ml-2 text-sm font-medium text-gray-700">Corrompida por essência</span>
+            </div>
+        </div>
+
+        <!-- Seção 4: Relação com Essência -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Relação com Essência</h2>
+                        <p class="text-indigo-100 text-sm mt-0.5">Conexão mágica e corrupção</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Relacionada com essência -->
+                    <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4">
+                        <label class="flex items-start cursor-pointer group">
+                            <div class="flex items-center h-6">
+                                <input type="checkbox" name="relacionada_com_essencia" id="id_relacionada_com_essencia"
+                                       {% if form.relacionada_com_essencia.value %}checked{% endif %}
+                                       class="w-5 h-5 text-indigo-600 border-2 border-indigo-300 rounded focus:ring-4 focus:ring-indigo-500/20 cursor-pointer transition-all">
+                            </div>
+                            <div class="ml-3">
+                                <span class="text-sm font-bold text-indigo-900 group-hover:text-indigo-700 transition-colors">Relacionada com essência</span>
+                                <p class="text-xs text-indigo-700 mt-1">A criatura possui ligação natural com energia mágica</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <!-- Corrompida por essência -->
+                    <div class="bg-violet-50 border-2 border-violet-200 rounded-xl p-4">
+                        <label class="flex items-start cursor-pointer group">
+                            <div class="flex items-center h-6">
+                                <input type="checkbox" name="corrompida_por_essencia" id="id_corrompida_por_essencia"
+                                       {% if form.corrompida_por_essencia.value %}checked{% endif %}
+                                       class="w-5 h-5 text-violet-600 border-2 border-violet-300 rounded focus:ring-4 focus:ring-violet-500/20 cursor-pointer transition-all">
+                            </div>
+                            <div class="ml-3">
+                                <span class="text-sm font-bold text-violet-900 group-hover:text-violet-700 transition-colors">Corrompida por essência</span>
+                                <p class="text-xs text-violet-700 mt-1">A criatura foi alterada ou corrompida por magia</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 5: Doenças Associadas -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-rose-600 to-pink-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Doenças Associadas</h2>
+                        <p class="text-rose-100 text-sm mt-0.5">Enfermidades relacionadas à criatura</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="group">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Selecione as doenças relacionadas
                     </label>
+                    
+                    <!-- Container para inputs hidden das doenças selecionadas -->
+                    <div id="doenca-hidden-container"></div>
+                    
+                    <!-- Grid de Cards de Doenças -->
+                    <div id="doencas-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for doenca in form.doenca_relacionada.field.queryset %}
+                        <div class="doenca-card bg-white border-2 border-gray-200 rounded-xl hover:border-rose-400 hover:shadow-md transition-all duration-200 cursor-pointer"
+                             data-id="{{ doenca.id }}">
+                            
+                            <!-- Header gradiente -->
+                            <div class="h-3 bg-gradient-to-r from-rose-500 to-pink-500 rounded-t-xl"></div>
+                            
+                            <div class="p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-gray-800 text-base mb-2">{{ doenca.nome }}</h3>
+                                        <span class="px-2.5 py-1 text-xs font-bold rounded-lg inline-flex items-center gap-1
+                                            {% if doenca.tipo == 'F' %}bg-red-100 text-red-700
+                                            {% elif doenca.tipo == 'M' %}bg-purple-100 text-purple-700
+                                            {% else %}bg-orange-100 text-orange-700{% endif %}">
+                                            {% if doenca.tipo == 'F' %}🩺{% elif doenca.tipo == 'M' %}🧠{% else %}⚡{% endif %}
+                                            {{ doenca.get_tipo_display }}
+                                        </span>
+                                    </div>
+                                    <input type="checkbox" 
+                                           class="doenca-checkbox w-6 h-6 text-rose-600 border-gray-300 rounded-lg focus:ring-rose-500 focus:ring-4 focus:ring-rose-500/20 mt-1 cursor-pointer"
+                                           value="{{ doenca.id }}"
+                                           {% if doenca in form.doenca_relacionada.value %}checked{% endif %}>
+                                </div>
+                                
+                                <div class="text-xs text-gray-600 space-y-2">
+                                    {% if doenca.sintomas %}
+                                    <div class="bg-gray-50 rounded-lg p-2">
+                                        <p class="font-semibold text-gray-700 mb-1">Sintomas:</p>
+                                        <p class="text-gray-600">{{ doenca.sintomas|truncatewords:12 }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <p class="text-gray-600 font-medium mb-2">Nenhuma doença cadastrada</p>
+                            <a href="{% url 'doenca-create' %}" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Cadastrar primeira doença
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Contador -->
+                    <div class="mt-4 bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-rose-200 rounded-xl p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-rose-600 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-700">
+                                    <span class="text-2xl font-bold text-rose-600" id="doencas-count">0</span> doença(s) selecionada(s)
+                                </p>
+                            </div>
+                        </div>
+                        <svg class="w-12 h-12 text-rose-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    
+                    {% if form.doenca_relacionada.errors %}
+                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            {{ form.doenca_relacionada.errors.0 }}
+                        </p>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Doenças Associadas -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Doenças Associadas
-            </h2>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Selecione as doenças</label>
-                {{ form.doenca_relacionada }}
-                <p class="text-xs text-gray-500 mt-1">Segure Ctrl/Cmd para selecionar múltiplas doenças</p>
+        <!-- Seção 6: Anotações -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-gray-700 to-gray-900 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Anotações Adicionais</h2>
+                        <p class="text-gray-300 text-sm mt-0.5">Observações extras e informações complementares</p>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <!-- Anotações -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
-                Anotações Adicionais
-            </h2>
             
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
-                {{ form.anotacoes }}
+            <div class="p-6">
+                <div class="group">
+                    <label for="id_anotacoes" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Observações e Notas
+                    </label>
+                    <textarea name="anotacoes" id="id_anotacoes" rows="4"
+                              placeholder="💭 Adicione observações gerais:&#10;• Comportamento típico&#10;• Habitat natural&#10;• Avistamentos recentes&#10;• Outras informações relevantes..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-gray-500/20 focus:border-gray-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.anotacoes.value|default:'' }}</textarea>
+                    {% if form.anotacoes.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.anotacoes.errors.0 }}</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
         <!-- Botões de Ação -->
-        <div class="flex gap-3 pb-6">
-            <button type="submit" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 font-medium shadow-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                <span>Salvar Criatura</span>
-            </button>
-            <a href="{% url 'besta-list' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 font-medium">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex gap-3 justify-end pb-6">
+            <a href="{% url 'besta-list' %}" class="group px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-md hover:shadow-lg">
+                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
                 <span>Cancelar</span>
             </a>
+            <button type="submit" class="group px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl hover:scale-105">
+                <svg class="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Salvar Criatura</span>
+            </button>
         </div>
     </form>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
 <style>
-    input[type="text"], textarea, select {
-        width: 100%;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
+    /* Animação de entrada */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
-    input[type="text"]:focus, textarea:focus, select:focus {
-        outline: none;
-        ring: 2px;
-        ring-color: #9333ea;
-        border-color: transparent;
+    form > div {
+        animation: slideIn 0.4s ease-out backwards;
     }
     
-    textarea {
-        min-height: 120px;
-        resize: vertical;
+    form > div:nth-child(1) { animation-delay: 0.1s; }
+    form > div:nth-child(2) { animation-delay: 0.2s; }
+    form > div:nth-child(3) { animation-delay: 0.3s; }
+    form > div:nth-child(4) { animation-delay: 0.4s; }
+    form > div:nth-child(5) { animation-delay: 0.5s; }
+    form > div:nth-child(6) { animation-delay: 0.6s; }
+    form > div:nth-child(7) { animation-delay: 0.7s; }
+    
+    /* Estilo para cards de doença */
+    .doenca-card {
+        transform: scale(1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    select[multiple] {
-        min-height: 200px;
+    .doenca-card:hover {
+        transform: translateY(-2px);
     }
     
-    input[type="checkbox"] {
-        width: 1rem;
-        height: 1rem;
-        color: #9333ea;
-        border-radius: 0.25rem;
+    .doenca-card.scale-105 {
+        transform: scale(1.02);
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Gerenciamento de seleção de doenças com checkboxes
+    const doencaCheckboxes = document.querySelectorAll('.doenca-checkbox');
+    const doencaHiddenContainer = document.getElementById('doenca-hidden-container');
+    const doencasCount = document.getElementById('doencas-count');
+    
+    // Função para atualizar os campos hidden com as doenças selecionadas
+    function updateDoencaSelection() {
+        // Limpar container
+        doencaHiddenContainer.innerHTML = '';
+        
+        let count = 0;
+        // Criar um input hidden para cada doença selecionada
+        doencaCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                count++;
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'doenca_relacionada';
+                hiddenInput.value = checkbox.value;
+                doencaHiddenContainer.appendChild(hiddenInput);
+            }
+        });
+        
+        // Atualizar contador
+        if (doencasCount) {
+            doencasCount.textContent = count;
+        }
+    }
+    
+    // Adicionar evento de mudança para cada checkbox
+    doencaCheckboxes.forEach(checkbox => {
+        const card = checkbox.closest('.doenca-card');
+        
+        // Atualizar estilo do card ao marcar/desmarcar
+        checkbox.addEventListener('change', function() {
+            updateDoencaSelection();
+            
+            if (this.checked) {
+                card.classList.add('border-rose-600', 'bg-rose-50', 'shadow-lg', 'scale-105');
+                card.classList.remove('border-gray-200');
+            } else {
+                card.classList.remove('border-rose-600', 'bg-rose-50', 'shadow-lg', 'scale-105');
+                card.classList.add('border-gray-200');
+            }
+        });
+        
+        // Permitir clicar no card inteiro para marcar/desmarcar
+        card.addEventListener('click', function(e) {
+            // Não fazer nada se clicou diretamente no checkbox
+            if (e.target === checkbox) return;
+            
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change'));
+        });
+        
+        // Aplicar estilo inicial para checkboxes já marcados
+        if (checkbox.checked) {
+            card.classList.add('border-rose-600', 'bg-rose-50', 'shadow-lg');
+            card.classList.remove('border-gray-200');
+        }
+    });
+    
+    // Inicializar seleção ao carregar a página
+    updateDoencaSelection();
+    
+    // Validação em tempo real
+    const requiredFields = document.querySelectorAll('input[required], select[required], textarea[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', () => {
+            if (!field.value) {
+                field.classList.add('border-red-500', 'bg-red-50');
+            } else {
+                field.classList.remove('border-red-500', 'bg-red-50');
+                field.classList.add('border-green-500');
+                setTimeout(() => field.classList.remove('border-green-500'), 2000);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

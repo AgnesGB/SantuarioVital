@@ -19,7 +19,7 @@ class DoencaForm(forms.ModelForm):
 class PacienteForm(forms.ModelForm):
     class Meta:
         model = Paciente
-        fields = ['nome', 'idade', 'raca', 'afinidade', 'cidade', 'status', 'contatos_emergencia', 'observacoes']
+        fields = ['nome', 'idade', 'raca', 'afinidade', 'fay_normal', 'cidade', 'status', 'contatos_emergencia', 'observacoes']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'input'}),
             'idade': forms.NumberInput(attrs={
@@ -29,6 +29,7 @@ class PacienteForm(forms.ModelForm):
             }),
             'raca': forms.SelectMultiple(attrs={'class': 'select'}),
             'afinidade': forms.Select(attrs={'class': 'select'}),
+            'fay_normal': forms.TextInput(attrs={'class': 'input', 'placeholder': '💡 Ex: Luz, Fogo, Água, Terra, Ar, Trevas...'}),
             'cidade': forms.Select(attrs={'class': 'select'}),
             'status': forms.Select(attrs={'class': 'select'}),
             'contatos_emergencia': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),

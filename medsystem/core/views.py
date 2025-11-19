@@ -240,6 +240,14 @@ class BestaUpdateView(LoginRequiredMixin, UpdateView):
     form_class = BestaForm
     template_name = 'core/besta_form.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # Verifica se o usuário é admin
+        if request.user.tipo != 'ADM':
+            messages.error(request, 'Apenas administradores podem editar criaturas.')
+            return redirect('besta-detail', pk=obj.pk)
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         response = super().form_valid(form)
         messages.success(self.request, 'Criatura atualizada com sucesso!')
@@ -257,6 +265,14 @@ class BestaDeleteView(LoginRequiredMixin, DeleteView):
     model = Besta
     template_name = 'core/besta_confirm_delete.html'
     success_url = reverse_lazy('besta-list')
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # Verifica se o usuário é admin
+        if request.user.tipo != 'ADM':
+            messages.error(request, 'Apenas administradores podem excluir criaturas.')
+            return redirect('besta-detail', pk=obj.pk)
+        return super().dispatch(request, *args, **kwargs)
 
 # diagnostico
 class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
@@ -370,7 +386,7 @@ class PacienteDeleteView(MedicoRequiredMixin, DeleteView):
 
 class PacienteCreateView(MedicoRequiredMixin, CreateView):
     model = Paciente
-    fields = ['nome', 'idade', 'raca', 'afinidade', 'cidade', 'status', 'observacoes']
+    form_class = PacienteForm
     template_name = 'core/paciente_form.html'
     
     def form_valid(self, form):
@@ -514,6 +530,14 @@ class RelatorioExpedicaoUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'core/relatorio_form.html'
     success_url = reverse_lazy('relatorio-list')
     
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # Verifica se o usuário é o autor ou admin
+        if obj.autor != request.user and request.user.tipo != 'ADM':
+            messages.error(request, 'Você só pode editar seus próprios relatórios.')
+            return redirect('relatorio-detail', pk=obj.pk)
+        return super().dispatch(request, *args, **kwargs)
+    
     def form_valid(self, form):
         messages.success(self.request, 'Relatório atualizado com sucesso!')
         return super().form_valid(form)
@@ -522,6 +546,14 @@ class RelatorioExpedicaoDeleteView(LoginRequiredMixin, DeleteView):
     model = RelatorioExpedicao
     template_name = 'core/relatorio_confirm_delete.html'
     success_url = reverse_lazy('relatorio-list')
+    
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # Verifica se o usuário é o autor ou admin
+        if obj.autor != request.user and request.user.tipo != 'ADM':
+            messages.error(request, 'Você só pode excluir seus próprios relatórios.')
+            return redirect('relatorio-detail', pk=obj.pk)
+        return super().dispatch(request, *args, **kwargs)
     
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Relatório excluído com sucesso!')
@@ -578,6 +610,14 @@ class AnotacaoCreateView(LoginRequiredMixin, CreateView):
         form.instance.usuario = self.request.user
         messages.success(self.request, 'Anotação criada com sucesso!')
         return super().form_valid(form)
+
+class AnotacaoDetailView(LoginRequiredMixin, DetailView):
+    model = AnotacaoPessoal
+    template_name = 'core/anotacao_detail.html'
+    context_object_name = 'anotacao'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(usuario=self.request.user)
 
 class AnotacaoUpdateView(LoginRequiredMixin, UpdateView):
     model = AnotacaoPessoal

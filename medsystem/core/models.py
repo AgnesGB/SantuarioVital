@@ -136,6 +136,7 @@ class Paciente(models.Model):
     idade = models.PositiveIntegerField(verbose_name="Idade")
     raca = models.ManyToManyField(Raca, related_name='racas')
     afinidade = models.CharField(max_length=2, choices=AFINIDADE, blank=True)
+    fay_normal = models.CharField(max_length=100, blank=True, null=True, verbose_name="Fay Normal", help_text="Tipo de Fay predominante ou natural do paciente")
     cidade = models.ForeignKey(Cidade, on_delete=models.CASCADE, related_name='pacientes')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ESTAVEL')
     contatos_emergencia = models.TextField(blank=True, verbose_name="Contatos de Emergência", help_text="Nomes e informações de contato de emergência")

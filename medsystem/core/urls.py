@@ -10,7 +10,7 @@ from .views import (
     BestaUpdateView, AdicionarDiagnosticoView, HomeView, RelatorioExpedicaoCreateView,
     RelatorioExpedicaoListView, registrar, RelatorioExpedicaoDeleteView, 
     RelatorioExpedicaoDetailView, RelatorioExpedicao, RelatorioExpedicaoUpdateView, BestaDeleteView,
-    AnotacaoListView, AnotacaoCreateView, AnotacaoUpdateView, AnotacaoDeleteView, recuperar_senha, DiagnosticoDetailView,
+    AnotacaoListView, AnotacaoCreateView, AnotacaoDetailView, AnotacaoUpdateView, AnotacaoDeleteView, recuperar_senha, DiagnosticoDetailView,
     RacaListView, RacaDetailView, RacaCreateView, RacaUpdateView, RacaDeleteView,
     IngredienteListView, IngredienteDetailView, IngredienteCreateView, IngredienteUpdateView, IngredienteDeleteView,
     RemedioListView, RemedioDetailView, RemedioCreateView, RemedioUpdateView, RemedioDeleteView, alterar_tipo_usuario
@@ -73,6 +73,7 @@ urlpatterns = [
     # Anotações Pessoais
     path('anotacoes/', AnotacaoListView.as_view(), name='anotacao-list'),
     path('anotacoes/nova/', AnotacaoCreateView.as_view(), name='anotacao-create'),
+    path('anotacoes/<int:pk>/', AnotacaoDetailView.as_view(), name='anotacao-detail'),
     path('anotacoes/editar/<int:pk>/', AnotacaoUpdateView.as_view(), name='anotacao-update'),
     path('anotacoes/excluir/<int:pk>/', AnotacaoDeleteView.as_view(), name='anotacao-delete'),
     

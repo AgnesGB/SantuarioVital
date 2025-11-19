@@ -4,121 +4,176 @@
 {% block title %}{% if object %}Editar{% else %}Novo{% endif %} Remédio - SantuarioVital{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto">
+<div class="max-w-6xl mx-auto px-4 py-8">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg shadow-lg p-6 mb-6">
+    <div class="mb-6"> 
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <i class="fas fa-pills text-white text-2xl"></i>
+            <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
             </div>
             <div>
-                <h1 class="text-3xl font-bold text-white">
+                <h1 class="text-4xl font-bold text-gray-900">
                     {% if object %}Editar Remédio{% else %}Novo Remédio{% endif %}
                 </h1>
-                <p class="text-purple-100 mt-1">Preencha os dados do remédio e seus ingredientes</p>
+                <p class="text-gray-600 mt-1">Cadastre informações sobre remédios e seus ingredientes</p>
             </div>
         </div>
     </div>
 
-    <!-- Formulário -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <form method="post" class="p-8">
-            {% csrf_token %}
-            
-            <!-- Informações Básicas -->
-            <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-purple-500 flex items-center gap-2">
-                    <i class="fas fa-info-circle text-purple-600"></i>
-                    Informações Básicas
-                </h2>
-                
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Nome <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="nome" value="{{ form.nome.value|default:'' }}"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                               placeholder="Ex: Poção Curativa, Elixir da Calma..."
-                               required>
-                        {% if form.nome.errors %}
-                        <p class="text-red-600 text-sm mt-1 flex items-center gap-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ form.nome.errors.0 }}
-                        </p>
-                        {% endif %}
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Seção 1: Informações Básicas -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                     </div>
-
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Descrição
-                        </label>
-                        <textarea name="descricao" rows="4"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition resize-none"
-                                  placeholder="Descreva o remédio, sua função geral, características...">{{ form.descricao.value|default:'' }}</textarea>
-                        <p class="text-gray-500 text-sm mt-1 flex items-center gap-1">
-                            <i class="fas fa-lightbulb"></i>
-                            Descrição geral do remédio
-                        </p>
+                        <h2 class="text-2xl font-bold text-white">Informações Básicas</h2>
+                        <p class="text-purple-100 text-sm mt-0.5">Identifique o remédio e sua descrição geral</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Ingredientes -->
-            <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-green-500 flex items-center gap-2">
-                    <i class="fas fa-leaf text-green-600"></i>
-                    Ingredientes e Quantidades
-                </h2>
+            
+            <div class="p-6 space-y-5">
+                <!-- Nome -->
+                <div class="group">
+                    <label for="id_nome" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        Nome do Remédio
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="nome" id="id_nome" value="{{ form.nome.value|default:'' }}" required
+                           placeholder="💊 Ex: Poção Curativa, Elixir da Calma, Tônico Revigorante..."
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 group-hover:border-gray-400">
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Nome comercial ou popular do remédio
+                    </p>
+                    {% if form.nome.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.nome.errors.0 }}</p>
+                    {% endif %}
+                </div>
                 
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <!-- Descrição -->
+                <div class="group">
+                    <label for="id_descricao" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Descrição
+                    </label>
+                    <textarea name="descricao" id="id_descricao" rows="4"
+                              placeholder="📝 Descreva o remédio:&#10;• Função geral&#10;• Características principais&#10;• Forma (líquido, pó, cápsula...)&#10;• Cor, sabor, cheiro..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.descricao.value|default:'' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Descrição geral do remédio e suas características
+                    </p>
+                    {% if form.descricao.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.descricao.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 2: Ingredientes e Quantidades -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Ingredientes e Quantidades</h2>
+                        <p class="text-green-100 text-sm mt-0.5">Adicione os componentes que formam este remédio</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-6">
                     <p class="text-green-800 text-sm flex items-center gap-2">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Adicione os ingredientes que compõem este remédio com suas respectivas quantidades</span>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="font-medium">Adicione cada ingrediente com sua quantidade/dose específica</span>
                     </p>
                 </div>
                 
                 <div id="ingredientes-container">
                     {{ ingredientes_formset.management_form }}
                     
-                    <div class="space-y-3">
+                    <div class="space-y-4" id="ingredientes-list">
                         {% for form in ingredientes_formset %}
-                        <div class="ingrediente-form grid grid-cols-12 gap-3 items-start p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="ingrediente-form bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 hover:shadow-md transition-all duration-200">
                             {{ form.id }}
                             
-                            <div class="col-span-5">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Ingrediente</label>
-                                <select name="{{ form.ingrediente.html_name }}" 
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
-                                    <option value="">Selecione...</option>
-                                    {% for ingrediente in form.ingrediente.field.queryset %}
-                                    <option value="{{ ingrediente.pk }}" {% if form.ingrediente.value == ingrediente.pk|stringformat:"s" %}selected{% endif %}>
-                                        {{ ingrediente.nome }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="col-span-5">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Quantidade / Dose</label>
-                                <input type="text" name="{{ form.quantidade.html_name }}" 
-                                       value="{{ form.quantidade.value|default:'' }}"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
-                                       placeholder="Ex: 2 colheres, 100g, 5 gotas">
-                            </div>
-                            
-                            <div class="col-span-2 flex items-end">
-                                {% if form.instance.pk %}
-                                <label class="flex items-center gap-2 text-sm text-red-600 cursor-pointer">
-                                    {{ form.DELETE }}
-                                    <i class="fas fa-trash"></i>
-                                </label>
-                                {% else %}
-                                <button type="button" onclick="removeIngrediente(this)" 
-                                        class="w-full px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition text-sm">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                {% endif %}
+                            <div class="grid grid-cols-12 gap-4 items-start">
+                                <div class="col-span-12 sm:col-span-5">
+                                    <label class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        Ingrediente
+                                    </label>
+                                    <select name="{{ form.ingrediente.html_name }}" 
+                                            class="w-full px-3 py-2.5 border-2 border-green-300 rounded-lg focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm">
+                                        <option value="">🔍 Selecione um ingrediente...</option>
+                                        {% for ingrediente in form.ingrediente.field.queryset %}
+                                        <option value="{{ ingrediente.pk }}" {% if form.ingrediente.value == ingrediente.pk|stringformat:"s" %}selected{% endif %}>
+                                            {{ ingrediente.nome }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="col-span-12 sm:col-span-5">
+                                    <label class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                        </svg>
+                                        Quantidade / Dose
+                                    </label>
+                                    <input type="text" name="{{ form.quantidade.html_name }}" 
+                                           value="{{ form.quantidade.value|default:'' }}"
+                                           class="w-full px-3 py-2.5 border-2 border-green-300 rounded-lg focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm"
+                                           placeholder="📏 Ex: 2 colheres, 100g, 5 gotas...">
+                                </div>
+                                
+                                <div class="col-span-12 sm:col-span-2 flex items-end justify-end">
+                                    {% if form.instance.pk %}
+                                    <label class="flex items-center gap-2 px-3 py-2.5 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg cursor-pointer transition-all">
+                                        {{ form.DELETE }}
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Excluir
+                                    </label>
+                                    {% else %}
+                                    <button type="button" onclick="removeIngrediente(this)" 
+                                            class="px-3 py-2.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 hover:scale-105 transition-all text-sm font-medium flex items-center gap-2 group">
+                                        <svg class="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Remover
+                                    </button>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                         {% endfor %}
@@ -126,113 +181,301 @@
                 </div>
                 
                 <button type="button" onclick="addIngrediente()" 
-                        class="mt-4 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition text-sm font-medium flex items-center gap-2">
-                    <i class="fas fa-plus"></i>
-                    Adicionar Ingrediente
+                        class="mt-6 px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl transition-all duration-200 font-medium shadow-md hover:shadow-lg hover:scale-105 flex items-center gap-2 group">
+                    <svg class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    <span>Adicionar Ingrediente</span>
                 </button>
             </div>
+        </div>
 
-            <!-- Uso e Tratamento -->
-            <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-blue-500 flex items-center gap-2">
-                    <i class="fas fa-hand-holding-medical text-blue-600"></i>
-                    Uso e Tratamento
-                </h2>
-                
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Modo de Uso
-                        </label>
-                        <textarea name="modo_uso" rows="5"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
-                                  placeholder="Descreva como usar o remédio, posologia, frequência, duração do tratamento...">{{ form.modo_uso.value|default:'' }}</textarea>
-                        <p class="text-gray-500 text-sm mt-1 flex items-center gap-1">
-                            <i class="fas fa-clock"></i>
-                            Instruções de como e quando usar
-                        </p>
+        <!-- Seção 3: Uso e Tratamento -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
                     </div>
-
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Doenças Tratadas
-                        </label>
-                        <select name="doencas" multiple size="6"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            {% for doenca in form.doencas.field.queryset %}
-                            <option value="{{ doenca.pk }}" {% if doenca.pk in form.doencas.value %}selected{% endif %}>
-                                {{ doenca.nome }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                        <p class="text-gray-500 text-sm mt-1 flex items-center gap-1">
-                            <i class="fas fa-disease"></i>
-                            Ctrl+clique para selecionar múltiplas doenças
-                        </p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Observações
-                        </label>
-                        <textarea name="observacoes" rows="4"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition resize-none"
-                                  placeholder="Observações adicionais, precauções, efeitos colaterais...">{{ form.observacoes.value|default:'' }}</textarea>
-                        <p class="text-gray-500 text-sm mt-1 flex items-center gap-1">
-                            <i class="fas fa-sticky-note"></i>
-                            Informações adicionais importantes
-                        </p>
+                        <h2 class="text-2xl font-bold text-white">Uso e Tratamento</h2>
+                        <p class="text-blue-100 text-sm mt-0.5">Como usar e para quais doenças é indicado</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Botões de Ação -->
-            <div class="flex gap-3 pt-6 border-t border-gray-200">
-                <button type="submit" 
-                        class="flex-1 md:flex-none px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                    <i class="fas fa-save"></i>
-                    <span>Salvar Remédio</span>
-                </button>
-                <a href="{% url 'remedio-list' %}" 
-                   class="px-8 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-200 font-semibold flex items-center justify-center gap-2">
-                    <i class="fas fa-times"></i>
-                    <span>Cancelar</span>
-                </a>
+            
+            <div class="p-6 space-y-5">
+                <!-- Modo de Uso -->
+                <div class="group">
+                    <label for="id_modo_uso" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Modo de Uso
+                    </label>
+                    <textarea name="modo_uso" id="id_modo_uso" rows="5"
+                              placeholder="⏰ Descreva como usar:&#10;• Posologia (dose e horários)&#10;• Frequência (quantas vezes ao dia)&#10;• Duração do tratamento&#10;• Modo de preparo/administração&#10;• Observações sobre o uso..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.modo_uso.value|default:'' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Instruções de como e quando usar o remédio
+                    </p>
+                    {% if form.modo_uso.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.modo_uso.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Doenças Tratadas -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Doenças Tratadas
+                    </label>
+                    
+                    <!-- Hidden inputs container -->
+                    <div id="doencas-hidden-inputs">
+                        {% for doenca in form.doencas.value %}
+                        <input type="hidden" name="doencas" value="{{ doenca }}">
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Contador -->
+                    <div class="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-rose-200 rounded-xl">
+                        <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span class="text-sm font-semibold text-gray-700">
+                            <span id="doencas-counter">{{ form.doencas.value|length|default:0 }}</span> doença(s) selecionada(s)
+                        </span>
+                    </div>
+                    
+                    <!-- Grid de cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for doenca in form.doencas.field.queryset %}
+                        <div class="doenca-card group cursor-pointer border-2 rounded-xl p-4 transition-all duration-200 hover:shadow-lg {% if doenca.pk in form.doencas.value %}border-rose-600 bg-rose-50 shadow-md{% else %}border-gray-200 bg-white hover:border-gray-300{% endif %}"
+                             data-doenca-id="{{ doenca.pk }}"
+                             onclick="toggleDoencaCard(this)">
+                            <!-- Checkbox no canto -->
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                    <input type="checkbox" 
+                                           class="w-5 h-5 text-rose-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-rose-500 cursor-pointer"
+                                           {% if doenca.pk in form.doencas.value %}checked{% endif %}
+                                           onclick="event.stopPropagation()">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-gray-800 text-sm mb-1 group-hover:text-rose-600 transition-colors truncate">
+                                        {{ doenca.nome }}
+                                    </h4>
+                                </div>
+                            </div>
+                            
+                            <!-- Tipo da doença -->
+                            {% if doenca.tipo %}
+                            <div class="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-lg text-xs font-medium text-purple-700 mb-2">
+                                {% if doenca.tipo == 'viral' %}🦠{% elif doenca.tipo == 'bacteriana' %}🔬{% elif doenca.tipo == 'fungica' %}🍄{% elif doenca.tipo == 'parasitaria' %}🐛{% elif doenca.tipo == 'genetica' %}🧬{% elif doenca.tipo == 'mental' %}🧠{% elif doenca.tipo == 'essencia' %}✨{% else %}⚕️{% endif %}
+                                {{ doenca.get_tipo_display }}
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Preview dos sintomas -->
+                            {% if doenca.sintomas %}
+                            <p class="text-xs text-gray-600 line-clamp-2">
+                                {{ doenca.sintomas|truncatewords:15 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <p class="mt-3 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Clique nos cards para selecionar as doenças que este remédio trata
+                    </p>
+                    {% if form.doencas.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.doencas.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Observações -->
+                <div class="group">
+                    <label for="id_observacoes" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                        </svg>
+                        Observações
+                    </label>
+                    <textarea name="observacoes" id="id_observacoes" rows="4"
+                              placeholder="📌 Informações adicionais importantes:&#10;• Precauções especiais&#10;• Efeitos colaterais conhecidos&#10;• Interações com outros remédios&#10;• Contraindicações..."
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all duration-200 group-hover:border-gray-400 font-mono text-sm">{{ form.observacoes.value|default:'' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        Informações adicionais importantes sobre o remédio
+                    </p>
+                    {% if form.observacoes.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.observacoes.errors.0 }}</p>
+                    {% endif %}
+                </div>
             </div>
-        </form>
-    </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex gap-3 justify-end pb-6">
+            <a href="{% url 'remedio-list' %}" class="group px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-md hover:shadow-lg">
+                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>Cancelar</span>
+            </a>
+            <button type="submit" class="group px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl hover:scale-105">
+                <svg class="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Salvar Remédio</span>
+            </button>
+        </div>
+    </form>
 </div>
 
-<script>
-    let formCount = {{ ingredientes_formset.total_form_count }};
-    
-    function addIngrediente() {
-        const container = document.getElementById('ingredientes-container').querySelector('.space-y-3');
-        const emptyForm = container.querySelector('.ingrediente-form').cloneNode(true);
-        
-        // Atualizar índices do formulário
-        const formRegex = /form-\d+-/g;
-        emptyForm.innerHTML = emptyForm.innerHTML.replace(formRegex, `form-${formCount}-`);
-        
-        // Limpar valores
-        emptyForm.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
-        emptyForm.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
-        emptyForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
-        
-        container.appendChild(emptyForm);
-        
-        // Atualizar total de forms
-        formCount++;
-        document.querySelector('#id_remedioingrediente_set-TOTAL_FORMS').value = formCount;
+{% endblock %}
+
+{% block scripts %}
+<style>
+    /* Animação de entrada */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
-    function removeIngrediente(button) {
-        const form = button.closest('.ingrediente-form');
+    form > div {
+        animation: slideIn 0.4s ease-out backwards;
+    }
+    
+    form > div:nth-child(1) { animation-delay: 0.1s; }
+    form > div:nth-child(2) { animation-delay: 0.2s; }
+    form > div:nth-child(3) { animation-delay: 0.3s; }
+    form > div:nth-child(4) { animation-delay: 0.4s; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Validação em tempo real
+    const requiredFields = document.querySelectorAll('input[required], textarea[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', () => {
+            if (!field.value) {
+                field.classList.add('border-red-500', 'bg-red-50');
+            } else {
+                field.classList.remove('border-red-500', 'bg-red-50');
+                field.classList.add('border-green-500');
+                setTimeout(() => field.classList.remove('border-green-500'), 2000);
+            }
+        });
+    });
+});
+
+// Gestão de ingredientes no formset
+let formCount = {{ ingredientes_formset.total_form_count }};
+
+function addIngrediente() {
+    const container = document.getElementById('ingredientes-list');
+    const emptyForm = container.querySelector('.ingrediente-form').cloneNode(true);
+    
+    // Atualizar índices do formulário
+    const formRegex = /form-\d+-/g;
+    emptyForm.innerHTML = emptyForm.innerHTML.replace(formRegex, `form-${formCount}-`);
+    
+    // Limpar valores
+    emptyForm.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+    emptyForm.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+    emptyForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
+    
+    // Remover classe de seleção (para forms já existentes que poderiam ser clonados)
+    emptyForm.classList.remove('border-green-500', 'shadow-md');
+    
+    container.appendChild(emptyForm);
+    
+    // Atualizar total de forms
+    formCount++;
+    document.querySelector('#id_remedioingrediente_set-TOTAL_FORMS').value = formCount;
+    
+    // Animação de entrada
+    emptyForm.style.opacity = '0';
+    emptyForm.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+        emptyForm.style.transition = 'all 0.3s ease-out';
+        emptyForm.style.opacity = '1';
+        emptyForm.style.transform = 'translateY(0)';
+    }, 10);
+}
+
+function removeIngrediente(button) {
+    const form = button.closest('.ingrediente-form');
+    
+    // Animação de saída
+    form.style.transition = 'all 0.3s ease-out';
+    form.style.opacity = '0';
+    form.style.transform = 'translateX(-20px)';
+    
+    setTimeout(() => {
         form.remove();
         
         // Atualizar total de forms
         formCount--;
         document.querySelector('#id_remedioingrediente_set-TOTAL_FORMS').value = formCount;
+    }, 300);
+}
+
+// Gestão de seleção de doenças (cards)
+function toggleDoencaCard(card) {
+    const checkbox = card.querySelector('input[type="checkbox"]');
+    const doencaId = card.getAttribute('data-doenca-id');
+    const hiddenInputsContainer = document.getElementById('doencas-hidden-inputs');
+    const counter = document.getElementById('doencas-counter');
+    
+    // Toggle checkbox
+    checkbox.checked = !checkbox.checked;
+    
+    // Toggle visual do card
+    if (checkbox.checked) {
+        card.classList.add('border-rose-600', 'bg-rose-50', 'shadow-md');
+        card.classList.remove('border-gray-200', 'bg-white');
+        
+        // Adicionar hidden input
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'doencas';
+        input.value = doencaId;
+        input.setAttribute('data-doenca-id', doencaId);
+        hiddenInputsContainer.appendChild(input);
+    } else {
+        card.classList.remove('border-rose-600', 'bg-rose-50', 'shadow-md');
+        card.classList.add('border-gray-200', 'bg-white');
+        
+        // Remover hidden input
+        const input = hiddenInputsContainer.querySelector(`input[data-doenca-id="${doencaId}"]`);
+        if (input) input.remove();
     }
+    
+    // Atualizar contador
+    const count = hiddenInputsContainer.querySelectorAll('input').length;
+    counter.textContent = count;
+}
 </script>
 {% endblock %}
