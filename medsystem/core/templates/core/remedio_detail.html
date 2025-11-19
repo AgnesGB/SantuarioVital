@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ remedio.nome }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-pills text-3xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-4xl font-bold">{{ remedio.nome }}</h1>
+                    <p class="text-purple-100 mt-1">Remédio Medicinal</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="p-8 space-y-6">
+            {% if remedio.descricao %}
+            <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
+                <h3 class="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i>
+                    Descrição
+                </h3>
+                <p class="text-blue-800">{{ remedio.descricao }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Ingredientes -->
+            <div class="bg-green-50 p-6 rounded-lg border border-green-100">
+                <h3 class="text-lg font-semibold text-green-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-leaf"></i>
+                    Ingredientes
+                </h3>
+                <div class="space-y-3">
+                    {% for ri in ingredientes_remedio %}
+                    <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-green-200">
+                        <span class="text-green-900 font-medium">{{ ri.ingrediente.nome }}</span>
+                        <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm">{{ ri.quantidade }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-green-700">Nenhum ingrediente adicionado</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if remedio.modo_uso %}
+            <div class="bg-purple-50 p-6 rounded-lg border border-purple-100">
+                <h3 class="text-lg font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                    <i class="fas fa-hand-holding-medical"></i>
+                    Modo de Uso
+                </h3>
+                <p class="text-purple-800">{{ remedio.modo_uso }}</p>
+            </div>
+            {% endif %}
+
+            {% if remedio.doencas.all %}
+            <div class="bg-red-50 p-6 rounded-lg border border-red-100">
+                <h3 class="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-disease"></i>
+                    Doenças Tratadas
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for doenca in remedio.doencas.all %}
+                    <span class="px-4 py-2 bg-red-200 text-red-900 rounded-lg font-medium">{{ doenca.nome }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if remedio.observacoes %}
+            <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-100">
+                <h3 class="text-lg font-semibold text-yellow-900 mb-3 flex items-center gap-2">
+                    <i class="fas fa-note-sticky"></i>
+                    Observações
+                </h3>
+                <p class="text-yellow-800">{{ remedio.observacoes }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Ações -->
+        {% if is_medico_or_admin %}
+        <div class="p-6 bg-gray-50 border-t flex gap-3">
+            <a href="{% url 'remedio-update' remedio.pk %}" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <i class="fas fa-edit mr-2"></i>Editar
+            </a>
+            <a href="{% url 'remedio-delete' remedio.pk %}" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                <i class="fas fa-trash mr-2"></i>Excluir
+            </a>
+            <a href="{% url 'remedio-list' %}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                Voltar
+            </a>
+        </div>
+        {% else %}
+        <div class="p-6 bg-gray-50 border-t">
+            <a href="{% url 'remedio-list' %}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition inline-block">
+                Voltar
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,132 +1,270 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Lista de Criaturas{% endblock %}
+{% block title %}Bestiário{% endblock %}
 
 {% block content %}
-<div class="columns">
-    <div class="column is-3">
-        <div class="box">
-            <h2 class="title is-4">Filtros</h2>
-            <form method="get" action="{% url 'besta-list' %}">
-                <div class="field">
-                    <label class="label">Nome</label>
-                    <div class="control">
-                        <input class="input" type="text" name="nome" 
-                               value="{{ request.GET.nome }}" 
-                               placeholder="Filtrar por nome...">
-                    </div>
-                </div>
+<div class="max-w-7xl mx-auto">
+    <div class="flex gap-6">
+        <!-- Sidebar de Filtros -->
+        <div class="w-80 flex-shrink-0">
+            <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    Filtros
+                </h2>
                 
-                <div class="field">
-                    <label class="label">Nível de Ameaça</label>
-                    <div class="control">
-                        <div class="select is-fullwidth">
-                            <select name="nivel_ameaca">
-                                <option value="">Todos</option>
-                                <option value="01" {% if request.GET.nivel_ameaca == '01' %}selected{% endif %}> 01/10</option>
-                                <option value="02" {% if request.GET.nivel_ameaca == '02' %}selected{% endif %}> 02/10</option>
-                                <option value="03" {% if request.GET.nivel_ameaca == '03' %}selected{% endif %}> 03/10</option>
-                                <option value="04" {% if request.GET.nivel_ameaca == '04' %}selected{% endif %}> 04/10</option>
-                                <option value="05" {% if request.GET.nivel_ameaca == '05' %}selected{% endif %}> 05/10</option>
-                                <option value="06" {% if request.GET.nivel_ameaca == '06' %}selected{% endif %}> 06/10</option>
-                                <option value="07" {% if request.GET.nivel_ameaca == '07' %}selected{% endif %}> 07/10</option>
-                                <option value="08" {% if request.GET.nivel_ameaca == '08' %}selected{% endif %}> 08/10</option>
-                                <option value="09" {% if request.GET.nivel_ameaca == '09' %}selected{% endif %}> 09/10</option>
-                                <option value="10" {% if request.GET.nivel_ameaca == '10' %}selected{% endif %}> 10/10</option>
-                            </select>
-                        </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nome</label>
+                        <input type="text" id="filtro-nome" placeholder="Buscar criatura..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
                     </div>
-                </div>
-                
-                <div class="field">
-                    <label class="label">Habilidades</label>
-                    <div class="control">
-                        <input class="input" type="text" name="habilidades" 
-                               value="{{ request.GET.habilidades }}" 
-                               placeholder="Ex: fogo, veneno, invisibilidade">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nível de Ameaça</label>
+                        <select id="filtro-nivel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+                            <option value="">Todos</option>
+                            <option value="01">1/10 - Inofensivo</option>
+                            <option value="02">2/10 - Muito Baixo</option>
+                            <option value="03">3/10 - Baixo</option>
+                            <option value="04">4/10 - Moderado Baixo</option>
+                            <option value="05">5/10 - Moderado</option>
+                            <option value="06">6/10 - Moderado Alto</option>
+                            <option value="07">7/10 - Alto</option>
+                            <option value="08">8/10 - Muito Alto</option>
+                            <option value="09">9/10 - Extremo</option>
+                            <option value="10">10/10 - Catastrófico</option>
+                        </select>
                     </div>
-                </div>
-                
-                <div class="field">
-                    <div class="control">
-                        <button type="submit" class="button is-primary is-fullwidth">Filtrar</button>
-                        {% if request.GET.nome or request.GET.nivel_ameaca or request.GET.habilidades %}
-                        <a href="{% url 'besta-list' %}" class="button is-light is-fullwidth mt-2">
-                            Limpar filtros
-                        </a>
-                        {% endif %}
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Habilidades</label>
+                        <input type="text" id="filtro-habilidades" placeholder="Ex: fogo, veneno..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
                     </div>
-                </div>
-            </form>
-        </div>
-        
-        <a href="{% url 'besta-create' %}" class="button is-success is-fullwidth">
-            <span class="icon">
-                <i class="fas fa-plus"></i>
-            </span>
-            <span>Nova Criatura</span>
-        </a>
-    </div>
-    
-    <div class="column is-9">
-        <h1 class="title">Criaturas</h1>
-        
-        {% if bestas %}
-        <div class="columns is-multiline">
-            {% for besta in bestas %}
-            <div class="column is-4">
-                <div class="card">
-                    <header class="card-header">
-                        <p class="card-header-title">
-                            Nome: {{ besta.nome }}
-                        </p>
-                    </header>
-                    <div class="card-content">
-                        <div class="content">
-                            <p><strong>Título:</strong> {{ besta.titulo }}</p>
-                            <p><strong>Nível de Ameaça:</strong> {{ besta.get_nivel_ameaca_display }}</p>
-                            <p><strong>Aparência:</strong> {{ besta.aparencia|truncatechars:50 }}</p>
-                            <p><strong>Habilidades:</strong> {{ besta.habilidades|truncatechars:50 }}</p>
-                            
-                            {% if besta.doencas.all %}
-                            <div class="mt-3">
-                                <h6 class="subtitle is-6">Doenças associadas:</h6>
-                                <div class="tags">
-                                    {% for doenca in besta.doencas.all %}
-                                    <span class="tag is-danger">{{ doenca.nome }}</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Características</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filtro-contaminar" class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                <span class="ml-2 text-sm text-gray-700">Pode contaminar</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filtro-essencia" class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                <span class="ml-2 text-sm text-gray-700">Relacionada com essência</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="filtro-corrompida" class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                <span class="ml-2 text-sm text-gray-700">Corrompida por essência</span>
+                            </label>
                         </div>
                     </div>
                     
-                    <footer class="card-footer">
-                        <a href="{% url 'besta-detail' besta.pk %}" class="card-footer-item">
-                            <span class="icon">
-                                <i class="fas fa-eye"></i>
-                            </span>
-                        </a>
-                        <a href="{% url 'besta-update' besta.pk %}" class="card-footer-item">
-                            <span class="icon">
-                                <i class="fas fa-edit"></i>
-                            </span>
-                        </a>
-                        <a href="{% url 'besta-delete' besta.pk %}" class="card-footer-item has-text-danger">
-                            <span class="icon">
-                                <i class="fas fa-trash"></i>
-                            </span>
-                        </a>
-                    </footer>
+                    <button id="limpar-filtros" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                        Limpar Filtros
+                    </button>
                 </div>
             </div>
-            {% endfor %}
+            
+            <a href="{% url 'besta-create' %}" class="mt-4 w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-lg flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span>Nova Criatura</span>
+            </a>
         </div>
-        {% else %}
-        <div class="notification is-warning">
-            Nenhuma criatura encontrada com os filtros atuais.
+        
+        <!-- Conteúdo Principal -->
+        <div class="flex-1">
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Bestiário</h1>
+                <p class="text-gray-600 mt-1">Catálogo de criaturas e bestas encontradas</p>
+            </div>
+            
+            <!-- Grid de Cards -->
+            <div id="bestas-container" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {% for besta in bestas %}
+                <div class="besta-card bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col"
+                     data-nome="{{ besta.nome|lower }}"
+                     data-nivel="{{ besta.nivel_ameaca }}"
+                     data-habilidades="{{ besta.habilidades|lower }}"
+                     data-contaminar="{{ besta.pode_contaminar|yesno:'true,false' }}"
+                     data-essencia="{{ besta.relacionada_com_essencia|yesno:'true,false' }}"
+                     data-corrompida="{{ besta.corrompida_por_essencia|yesno:'true,false' }}">
+                    
+                    <!-- Header com gradiente baseado no nível -->
+                    <div class="h-2 
+                        {% if besta.nivel_ameaca <= '03' %}bg-green-500
+                        {% elif besta.nivel_ameaca <= '05' %}bg-yellow-500
+                        {% elif besta.nivel_ameaca <= '07' %}bg-orange-500
+                        {% else %}bg-red-500{% endif %}">
+                    </div>
+                    
+                    <div class="p-5 flex-1 flex flex-col">
+                        <!-- Título e Nível -->
+                        <div class="mb-3">
+                            <h3 class="text-lg font-bold text-gray-800 mb-1">{{ besta.nome }}</h3>
+                            {% if besta.titulo %}
+                            <p class="text-sm text-gray-600 italic">"{{ besta.titulo }}"</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Nível de Ameaça -->
+                        <div class="mb-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold
+                                {% if besta.nivel_ameaca <= '03' %}bg-green-100 text-green-700
+                                {% elif besta.nivel_ameaca <= '05' %}bg-yellow-100 text-yellow-700
+                                {% elif besta.nivel_ameaca <= '07' %}bg-orange-100 text-orange-700
+                                {% else %}bg-red-100 text-red-700{% endif %}">
+                                Ameaça {{ besta.get_nivel_ameaca_display }}
+                            </span>
+                        </div>
+                        
+                        <!-- Informações -->
+                        <div class="space-y-2 mb-3 flex-1">
+                            <div>
+                                <p class="text-xs font-medium text-gray-700">Aparência:</p>
+                                <p class="text-xs text-gray-600">{{ besta.aparencia|truncatewords:15 }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs font-medium text-gray-700">Habilidades:</p>
+                                <p class="text-xs text-gray-600">{{ besta.habilidades|truncatewords:12 }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Tags de Características -->
+                        <div class="flex flex-wrap gap-1 mb-4">
+                            {% if besta.pode_contaminar %}
+                            <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-medium">🦠 Contagioso</span>
+                            {% endif %}
+                            {% if besta.relacionada_com_essencia %}
+                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">✨ Essência</span>
+                            {% endif %}
+                            {% if besta.corrompida_por_essencia %}
+                            <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-medium">⚡ Corrompida</span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Doenças Associadas -->
+                        {% if besta.doenca_relacionada.all %}
+                        <div class="mb-4 pb-4 border-t border-gray-200 pt-3">
+                            <p class="text-xs font-medium text-gray-700 mb-1">Doenças associadas:</p>
+                            <div class="flex flex-wrap gap-1">
+                                {% for doenca in besta.doenca_relacionada.all %}
+                                <span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded text-xs font-medium">{{ doenca.nome }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Botões de Ação -->
+                        <div class="grid grid-cols-3 gap-2 mt-auto">
+                            <a href="{% url 'besta-detail' besta.pk %}" class="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium text-center">
+                                Detalhes
+                            </a>
+                            <a href="{% url 'besta-update' besta.pk %}" class="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-xs font-medium text-center">
+                                Editar
+                            </a>
+                            <a href="{% url 'besta-delete' besta.pk %}" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs font-medium text-center">
+                                Excluir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if not bestas %}
+            <div class="bg-white rounded-xl shadow-lg p-12 text-center">
+                <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-700 mb-2">Nenhuma criatura encontrada</h3>
+                <p class="text-gray-500 mb-4">Comece adicionando criaturas ao bestiário</p>
+                <a href="{% url 'besta-create' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    <span>Adicionar Primeira Criatura</span>
+                </a>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroNome = document.getElementById('filtro-nome');
+    const filtroNivel = document.getElementById('filtro-nivel');
+    const filtroHabilidades = document.getElementById('filtro-habilidades');
+    const filtroContaminar = document.getElementById('filtro-contaminar');
+    const filtroEssencia = document.getElementById('filtro-essencia');
+    const filtroCorrompida = document.getElementById('filtro-corrompida');
+    const limparBtn = document.getElementById('limpar-filtros');
+    
+    function filtrarBestas() {
+        const nomeTerm = filtroNome.value.toLowerCase();
+        const nivelTerm = filtroNivel.value;
+        const habilidadesTerm = filtroHabilidades.value.toLowerCase();
+        const checkContaminar = filtroContaminar.checked;
+        const checkEssencia = filtroEssencia.checked;
+        const checkCorrompida = filtroCorrompida.checked;
+        
+        const cards = document.querySelectorAll('.besta-card');
+        let visiveis = 0;
+        
+        cards.forEach(card => {
+            const nome = card.dataset.nome;
+            const nivel = card.dataset.nivel;
+            const habilidades = card.dataset.habilidades;
+            const contaminar = card.dataset.contaminar === 'true';
+            const essencia = card.dataset.essencia === 'true';
+            const corrompida = card.dataset.corrompida === 'true';
+            
+            const nomeMatch = !nomeTerm || nome.includes(nomeTerm);
+            const nivelMatch = !nivelTerm || nivel === nivelTerm;
+            const habilidadesMatch = !habilidadesTerm || habilidades.includes(habilidadesTerm);
+            const contaminarMatch = !checkContaminar || contaminar;
+            const essenciaMatch = !checkEssencia || essencia;
+            const corrompidaMatch = !checkCorrompida || corrompida;
+            
+            if (nomeMatch && nivelMatch && habilidadesMatch && contaminarMatch && essenciaMatch && corrompidaMatch) {
+                card.style.display = 'flex';
+                visiveis++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // Debounce para inputs de texto
+    let debounceTimer;
+    function debounceFilter() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(filtrarBestas, 300);
+    }
+    
+    filtroNome.addEventListener('input', debounceFilter);
+    filtroHabilidades.addEventListener('input', debounceFilter);
+    filtroNivel.addEventListener('change', filtrarBestas);
+    filtroContaminar.addEventListener('change', filtrarBestas);
+    filtroEssencia.addEventListener('change', filtrarBestas);
+    filtroCorrompida.addEventListener('change', filtrarBestas);
+    
+    limparBtn.addEventListener('click', function() {
+        filtroNome.value = '';
+        filtroNivel.value = '';
+        filtroHabilidades.value = '';
+        filtroContaminar.checked = false;
+        filtroEssencia.checked = false;
+        filtroCorrompida.checked = false;
+        filtrarBestas();
+    });
+});
+</script>
 {% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Postagem, Usuario, RelatorioExpedicao, Bunker, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, AnotacaoPessoal
+from .models import Usuario, RelatorioExpedicao, Cidade, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, AnotacaoPessoal, Raca, Ingrediente, Remedio
 from django.forms.widgets import DateInput
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
@@ -18,7 +18,7 @@ class DoencaForm(forms.ModelForm):
 class PacienteForm(forms.ModelForm):
     class Meta:
         model = Paciente
-        fields = ['nome', 'idade', 'tipo_sanguineo', 'bunker', 'status', 'observacoes']
+        fields = ['nome', 'idade', 'raca', 'afinidade', 'cidade', 'status', 'observacoes']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'input'}),
             'idade': forms.NumberInput(attrs={
@@ -26,8 +26,9 @@ class PacienteForm(forms.ModelForm):
                 'min': '0',
                 'max': '150'
             }),
-            'tipo_sanguineo': forms.Select(attrs={'class': 'select'}),
-            'bunker': forms.Select(attrs={'class': 'select'}),
+            'raca': forms.SelectMultiple(attrs={'class': 'select'}),
+            'afinidade': forms.Select(attrs={'class': 'select'}),
+            'cidade': forms.Select(attrs={'class': 'select'}),
             'status': forms.Select(attrs={'class': 'select'}),
             'observacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
         }
@@ -46,15 +47,17 @@ class RegistroMedicoForm(forms.ModelForm):
         model = RegistroMedico
         fields = ['paciente', 'sintomas_observados', 'observacoes', 'tratamento_aplicado']
 
-class BunkerForm(forms.ModelForm):
+class CidadeForm(forms.ModelForm):
     class Meta:
-        model = Bunker
-        fields = ['nome']
+        model = Cidade
+        fields = ['nome', 'funcao']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'input'}),
+            'funcao': forms.TextInput(attrs={'class': 'input'}),
         }
         labels = {
-            'nome': 'Nome do Bunker',
+            'nome': 'Nome da Cidade',
+            'funcao': 'Função',
         }
 
 class UsuarioCreationForm(UserCreationForm):
@@ -62,10 +65,10 @@ class UsuarioCreationForm(UserCreationForm):
     
     class Meta:
         model = Usuario
-        fields = ['username', 'nickname', 'password1', 'password2', 'tipo', 'bunker']
+        fields = ['username', 'nickname', 'password1', 'password2', 'tipo', 'cidade']
         widgets = {
             'tipo': forms.Select(attrs={'class': 'select'}),
-            'bunker': forms.Select(attrs={'class': 'select'}),
+            'cidade': forms.Select(attrs={'class': 'select'}),
         }
     
     def __init__(self, *args, **kwargs):
@@ -74,11 +77,6 @@ class UsuarioCreationForm(UserCreationForm):
         self.fields['nickname'].widget.attrs.update({'class': 'input'})
         self.fields['password1'].widget.attrs.update({'class': 'input'})
         self.fields['password2'].widget.attrs.update({'class': 'input'})
-        
-class PostagemForm(forms.ModelForm):
-    class Meta:
-        model = Postagem
-        fields = ['titulo', 'descricao', 'imagem']
 
 class RelatorioExpedicaoForm(forms.ModelForm):
     class Meta:
@@ -133,4 +131,48 @@ class AnotacaoPessoalForm(forms.ModelForm):
                 'class': 'input',
                 'placeholder': 'palavra-chave1, palavra-chave2, ...'
             }),
+        }
+
+
+class RacaForm(forms.ModelForm):
+    class Meta:
+        model = Raca
+        fields = '__all__'
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'input'}),
+            'longevidade': forms.TextInput(attrs={'class': 'input'}),
+            'caracteristicas_fisicas': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'cor_sangue': forms.TextInput(attrs={'class': 'input'}),
+            'afinidade_magica': forms.TextInput(attrs={'class': 'input'}),
+            'cuidados_especiais': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'alimentacao': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'peculiaridades': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'observacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+        }
+
+
+class IngredienteForm(forms.ModelForm):
+    class Meta:
+        model = Ingrediente
+        fields = '__all__'
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'input'}),
+            'o_que_e': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'o_que_faz': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'contra_indicacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'reacoes_adversas': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'cuidados_ao_uso': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+        }
+
+
+class RemedioForm(forms.ModelForm):
+    class Meta:
+        model = Remedio
+        fields = ['nome', 'descricao', 'modo_uso', 'doencas', 'observacoes']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'input'}),
+            'descricao': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'modo_uso': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'doencas': forms.SelectMultiple(attrs={'class': 'select'}),
+            'observacoes': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
         }

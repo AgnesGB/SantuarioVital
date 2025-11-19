@@ -1,24 +1,106 @@
 {% extends 'core/base.html' %}
 
+{% block title %}Excluir Doença{% endblock %}
+
 {% block content %}
-<section class="section">
-    <div class="container">
-        <div class="box">
-            <h1 class="title">Confirmar Exclusão</h1>
-            <p>Tem certeza que deseja excluir a doença "{{ object.nome }}"?</p>
-            
-            <form method="post" class="mt-5">
+<div class="max-w-2xl mx-auto">
+    <!-- Warning Card -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4">
+            <div class="flex items-center gap-3 text-white">
+                <svg class="w-8 h-8 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                    <h1 class="text-2xl font-bold">Confirmar Exclusão</h1>
+                    <p class="text-red-100 text-sm">Esta ação não pode ser desfeita</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <!-- Disease Info -->
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p class="text-gray-700 mb-4">Tem certeza que deseja excluir a doença:</p>
+                
+                <div class="bg-white rounded-lg p-4 border-l-4 border-red-500">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800">{{ object.nome }}</h3>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if object.tipo == 'F' %}bg-red-100 text-red-800
+                                    {% elif object.tipo == 'M' %}bg-purple-100 text-purple-800
+                                    {% else %}bg-orange-100 text-orange-800{% endif %}">
+                                    {{ object.get_tipo_display }}
+                                </span>
+                                {% if object.contagiosa %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    Contagiosa
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% if object.parte_afetada %}
+                            <p class="text-sm text-gray-600 mt-2">
+                                <span class="font-medium">Parte Afetada:</span> {{ object.parte_afetada }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Message -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div class="flex gap-3">
+                    <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-sm text-yellow-800">
+                        <p class="font-medium mb-1">Atenção:</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Todos os dados da doença serão permanentemente removidos</li>
+                            <li>Diagnósticos relacionados podem ser afetados</li>
+                            <li>Esta ação não pode ser revertida</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <form method="post">
                 {% csrf_token %}
-                <div class="field is-grouped">
-                    <div class="control">
-                        <button type="submit" class="button is-danger">Confirmar Exclusão</button>
-                    </div>
-                    <div class="control">
-                        <a href="{% url 'doenca-list' %}" class="button is-light">Cancelar</a>
-                    </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="submit" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span>Sim, Excluir Doença</span>
+                    </button>
+                    <a href="{% url 'doenca-list' %}" class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        <span>Cancelar</span>
+                    </a>
                 </div>
             </form>
         </div>
     </div>
-</section>
+
+    <!-- Info Box -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <p class="text-sm text-blue-800">
+                <span class="font-medium">Dica:</span> Se você não tem certeza, clique em "Cancelar" e revise as informações da doença antes de decidir excluí-la.
+            </p>
+        </div>
+    </div>
+</div>
 {% endblock %}

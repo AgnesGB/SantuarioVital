@@ -2,17 +2,17 @@ from django.views.generic import DeleteView, ListView, DetailView, CreateView, U
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Doenca, RelatorioExpedicao, Postagem, Comentario, Usuario, Besta, Bunker, Paciente, RegistroMedico, Diagnostico, AnotacaoPessoal
-from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, BunkerForm, DiagnosticoForm, AnotacaoPessoalForm
+from .models import Doenca, RelatorioExpedicao, Usuario, Besta, Cidade, Paciente, RegistroMedico, Diagnostico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente
+from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, CidadeForm, DiagnosticoForm, AnotacaoPessoalForm, RacaForm, IngredienteForm, RemedioForm
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from .mixins import MedicoRequiredMixin, AdminRequiredMixin
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from datetime import datetime
-from .mixins import MedicoRequiredMixin 
 from django.contrib.auth import get_user_model
 
 def registrar(request):
@@ -32,35 +32,20 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['usuarios'] = Usuario.objects.all().order_by('nickname')
-        context['is_medico'] = self.request.user.is_authenticated and self.request.user.tipo == 'MED'
         return context
 
-class RelatorioExpedicaoListView(LoginRequiredMixin, ListView):
-    model = RelatorioExpedicao
-    template_name = 'core/relatorio_list.html'
-
-class RelatorioExpedicaoCreateView(LoginRequiredMixin, CreateView):
-    model = RelatorioExpedicao
-    fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
-    template_name = 'core/relatorio_form.html'
-    success_url = reverse_lazy('relatorio-list')
-    
-    def form_valid(self, form):
-        form.instance.autor = self.request.user
-        return super().form_valid(form)
-
 class BunkerDetailView(DetailView):
-    model = Bunker
+    model = Cidade
     template_name = 'core/bunker_detail.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['membros'] = Usuario.objects.filter(bunker=self.object)
-        context['pacientes'] = Paciente.objects.filter(bunker=self.object).only('nome', 'idade', 'tipo_sanguineo')
+        context['membros'] = Usuario.objects.filter(cidade=self.object)
+        context['pacientes'] = Paciente.objects.filter(cidade=self.object).only('nome', 'idade')
         return context
 
 class BunkertListView(ListView):
-    model = Bunker
+    model = Cidade
     template_name = 'core/bunker_list.html'
     context_object_name = 'bunkers'
 
@@ -269,11 +254,15 @@ class DiagnosticoCreateView(MedicoRequiredMixin, CreateView):
         form.instance.paciente = get_object_or_404(Paciente, pk=self.kwargs['paciente_id'])
         form.instance.responsavel = self.request.user
         
+        # Processa o campo tratado (checkbox)
+        form.instance.tratado = self.request.POST.get('tratado') == 'true'
+        
         # Salva o diagnóstico primeiro
         response = super().form_valid(form)
         
-        # Processa as hipóteses (enviadas como string separada por vírgulas)
-        hipoteses_ids = [int(id) for id in self.request.POST.get('hipoteses', '').split(',') if id]
+        # Processa as hipóteses (enviadas como lista de checkboxes)
+        hipoteses_ids = self.request.POST.getlist('hipoteses')
+        hipoteses_ids = [int(id) for id in hipoteses_ids if id]
         self.object.hipoteses.set(hipoteses_ids)
         
         messages.success(self.request, 'Diagnóstico salvo com sucesso!')
@@ -302,11 +291,14 @@ class DiagnosticoUpdateView(MedicoRequiredMixin, UpdateView):
         return self.form_invalid(form)
 
     def form_valid(self, form):
+        # Processa o campo tratado (checkbox)
+        form.instance.tratado = self.request.POST.get('tratado') == 'true'
+        
         response = super().form_valid(form)
         
-        # Processa as hipóteses
-        hipoteses_ids = self.request.POST.get('hipoteses', '').split(',')
-        hipoteses_ids = [int(id) for id in hipoteses_ids if id]  # Remove valores vazios
+        # Processa as hipóteses (enviadas como lista de checkboxes)
+        hipoteses_ids = self.request.POST.getlist('hipoteses')
+        hipoteses_ids = [int(id) for id in hipoteses_ids if id]
         self.object.hipoteses.set(hipoteses_ids)
         
         messages.success(self.request, 'Diagnóstico atualizado com sucesso!')
@@ -346,7 +338,7 @@ class PacienteDeleteView(MedicoRequiredMixin, DeleteView):
 
 class PacienteCreateView(MedicoRequiredMixin, CreateView):
     model = Paciente
-    fields = ['nome', 'idade', 'tipo_sanguineo', 'status', 'bunker', 'observacoes']  # Remova form_class temporariamente
+    fields = ['nome', 'idade', 'raca', 'afinidade', 'cidade', 'status', 'observacoes']
     template_name = 'core/paciente_form.html'
     
     def form_valid(self, form):
@@ -380,37 +372,37 @@ class PacienteListView(LoginRequiredMixin, ListView):
     context_object_name = 'pacientes'
     
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('bunker').order_by('nome')  # Ordenação padrão por nome
+        queryset = super().get_queryset().select_related('cidade').order_by('nome')  # Ordenação padrão por nome
         
         # Aplica filtros se existirem
         nome = self.request.GET.get('nome')
         status = self.request.GET.get('status')
-        tipo_sanguineo = self.request.GET.get('tipo_sanguineo')
-        bunker = self.request.GET.get('bunker')
+        afinidade = self.request.GET.get('afinidade')
+        cidade = self.request.GET.get('cidade')
         
         if nome:
             queryset = queryset.filter(nome__icontains=nome)
         if status:
             queryset = queryset.filter(status=status)
-        if tipo_sanguineo:
-            queryset = queryset.filter(tipo_sanguineo=tipo_sanguineo)
-        if bunker:
-            queryset = queryset.filter(bunker_id=bunker)
+        if afinidade:
+            queryset = queryset.filter(afinidade=afinidade)
+        if cidade:
+            queryset = queryset.filter(cidade_id=cidade)
             
         return queryset
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['bunkers'] = Bunker.objects.all()
+        context['cidades'] = Cidade.objects.all()
         context['status_choices'] = Paciente.STATUS_CHOICES
-        context['tipo_sanguineo_choices'] = Paciente.TIPO_SANGUINEO_CHOICES
+        context['afinidade_choices'] = Paciente.AFINIDADE
         
         # Adiciona flag para saber se há filtros ativos
         context['has_filters'] = any([
             self.request.GET.get('nome'),
             self.request.GET.get('status'),
-            self.request.GET.get('tipo_sanguineo'),
-            self.request.GET.get('bunker')
+            self.request.GET.get('afinidade'),
+            self.request.GET.get('cidade')
         ])
         
         return context
@@ -423,6 +415,13 @@ class PacienteDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['diagnosticos'] = self.object.diagnostico_set.all()
         context['todas_doencas'] = Doenca.objects.all()
+        
+        # Contagens de diagnósticos
+        diagnosticos = self.object.diagnostico_set.all()
+        context['total_diagnosticos'] = diagnosticos.count()
+        context['diagnosticos_tratados'] = diagnosticos.filter(tratado=True).count()
+        context['diagnosticos_nao_tratados'] = diagnosticos.filter(tratado=False).count()
+        
         return context
 
 class RelatorioExpedicaoListView(LoginRequiredMixin, ListView):
@@ -431,7 +430,7 @@ class RelatorioExpedicaoListView(LoginRequiredMixin, ListView):
     context_object_name = 'relatorios'
     ordering = ['-data']
 
-class RelatorioExpedicaoCreateView(LoginRequiredMixin, CreateView):
+class RelatorioExpedicaoCreateView(MedicoRequiredMixin, CreateView):
     model = RelatorioExpedicao
     fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
     template_name = 'core/relatorio_form.html'
@@ -439,6 +438,7 @@ class RelatorioExpedicaoCreateView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         form.instance.autor = self.request.user
+        messages.success(self.request, 'Relatório criado com sucesso!')
         return super().form_valid(form)
 
 class RelatorioExpedicaoDetailView(LoginRequiredMixin, DetailView):
@@ -446,16 +446,24 @@ class RelatorioExpedicaoDetailView(LoginRequiredMixin, DetailView):
     template_name = 'core/relatorio_detail.html'
     context_object_name = 'relatorio'  # Isso define o nome da variável no template
 
-class RelatorioExpedicaoUpdateView(LoginRequiredMixin, UpdateView):
+class RelatorioExpedicaoUpdateView(MedicoRequiredMixin, UpdateView):
     model = RelatorioExpedicao
     fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
     template_name = 'core/relatorio_form.html'
     success_url = reverse_lazy('relatorio-list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Relatório atualizado com sucesso!')
+        return super().form_valid(form)
 
-class RelatorioExpedicaoDeleteView(LoginRequiredMixin, DeleteView):
+class RelatorioExpedicaoDeleteView(MedicoRequiredMixin, DeleteView):
     model = RelatorioExpedicao
     template_name = 'core/relatorio_confirm_delete.html'
     success_url = reverse_lazy('relatorio-list')
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Relatório excluído com sucesso!')
+        return super().delete(request, *args, **kwargs)
 
 class AnotacaoListView(LoginRequiredMixin, ListView):
     model = AnotacaoPessoal
@@ -544,3 +552,184 @@ def recuperar_senha(request):
             messages.error(request, "Usuário não encontrado!")
     
     return render(request, 'core/recuperar_senha.html')
+
+
+# Views para Raça
+class RacaListView(LoginRequiredMixin, ListView):
+    model = Raca
+    template_name = 'core/raca_list.html'
+    context_object_name = 'racas'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        nome = self.request.GET.get('nome')
+        if nome:
+            queryset = queryset.filter(nome__icontains=nome)
+        return queryset
+
+class RacaDetailView(LoginRequiredMixin, DetailView):
+    model = Raca
+    template_name = 'core/raca_detail.html'
+    context_object_name = 'raca'
+
+class RacaCreateView(AdminRequiredMixin, CreateView):
+    model = Raca
+    form_class = RacaForm
+    template_name = 'core/raca_form.html'
+    success_url = reverse_lazy('raca-list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Raça criada com sucesso!')
+        return super().form_valid(form)
+
+class RacaUpdateView(AdminRequiredMixin, UpdateView):
+    model = Raca
+    form_class = RacaForm
+    template_name = 'core/raca_form.html'
+    success_url = reverse_lazy('raca-list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Raça atualizada com sucesso!')
+        return super().form_valid(form)
+
+class RacaDeleteView(AdminRequiredMixin, DeleteView):
+    model = Raca
+    template_name = 'core/raca_confirm_delete.html'
+    success_url = reverse_lazy('raca-list')
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Raça excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
+
+
+# Views para Ingrediente
+class IngredienteListView(LoginRequiredMixin, ListView):
+    model = Ingrediente
+    template_name = 'core/ingrediente_list.html'
+    context_object_name = 'ingredientes'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filtro por nome
+        nome = self.request.GET.get('nome')
+        if nome:
+            queryset = queryset.filter(nome__icontains=nome)
+        
+        # Filtro por descrição (o_que_e)
+        descricao = self.request.GET.get('descricao')
+        if descricao:
+            queryset = queryset.filter(o_que_e__icontains=descricao)
+        
+        # Filtro por efeitos (o_que_faz)
+        efeitos = self.request.GET.get('efeitos')
+        if efeitos:
+            queryset = queryset.filter(o_que_faz__icontains=efeitos)
+        
+        # Filtro combinado (busca em nome, descrição e efeitos)
+        busca = self.request.GET.get('busca')
+        if busca:
+            queryset = queryset.filter(
+                Q(nome__icontains=busca) |
+                Q(o_que_e__icontains=busca) |
+                Q(o_que_faz__icontains=busca)
+            )
+        
+        return queryset
+
+class IngredienteDetailView(LoginRequiredMixin, DetailView):
+    model = Ingrediente
+    template_name = 'core/ingrediente_detail.html'
+    context_object_name = 'ingrediente'
+
+class IngredienteCreateView(MedicoRequiredMixin, CreateView):
+    model = Ingrediente
+    form_class = IngredienteForm
+    template_name = 'core/ingrediente_form.html'
+    success_url = reverse_lazy('ingrediente-list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Ingrediente criado com sucesso!')
+        return super().form_valid(form)
+
+class IngredienteUpdateView(MedicoRequiredMixin, UpdateView):
+    model = Ingrediente
+    form_class = IngredienteForm
+    template_name = 'core/ingrediente_form.html'
+    success_url = reverse_lazy('ingrediente-list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Ingrediente atualizado com sucesso!')
+        return super().form_valid(form)
+
+class IngredienteDeleteView(MedicoRequiredMixin, DeleteView):
+    model = Ingrediente
+    template_name = 'core/ingrediente_confirm_delete.html'
+    success_url = reverse_lazy('ingrediente-list')
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Ingrediente excluído com sucesso!')
+        return super().delete(request, *args, **kwargs)
+
+
+# Views para Remédio
+class RemedioListView(LoginRequiredMixin, ListView):
+    model = Remedio
+    template_name = 'core/remedio_list.html'
+    context_object_name = 'remedios'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset().prefetch_related('ingredientes', 'doencas')
+        nome = self.request.GET.get('nome')
+        doenca = self.request.GET.get('doenca')
+        
+        if nome:
+            queryset = queryset.filter(nome__icontains=nome)
+        if doenca:
+            queryset = queryset.filter(doencas__id=doenca)
+            
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['doencas'] = Doenca.objects.all()
+        return context
+
+class RemedioDetailView(LoginRequiredMixin, DetailView):
+    model = Remedio
+    template_name = 'core/remedio_detail.html'
+    context_object_name = 'remedio'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ingredientes_remedio'] = RemedioIngrediente.objects.filter(remedio=self.object).select_related('ingrediente')
+        return context
+
+class RemedioCreateView(MedicoRequiredMixin, CreateView):
+    model = Remedio
+    form_class = RemedioForm
+    template_name = 'core/remedio_form.html'
+    success_url = reverse_lazy('remedio-list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Remédio criado com sucesso!')
+        return super().form_valid(form)
+
+class RemedioUpdateView(MedicoRequiredMixin, UpdateView):
+    model = Remedio
+    form_class = RemedioForm
+    template_name = 'core/remedio_form.html'
+    success_url = reverse_lazy('remedio-list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Remédio atualizado com sucesso!')
+        return super().form_valid(form)
+
+class RemedioDeleteView(MedicoRequiredMixin, DeleteView):
+    model = Remedio
+    template_name = 'core/remedio_confirm_delete.html'
+    success_url = reverse_lazy('remedio-list')
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Remédio excluído com sucesso!')
+        return super().delete(request, *args, **kwargs)

@@ -1,160 +1,208 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ekkos - {% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tooltip@1.2.0/dist/bulma-tooltip.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <title>Edda - {% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#8b5cf6',
+                        accent: '#06b6d4',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Estilo para o rodapé fixo */
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
         }
-        
-        .main-content {
-            flex: 1;
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
-        .footer {
-            background-color: #ebebeb;
-            color: rgb(71, 71, 71);
-            padding: 2rem 1.5rem;
-            margin-top: auto;
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
     </style>
     {% block extra_css %}
     {% endblock %}
 </head>
 
-<body>
-    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="{% url 'home' %}">
-                <strong>Ekkos</strong>
-            </a>
-        </div>
-
-        {% if user.is_authenticated %}
-        <div class="navbar-menu">
-            <div class="navbar-start">
-                <a class="navbar-item" href="{% url 'paciente-list' %}">
-                    <span class="icon">
-                        <i class="fas fa-user-injured"></i>
-                    </span>
-                    <span>Pacientes</span>
-                </a>
-                <a class="navbar-item" href="{% url 'doenca-list' %}">
-                    <span class="icon">
-                        <i class="fas fa-disease"></i>
-                    </span>
-                    <span>Doenças</span>
-                </a>
-                <a class="navbar-item" href="{% url 'besta-list' %}">
-                    <span class="icon">
-                        <i class="fas fa-paw"></i>
-                    </span>
-                    <span>Bestiário</span>
-                </a>
-                <a class="navbar-item" href="{% url 'relatorio-list' %}">
-                    <span class="icon">
-                        <i class="fas fa-file-alt"></i>
-                    </span>
-                    <span>Expedições</span>
-                </a>
-                <a class="navbar-item" href="{% url 'anotacao-list' %}">
-                    <span class="icon">
-                        <i class="fas fa-book"></i>
-                    </span>
-                    <span>Minhas Anotações</span>
-                </a>
-            </div>
-            {% endif %}
-
-            <div class="navbar-end">
-                {% if user.is_authenticated %}
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
-                        <span class="icon">
-                            <i class="fas fa-user"></i>
-                        </span>
-                        <span>{{ user.nickname }}</span>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{% url 'home' %}" class="flex items-center">
+                        <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Edda</span>
                     </a>
-                    <div class="navbar-dropdown">
-                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="button is-light">
-                                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
-                                <span>Sair</span>
-                            </button>
-                        </form>
+                </div>
+
+                {% if user.is_authenticated %}
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="{% url 'paciente-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
+                        <i class="fas fa-user-injured"></i>
+                        <span>Pacientes</span>
+                    </a>
+                    <a href="{% url 'doenca-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
+                        <i class="fas fa-disease"></i>
+                        <span>Doenças</span>
+                    </a>
+                    <a href="{% url 'besta-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
+                        <i class="fas fa-paw"></i>
+                        <span>Bestiário</span>
+                    </a>
+                    <a href="{% url 'raca-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
+                        <i class="fas fa-users mr-2"></i>
+                        <span>Raças</span>
+                    </a>
+                    {% if is_medico_or_admin %}
+                    <div class="relative">
+                        <button onclick="toggleDropdown('farmacia-dropdown')" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition flex items-center gap-2">
+                            <i class="fas fa-flask"></i>
+                            <span>Farmácia</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="farmacia-dropdown" class="absolute hidden bg-white shadow-lg rounded-lg mt-1 w-48 z-50 border border-gray-200">
+                            <a href="{% url 'ingrediente-list' %}" class="block px-4 py-2 text-gray-700 hover:bg-purple-50 rounded-t-lg transition">
+                                <i class="fas fa-leaf mr-2"></i>Ingredientes
+                            </a>
+                            <a href="{% url 'remedio-list' %}" class="block px-4 py-2 text-gray-700 hover:bg-purple-50 rounded-b-lg transition">
+                                <i class="fas fa-pills mr-2"></i>Remédios
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <a href="{% url 'relatorio-list' %}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-2">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Expedições</span>
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <button onclick="toggleDropdown('user-dropdown')" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                {{ user.nickname|first|upper }}
+                            </div>
+                            <span class="hidden md:block font-medium text-gray-700">{{ user.nickname }}</span>
+                            <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                        </button>
+                        <div id="user-dropdown" class="absolute right-0 hidden bg-white shadow-lg rounded-lg mt-1 w-48 z-50 border border-gray-200">
+                            <div class="px-4 py-2 border-b">
+                                <p class="text-sm text-gray-500">Conectado como</p>
+                                <p class="font-medium text-gray-900">{{ user.nickname }}</p>
+                            </div>
+                            <a href="{% url 'anotacao-list' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                                <i class="fas fa-book mr-2"></i>
+                                <span>Anotações</span>
+                            </a>
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-b-lg transition">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>
+                                    <span>Sair</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 {% else %}
-                <div class="navbar-item">
-                    <div class="buttons">
-                        <a class="button is-light" href="{% url 'login' %}">
-                            <span class="icon">
-                                <i class="fas fa-sign-in-alt"></i>
-                            </span>
-                            <span>Entrar</span>
-                        </a>
-                    </div>
+                <div class="flex items-center">
+                    <a href="{% url 'login' %}" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition flex items-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Entrar</span>
+                    </a>
                 </div>
                 {% endif %}
             </div>
         </div>
     </nav>
 
+    <!-- Messages -->
     {% if messages %}
-    <div class="container mt-4">
-        <div class="columns">
-            <div class="column is-12">
-                {% for message in messages %}
-                <div class="notification is-{{ message.tags }}">
-                    <button class="delete" onclick="this.parentElement.remove()"></button>
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% for message in messages %}
+        <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border border-yellow-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %} flex items-center justify-between">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+        {% endfor %}
     </div>
     {% endif %}
 
-    <section class="section">
-        <div class="container">
-            <!-- Botão Voltar -->
-            <div class="mb-4">
-                <button onclick="window.history.back();" class="button is-light">
-                    <span class="icon">
-                        <i class="fas fa-arrow-left"></i>
-                    </span>
-                    <span>Voltar</span>
-                </button>
-            </div>
-            
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {% block content %}{% endblock %}
         </div>
-    </section>
+    </main>
 
-    <footer class="footer">
-        <div class="content has-text-centered">
-            <p>
-                <strong>Ekkos</strong> - Sistema de Gerenciamento da Nova Cidade Pós Acrópole. © {% now "Y" %}
-            </p>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="text-center">
+                <p class="text-sm">
+                    <strong class="text-white">Edda</strong> - Sistema de Gerenciamento do Reino de Edda
+                </p>
+                <p class="text-xs mt-2">© {% now "Y" %} - Todos os direitos reservados</p>
+            </div>
         </div>
     </footer>
+
+    <script>
+        // Controle de dropdowns
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            const allDropdowns = document.querySelectorAll('[id$="-dropdown"]');
+            
+            // Fechar todos os outros dropdowns
+            allDropdowns.forEach(d => {
+                if (d.id !== dropdownId) {
+                    d.classList.add('hidden');
+                }
+            });
+            
+            // Toggle do dropdown clicado
+            dropdown.classList.toggle('hidden');
+        }
+        
+        // Fechar dropdowns ao clicar fora
+        document.addEventListener('click', function(event) {
+            const dropdowns = document.querySelectorAll('[id$="-dropdown"]');
+            const buttons = document.querySelectorAll('button[onclick^="toggleDropdown"]');
+            
+            let clickedButton = false;
+            buttons.forEach(button => {
+                if (button.contains(event.target)) {
+                    clickedButton = true;
+                }
+            });
+            
+            if (!clickedButton) {
+                dropdowns.forEach(dropdown => {
+                    if (!dropdown.contains(event.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>

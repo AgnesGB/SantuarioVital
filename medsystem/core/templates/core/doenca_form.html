@@ -1,182 +1,208 @@
 {% extends 'core/base.html' %}
 
-{% block title %}{% if object %}Editar{% else %}Nova{% endif %} Doença{% endblock %}
-
-{% block extra_css %}
-<style>
-    .select2-container {
-        width: 100% !important;
-    }
-    .select2-selection {
-        height: auto !important;
-    }
-</style>
-{% endblock %}
+{% block title %}{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Doença{% endblock %}
 
 {% block content %}
-<section class="section">
-    <div class="container">
-        <div class="columns is-centered">
-            <div class="column is-two-thirds">
-                <h1 class="title">{% if object %}Editar{% else %}Nova{% endif %} Doença</h1>
-                
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    <div class="field">
-                        <label class="label">{{ form.nome.label }}</label>
-                        <div class="control">
-                            {{ form.nome }}
-                        </div>
-                    </div>
-                    
-                    <div class="columns">
-                        <div class="column">
-                            <div class="field">
-                                <label class="label">{{ form.tipo.label }}</label>
-                                <div class="control">
-                                    <div class="select is-fullwidth">
-                                        {{ form.tipo }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="column">
-                            <div class="field">
-                                <label class="label">{{ form.parte_afetada.label }}</label>
-                                <div class="control">
-                                    <div class="select is-fullwidth">
-                                        {{ form.parte_afetada }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.contagiosa.label }}</label>
-                        <div class="control">
-                            <label class="checkbox">
-                                {{ form.contagiosa }}
-                                {{ form.contagiosa.label }}
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="field" id="forma-contagio-field" style="display: none;">
-                        <label class="label">{{ form.forma_contagio.label }}</label>
-                        <div class="control">
-                            {{ form.forma_contagio }}
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">Sintomas</label>
-                        <div class="control">
-                            <input type="text" name="sintomas" class="input" 
-                                   value="{{ form.sintomas.value|default:'' }}"
-                                   placeholder="Digite os sintomas separados por vírgula">
-                        </div>
-                    </div>
-                    
-                    <script>
-                    let sintomaCount = 1;
-                    
-                    function adicionarSintoma() {
-                        sintomaCount++;
-                        const container = document.getElementById('sintomas-container');
-                        const novoSelect = `
-                            <div class="field has-addons mt-2" id="sintoma-${sintomaCount}">
-                                <div class="control is-expanded">
-                                    <div class="select is-fullwidth">
-                                        <select name="sintomas" class="sintoma-select">
-                                            {% for sintoma in sintomas %}
-                                            <option value="{{ sintoma.id }}">{{ sintoma.nome }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="control">
-                                    <button type="button" class="button is-danger" onclick="removerSintoma(${sintomaCount})">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                </div>
-                            </div>`;
-                        container.insertAdjacentHTML('beforeend', novoSelect);
-                    }
-                    
-                    function removerSintoma(id) {
-                        const element = document.getElementById(`sintoma-${id}`);
-                        if (element) element.remove();
-                    }
-                    </script>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.origem.label }}</label>
-                        <div class="control">
-                            {{ form.origem }}
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.tratamento.label }}</label>
-                        <div class="control">
-                            {{ form.tratamento }}
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.reacoes_esperadas.label }}</label>
-                        <div class="control">
-                            {{ form.reacoes_esperadas }}
-                        </div>
-                    </div>
-                    
-                    <div class="field is-grouped">
-                        <div class="control">
-                            <button type="submit" class="button is-primary">
-                                <span class="icon">
-                                    <i class="fas fa-save"></i>
-                                </span>
-                                <span>Salvar</span>
-                            </button>
-                        </div>
-                        <div class="control">
-                            <a href="{% url 'doenca-list' %}" class="button is-light">
-                                <span class="icon">
-                                    <i class="fas fa-times"></i>
-                                </span>
-                                <span>Cancelar</span>
-                            </a>
-                        </div>
-                    </div>
-                </form>
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Doença</h1>
+        <p class="text-gray-600 mt-1">Preencha as informações da doença</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-rose-600 to-pink-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Informações da Doença
+            </h2>
+        </div>
+
+        <form method="post" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                    <h3 class="font-medium text-red-800">Corrija os erros abaixo:</h3>
+                    <ul class="mt-1 text-sm text-red-700 list-disc list-inside">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Nome -->
+            <div>
+                <label for="id_nome" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.nome.label }} <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="nome" id="id_nome" 
+                       value="{{ form.nome.value|default:'' }}"
+                       required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all">
+                {% if form.nome.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.nome.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Tipo e Parte Afetada -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="id_tipo" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.tipo.label }} <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.tipo }}
+                    {% if form.tipo.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.tipo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="id_parte_afetada" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.parte_afetada.label }} <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.parte_afetada }}
+                    {% if form.parte_afetada.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.parte_afetada.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contagiosa -->
+            <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <input type="checkbox" name="contagiosa" id="id_contagiosa" 
+                       {% if form.contagiosa.value %}checked{% endif %}
+                       class="w-5 h-5 text-rose-600 border-gray-300 rounded focus:ring-2 focus:ring-rose-500">
+                <label for="id_contagiosa" class="text-sm font-medium text-gray-700">
+                    {{ form.contagiosa.label }}
+                </label>
+                {% if form.contagiosa.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.contagiosa.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Forma de Contágio -->
+            <div>
+                <label for="id_forma_contagio" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.forma_contagio.label }}
+                </label>
+                <textarea name="forma_contagio" id="id_forma_contagio" rows="3"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all">{{ form.forma_contagio.value|default:'' }}</textarea>
+                <p class="text-xs text-gray-500 mt-1">Descreva como a doença é transmitida (se aplicável)</p>
+                {% if form.forma_contagio.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.forma_contagio.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Sintomas -->
+            <div>
+                <label for="id_sintomas" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.sintomas.label }} <span class="text-red-500">*</span>
+                </label>
+                <textarea name="sintomas" id="id_sintomas" rows="4" required
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all">{{ form.sintomas.value|default:'' }}</textarea>
+                {% if form.sintomas.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.sintomas.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Tratamento -->
+            <div>
+                <label for="id_tratamento" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.tratamento.label }} <span class="text-red-500">*</span>
+                </label>
+                <textarea name="tratamento" id="id_tratamento" rows="4" required
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all">{{ form.tratamento.value|default:'' }}</textarea>
+                {% if form.tratamento.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.tratamento.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Reações Esperadas -->
+            <div>
+                <label for="id_reacoes_esperadas" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.reacoes_esperadas.label }}
+                </label>
+                <textarea name="reacoes_esperadas" id="id_reacoes_esperadas" rows="4"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all">{{ form.reacoes_esperadas.value|default:'' }}</textarea>
+                {% if form.reacoes_esperadas.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.reacoes_esperadas.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Origem -->
+            <div>
+                <label for="id_origem" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.origem.label }} <span class="text-red-500">*</span>
+                </label>
+                <textarea name="origem" id="id_origem" rows="4" required
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all">{{ form.origem.value|default:'' }}</textarea>
+                {% if form.origem.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.origem.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-4 border-t border-gray-200">
+                <button type="submit" class="px-6 py-3 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors flex items-center gap-2 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>Salvar Doença</span>
+                </button>
+                <a href="{% url 'doenca-list' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <span>Cancelar</span>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Card -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div class="text-sm text-blue-800">
+                <p class="font-medium mb-1">Dicas de Preenchimento:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>Campos marcados com <span class="text-red-500">*</span> são obrigatórios</li>
+                    <li>Seja específico nos sintomas para facilitar diagnósticos</li>
+                    <li>Descreva o tratamento de forma clara e detalhada</li>
+                    <li>Marque como contagiosa se houver risco de transmissão</li>
+                </ul>
             </div>
         </div>
     </div>
-</section>
-{% endblock %}
+</div>
 
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Mostrar/ocultar campo de forma de contágio
-    const contagiosaCheckbox = document.querySelector('#id_contagiosa');
-    const formaContagioField = document.querySelector('#forma-contagio-field');
-    
-    function toggleContagioField() {
-        formaContagioField.style.display = contagiosaCheckbox.checked ? 'block' : 'none';
+<style>
+    select, input[type="text"], input[type="number"], textarea {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
     }
     
-    contagiosaCheckbox.addEventListener('change', toggleContagioField);
-    toggleContagioField(); // Inicializar estado
-    
-    // Inicializar Select2 para múltipla seleção de sintomas
-    $('#id_sintomas').select2({
-        placeholder: "Selecione os sintomas",
-        allowClear: true,
-        width: 'resolve'
-    });
-});
-</script>
+    select:focus, input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+        outline: none;
+        border-color: transparent;
+        box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.5);
+    }
+</style>
 {% endblock %}

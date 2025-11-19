@@ -1,37 +1,118 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Confirmar Exclusão de Paciente{% endblock %}
+{% block title %}Confirmar Exclusão - {{ object.nome }}{% endblock %}
 
 {% block content %}
-<section class="section">
-    <div class="container">
-        <div class="box">
-            <h1 class="title">Confirmar Exclusão</h1>
-            <p class="subtitle">Tem certeza que deseja excluir o paciente <strong>"{{ object.nome }}"</strong>?</p>
-            <p class="has-text-danger">Esta ação não pode ser desfeita!</p>
-            
-            <form method="post" class="mt-5">
-                {% csrf_token %}
-                <div class="field is-grouped">
-                    <div class="control">
-                        <button type="submit" class="button is-danger">
-                            <span class="icon">
-                                <i class="fas fa-trash"></i>
-                            </span>
-                            <span>Confirmar Exclusão</span>
-                        </button>
+<div class="max-w-2xl mx-auto">
+    <!-- Warning Card -->
+    <div class="bg-red-50 border-2 border-red-300 rounded-xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4">
+            <div class="flex items-center gap-3">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <h1 class="text-2xl font-bold text-white">Atenção: Confirmação Necessária</h1>
+            </div>
+        </div>
+
+        <div class="p-8 space-y-6">
+            <!-- Warning Icon and Message -->
+            <div class="flex flex-col items-center text-center">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Excluir Paciente</h2>
+                <p class="text-lg text-gray-700">
+                    Você tem certeza que deseja excluir o paciente <strong class="text-red-600">{{ object.nome }}</strong>?
+                </p>
+            </div>
+
+            <!-- Patient Info Card -->
+            <div class="bg-white border border-red-200 rounded-lg p-4">
+                <h3 class="font-semibold text-gray-800 mb-3">Informações do Paciente:</h3>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <p class="text-gray-600">Nome:</p>
+                        <p class="font-medium text-gray-800">{{ object.nome }}</p>
                     </div>
-                    <div class="control">
-                        <a href="{% url 'paciente-detail' object.pk %}" class="button is-light">
-                            <span class="icon">
-                                <i class="fas fa-times"></i>
-                            </span>
-                            <span>Cancelar</span>
-                        </a>
+                    <div>
+                        <p class="text-gray-600">Idade:</p>
+                        <p class="font-medium text-gray-800">{{ object.idade }} anos</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Cidade:</p>
+                        <p class="font-medium text-gray-800">{{ object.cidade.nome }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Status:</p>
+                        <span class="inline-block px-2 py-1 rounded-full text-xs font-medium
+                            {% if object.status == 'ESTAVEL' %}bg-green-100 text-green-700
+                            {% elif object.status == 'TRATAMENTO' %}bg-yellow-100 text-yellow-700
+                            {% elif object.status == 'CRONICO' %}bg-orange-100 text-orange-700
+                            {% else %}bg-gray-800 text-white{% endif %}">
+                            {{ object.get_status_display }}
+                        </span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Warning Message -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div class="text-sm text-yellow-800">
+                    <p class="font-semibold mb-1">Esta ação é irreversível!</p>
+                    <p>Todos os diagnósticos, históricos médicos e dados relacionados a este paciente serão permanentemente excluídos do sistema.</p>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                    <button type="submit" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 font-semibold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span>Sim, Excluir Definitivamente</span>
+                    </button>
+                    <a href="{% url 'paciente-detail' object.pk %}" class="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-2 font-semibold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        <span>Não, Cancelar</span>
+                    </a>
+                </div>
             </form>
+
+            <!-- Additional Info -->
+            <p class="text-xs text-center text-gray-500 pt-4 border-t border-red-200">
+                Se você não tem certeza, clique em "Cancelar" e revise as informações do paciente antes de prosseguir.
+            </p>
         </div>
     </div>
-</section>
+
+    <!-- Safety Tips Card -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div class="text-sm text-blue-800">
+                <p class="font-medium mb-1">Alternativas à Exclusão:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>Considere alterar o status para "Óbito" em vez de excluir</li>
+                    <li>Mantenha o histórico médico para fins de pesquisa</li>
+                    <li>Consulte um administrador se tiver dúvidas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -3,164 +3,220 @@
 {% block title %}Diagnóstico - {{ diagnostico.paciente.nome }}{% endblock %}
 
 {% block content %}
-<section class="section">
-    <div class="container">
-        <div class="box">
-            <div class="level">
-                <div class="level-left">
-                    <h1 class="title">Diagnóstico</h1>
-                    <h2 class="subtitle ml-3">
-                        <a href="{% url 'paciente-detail' diagnostico.paciente.pk %}">
-                            {{ diagnostico.paciente.nome }}
-                        </a>
-                    </h2>
-                </div>
-                {% if is_medico %}
-                <div class="level-right">
-                    <div class="buttons">
-                        <a href="{% url 'diagnostico-update' diagnostico.pk %}" class="button is-warning">
-                            <span class="icon">
-                                <i class="fas fa-edit"></i>
-                            </span>
-                            <span>Editar</span>
-                        </a>
-                        <a href="{% url 'diagnostico-delete' diagnostico.pk %}" class="button is-danger">
-                            <span class="icon">
-                                <i class="fas fa-trash"></i>
-                            </span>
-                            <span>Excluir</span>
-                        </a>
-                    </div>
-                </div>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-center">
+        <div class="flex-1">
+            <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-bold text-gray-800">Diagnóstico</h1>
+                {% if diagnostico.tratado %}
+                <span class="px-3 py-1 bg-emerald-500 text-white rounded-full text-sm font-bold shadow-lg flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Tratado
+                </span>
+                {% else %}
+                <span class="px-3 py-1 bg-amber-500 text-white rounded-full text-sm font-bold shadow-lg flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Em Tratamento
+                </span>
                 {% endif %}
             </div>
-            
-            <div class="columns">
-                <div class="column">
-                    <div class="content">
-                        <div class="columns">
-                            <div class="column">
-                                <h3 class="title is-4">Informações Básicas</h3>
-                                <p><strong>Data:</strong> {{ diagnostico.data|date:"d/m/Y H:i" }}</p>
-                                <p><strong>Responsável:</strong> 
-                                    {% if diagnostico.responsavel %}
-                                        {{ diagnostico.responsavel.nickname|default:diagnostico.responsavel.username }}
-                                    {% else %}
-                                        <span class="has-text-grey">Não informado</span>
-                                    {% endif %}
-                                </p>
-                                
-                                <h3 class="title is-4 mt-5">Doença Diagnosticada</h3>
-                                {% if diagnostico.doenca %}
-                                <div class="box">
-                                    <a href="{% url 'doenca-detail' diagnostico.doenca.pk %}">
-                                        <h4 class="title is-5">{{ diagnostico.doenca.nome }}</h4>
-                                    </a>
-                                    <p><strong>Tipo:</strong> {{ diagnostico.doenca.get_tipo_display }}</p>
-                                    <p><strong>Tratamento:</strong> {{ diagnostico.doenca.tratamento|linebreaksbr }}</p>
-                                </div>
-                                {% else %}
-                                <div class="notification is-light">
-                                    Nenhuma doença específica diagnosticada
-                                </div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="column">
-                                <h3 class="title is-4">Hipóteses Consideradas</h3>
-                                {% if diagnostico.hipoteses.exists %}
-                                <div class="tags are-medium">
-                                    {% for doenca in diagnostico.hipoteses.all %}
-                                    <a href="{% url 'doenca-detail' doenca.pk %}" class="tag is-info is-light">
-                                        {{ doenca.nome }}
-                                    </a>
-                                    {% endfor %}
-                                </div>
-                                {% else %}
-                                <div class="notification is-light">
-                                    Nenhuma hipótese adicional registrada
-                                </div>
-                                {% endif %}
-                            </div>
+            <p class="text-gray-600 mt-1">
+                Paciente: 
+                <a href="{% url 'paciente-detail' diagnostico.paciente.pk %}" class="text-indigo-600 hover:text-indigo-700 font-medium">
+                    {{ diagnostico.paciente.nome }}
+                </a>
+            </p>
+        </div>
+        {% if is_medico_or_admin %}
+        <div class="flex gap-3">
+            <a href="{% url 'diagnostico-update' diagnostico.pk %}" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span>Editar</span>
+            </a>
+            <a href="{% url 'diagnostico-delete' diagnostico.pk %}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Excluir</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Coluna Principal -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Card de Informações Básicas -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Informações do Diagnóstico
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium mb-1">Data</p>
+                            <p class="text-lg font-semibold text-gray-800">{{ diagnostico.data|date:"d/m/Y H:i" }}</p>
                         </div>
-                        
-                        <div class="columns mt-3">
-                            <div class="column">
-                                <h3 class="title is-4">Sintomas Observados</h3>
-                                <div class="box">
-                                    {{ diagnostico.sintomas|linebreaksbr }}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="columns">
-                            <div class="column">
-                                <h3 class="title is-4">Observações</h3>
-                                {% if diagnostico.observacoes %}
-                                <div class="box">
-                                    {{ diagnostico.observacoes|linebreaksbr }}
-                                </div>
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium mb-1">Responsável</p>
+                            <p class="text-lg font-semibold text-gray-800">
+                                {% if diagnostico.responsavel %}
+                                    {{ diagnostico.responsavel.nickname|default:diagnostico.responsavel.username }}
                                 {% else %}
-                                <div class="notification is-light">
-                                    Nenhuma observação adicional
-                                </div>
+                                    <span class="text-gray-400">Não informado</span>
                                 {% endif %}
-                            </div>
+                            </p>
                         </div>
-                        
-                        <!-- Seção de Registros Médicos - REMOVIDA -->
-                        <!-- Como não há relacionamento direto, esta seção foi removida -->
                     </div>
+                </div>
+            </div>
+
+            <!-- Card da Doença Diagnosticada -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-rose-600 to-pink-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Doença Diagnosticada
+                    </h2>
+                </div>
+                <div class="p-6">
+                    {% if diagnostico.doenca %}
+                    <div class="space-y-4">
+                        <div>
+                            <a href="{% url 'doenca-detail' diagnostico.doenca.pk %}" class="text-2xl font-bold text-gray-800 hover:text-indigo-600 transition-colors">
+                                {{ diagnostico.doenca.nome }}
+                            </a>
+                            <span class="ml-3 px-3 py-1 {% if diagnostico.doenca.tipo == 'F' %}bg-red-100 text-red-700{% elif diagnostico.doenca.tipo == 'M' %}bg-purple-100 text-purple-700{% else %}bg-orange-100 text-orange-700{% endif %} rounded-full text-sm font-medium">
+                                {{ diagnostico.doenca.get_tipo_display }}
+                            </span>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Tratamento:</p>
+                            <p class="text-gray-800 whitespace-pre-line">{{ diagnostico.doenca.tratamento }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-gray-600">Nenhuma doença específica diagnosticada</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Card de Sintomas -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-amber-600 to-orange-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Sintomas Observados
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 whitespace-pre-line">{{ diagnostico.sintomas }}</p>
+                </div>
+            </div>
+
+            <!-- Card de Observações -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Observações
+                    </h2>
+                </div>
+                <div class="p-6">
+                    {% if diagnostico.observacoes %}
+                    <p class="text-gray-700 whitespace-pre-line">{{ diagnostico.observacoes }}</p>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-gray-600">Nenhuma observação adicional</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Card de Ações Rápidas -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Ações Rápidas</h3>
+                <div class="space-y-3">
+                    <a href="{% url 'paciente-detail' diagnostico.paciente.pk %}" class="block px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-center font-medium text-gray-700">
+                        ← Voltar para Paciente
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card de Hipóteses -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Hipóteses Consideradas</h3>
+                {% if diagnostico.hipoteses.exists %}
+                <div class="flex flex-wrap gap-2">
+                    {% for doenca in diagnostico.hipoteses.all %}
+                    <a href="{% url 'doenca-detail' doenca.pk %}" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors">
+                        {{ doenca.nome }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-sm text-center py-4">Nenhuma hipótese adicional registrada</p>
+                {% endif %}
+            </div>
+
+            <!-- Card de Resumo -->
+            <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg p-6 text-white">
+                <h3 class="text-lg font-bold mb-4">Resumo</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center">
+                        <span class="text-blue-100">Data:</span>
+                        <span class="font-bold">{{ diagnostico.data|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-blue-100">Hipóteses:</span>
+                        <span class="font-bold">{{ diagnostico.hipoteses.count }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-blue-100">Status:</span>
+                        {% if diagnostico.tratado %}
+                        <span class="font-bold bg-emerald-500 px-2 py-1 rounded text-xs">✓ Tratado</span>
+                        {% else %}
+                        <span class="font-bold bg-amber-500 px-2 py-1 rounded text-xs">⏱ Em Tratamento</span>
+                        {% endif %}
+                    </div>
+                    {% if diagnostico.doenca %}
+                    <div class="pt-2 border-t border-blue-400">
+                        <span class="text-blue-100 text-xs">Diagnóstico Confirmado</span>
+                        <p class="font-bold text-white mt-1">{{ diagnostico.doenca.nome }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-</section>
-
-<!-- Modal de confirmação para exclusão -->
-<div class="modal" id="deleteModal">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-        <header class="modal-card-head">
-            <p class="modal-card-title">Confirmar Exclusão</p>
-            <button class="delete" aria-label="close"></button>
-        </header>
-        <section class="modal-card-body">
-            <p>Tem certeza que deseja excluir este diagnóstico? Esta ação não pode ser desfeita.</p>
-        </section>
-        <footer class="modal-card-foot">
-            <button class="button is-danger">Confirmar</button>
-            <button class="button">Cancelar</button>
-        </footer>
-    </div>
 </div>
-
-{% endblock %}
-
-{% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Modal de confirmação
-    const deleteButtons = document.querySelectorAll('[href*="delete"]');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const modal = document.getElementById('deleteModal');
-            const confirmBtn = modal.querySelector('.is-danger');
-
-            modal.classList.add('is-active');
-
-            // Configura ação do botão confirmar
-            confirmBtn.onclick = () => {
-                window.location.href = button.href;
-            };
-
-            // Fechar modal
-            modal.querySelector('.modal-background, .delete').addEventListener('click', () => {
-                modal.classList.remove('is-active');
-            });
-        });
-    });
-});
-</script>
 {% endblock %}

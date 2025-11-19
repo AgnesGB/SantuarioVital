@@ -5,11 +5,12 @@ class Usuario(AbstractUser):
     TIPO_CHOICES = [
         ('MED', 'Médico'),
         ('OUT', 'Outro'),
+        ('ADM', 'Administrador'),
     ]
 
     nickname = models.CharField(max_length=100)
     tipo = models.CharField(max_length=3, choices=TIPO_CHOICES, default='OUT')
-    bunker = models.ForeignKey('Bunker', on_delete=models.SET_NULL, null=True, blank=True)
+    cidade = models.ForeignKey('Cidade', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.nickname
@@ -45,17 +46,20 @@ PARTES_CORPO = [
     ('PES', 'Pés'),
     ('PEL', 'Pele'),
     ('MEN', 'Mente'),
+    ('CAN', 'Canais de Essência'),
+    ('OUT', 'Outros'),
 ]
 
 TIPO_DOENCA = [
     ('F', 'Física'),
     ('M', 'Mental'),
-    ('B', 'Ambas'),
+    ('A', 'Mágica'),
 ]
 
 TIPO_SINTOMA = [
     ('F', 'Físico'),
     ('M', 'Mental'),
+    ('A', 'Mágico'),
 ]
 
 # Doenças
@@ -79,9 +83,28 @@ class Doenca(models.Model):
     def __str__(self):
         return self.nome
 
-class Bunker(models.Model):
+class Cidade(models.Model):
     nome = models.CharField(max_length=100)
     funcao = models.CharField(max_length=100, default=None)
+
+    def __str__(self):
+        return self.nome
+
+class Raca(models.Model):
+    nome = models.CharField(max_length=100, unique=True, verbose_name="Nome")
+    longevidade = models.CharField(max_length=200, blank=True, verbose_name="Longevidade", help_text="Ex: 80-100 anos")
+    caracteristicas_fisicas = models.TextField(blank=True, verbose_name="Características físicas")
+    cor_sangue = models.CharField(max_length=100, blank=True, verbose_name="Cor do sangue")
+    afinidade_magica = models.CharField(max_length=200, blank=True, verbose_name="Afinidade mágica")
+    cuidados_especiais = models.TextField(blank=True, verbose_name="Cuidados especiais")
+    alimentacao = models.TextField(blank=True, verbose_name="Alimentação")
+    peculiaridades = models.TextField(blank=True, verbose_name="Peculiaridades")
+    observacoes = models.TextField(blank=True, verbose_name="Observações")
+
+    class Meta:
+        verbose_name = "Raça"
+        verbose_name_plural = "Raças"
+        ordering = ['nome']
 
     def __str__(self):
         return self.nome
@@ -94,21 +117,24 @@ class Paciente(models.Model):
         ('OBITO', 'Óbito'),
     ]
 
-    TIPO_SANGUINEO_CHOICES = [
-        ('A+', 'A+'),
-        ('A-', 'A-'),
-        ('B+', 'B+'),
-        ('B-', 'B-'),
-        ('AB+', 'AB+'),
-        ('AB-', 'AB-'),
-        ('O+', 'O+'),
-        ('O-', 'O-'),
+    AFINIDADE = [
+        ('fo', 'Fogo'),
+        ('ra', 'Raio'),
+        ('cu', 'Cura'),
+        ('na', 'Natureza'),
+        ('ag', 'Água'),
+        ('ge', 'Gelo'),
+        ('sa', 'Sangue'),
+        ('ev', 'Evocação'),
+        ('va', 'Vazio'),
+        ('nn', 'Nenhuma'),
     ]
 
-    nome = models.CharField(max_length=100)
+    nome = models.CharField(max_length=200)
     idade = models.PositiveIntegerField(verbose_name="Idade")
-    tipo_sanguineo = models.CharField(max_length=3, choices=TIPO_SANGUINEO_CHOICES, blank=True)
-    bunker = models.ForeignKey(Bunker, on_delete=models.CASCADE, related_name='pacientes')
+    raca = models.ManyToManyField(Raca, related_name='racas')
+    afinidade = models.CharField(max_length=2, choices=AFINIDADE, blank=True)
+    cidade = models.ForeignKey(Cidade, on_delete=models.CASCADE, related_name='pacientes')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ESTAVEL')
     observacoes = models.TextField(blank=True)
     doencas = models.ManyToManyField(Doenca, through='Diagnostico', related_name='pacientes')
@@ -117,7 +143,7 @@ class Paciente(models.Model):
         return f"{self.nome} ({self.idade} anos, {self.get_status_display()})"
 
     class Meta:
-        ordering = ['bunker__nome', 'nome']
+        ordering = ['cidade__nome', 'nome']
         verbose_name_plural = "Pacientes"
 
 class Diagnostico(models.Model):
@@ -126,8 +152,10 @@ class Diagnostico(models.Model):
     observacoes = models.TextField(blank=True)
     hipoteses = models.ManyToManyField(Doenca, related_name='diagnosticos_hipotese', blank=True)
     doenca = models.ForeignKey(Doenca, on_delete=models.SET_NULL, null=True, blank=True)
+    remedios = models.ManyToManyField('Remedio', blank=True, related_name='diagnosticos', verbose_name="Remédios prescritos")
     data = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     responsavel = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
+    tratado = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-data']
@@ -168,9 +196,12 @@ class Besta(models.Model):
 
     nome = models.CharField(max_length=100)
     titulo = models.CharField(max_length=200, blank=True)
-    imagem = models.ImageField(upload_to='bestas/', null=True, blank=True)
     nivel_ameaca = models.CharField(max_length=2, choices=NIVEL_AMEAÇA_CHOICES, default='01')
     aparencia = models.TextField()
+    pode_contaminar = models.BooleanField(default=False)
+    contagio = models.TextField(blank=True, help_text="Descrição de como a besta pode contaminar outros")
+    relacionada_com_essencia = models.BooleanField(default=False)
+    corrompida_por_essencia = models.BooleanField(default=False)
     habilidades = models.TextField()
     doenca_relacionada = models.ManyToManyField(
         Doenca,
@@ -180,32 +211,6 @@ class Besta(models.Model):
 
     def __str__(self):
         return f"{self.nome} - {self.get_nivel_ameaca_display()}"
-
-
-class Postagem(models.Model):
-    titulo = models.CharField(max_length=200)
-    descricao = models.TextField()
-    data = models.DateTimeField(auto_now_add=True)
-    imagem = models.ImageField(upload_to='postagens/', null=True, blank=True)
-    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-
-    class Meta:
-        ordering = ['-data']
-
-    def __str__(self):
-        return self.titulo
-
-class Comentario(models.Model):
-    postagem = models.ForeignKey(Postagem, on_delete=models.CASCADE, related_name='comentarios')
-    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    texto = models.TextField()
-    data = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['data']
-
-    def __str__(self):
-        return f"Comentário de {self.autor} em {self.postagem}"
 
 class RelatorioExpedicao(models.Model):
     titulo = models.CharField(max_length=200)
@@ -235,3 +240,51 @@ class AnotacaoPessoal(models.Model):
 
     def __str__(self):
         return f"{self.titulo} - {self.usuario.nickname}"
+
+
+class Ingrediente(models.Model):
+    nome = models.CharField(max_length=200, unique=True, verbose_name="Nome")
+    o_que_e = models.TextField(verbose_name="O que é", help_text="Descrição do ingrediente")
+    o_que_faz = models.TextField(verbose_name="O que faz", help_text="Propriedades e efeitos do ingrediente")
+    contra_indicacoes = models.TextField(blank=True, verbose_name="Contraindicações", help_text="Situações em que não deve ser usado")
+    reacoes_adversas = models.TextField(blank=True, verbose_name="Reações adversas", help_text="Possíveis efeitos colaterais")
+    cuidados_ao_uso = models.TextField(blank=True, verbose_name="Cuidados ao uso", help_text="Precauções necessárias")
+
+    class Meta:
+        verbose_name = "Ingrediente"
+        verbose_name_plural = "Ingredientes"
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
+class Remedio(models.Model):
+    nome = models.CharField(max_length=200, verbose_name="Nome")
+    descricao = models.TextField(blank=True, verbose_name="Descrição", help_text="Descrição geral do remédio")
+    modo_uso = models.TextField(blank=True, verbose_name="Modo de uso", help_text="Instruções de como usar")
+    ingredientes = models.ManyToManyField(Ingrediente, through='RemedioIngrediente', related_name='remedios')
+    doencas = models.ManyToManyField(Doenca, blank=True, related_name='remedios', verbose_name="Doenças", help_text="Doenças que este remédio trata")
+    observacoes = models.TextField(blank=True, verbose_name="Observações")
+
+    class Meta:
+        verbose_name = "Remédio"
+        verbose_name_plural = "Remédios"
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
+class RemedioIngrediente(models.Model):
+    remedio = models.ForeignKey(Remedio, on_delete=models.CASCADE)
+    ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
+    quantidade = models.CharField(max_length=200, verbose_name="Quantidade", help_text="Ex: 2 colheres, 100g, 5 gotas")
+
+    class Meta:
+        verbose_name = "Ingrediente do Remédio"
+        verbose_name_plural = "Ingredientes do Remédio"
+        unique_together = ['remedio', 'ingrediente']
+
+    def __str__(self):
+        return f"{self.ingrediente.nome} ({self.quantidade}) - {self.remedio.nome}"

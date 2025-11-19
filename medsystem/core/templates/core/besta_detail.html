@@ -3,76 +3,231 @@
 {% block title %}{{ besta.nome }}{% endblock %}
 
 {% block content %}
-<section class="section">
-    <div class="container">
-        <div class="box">
-            <div class="level">
-                <div class="level-left">
-                    <h1 class="title">{{ besta.nome }}</h1>
-                    <h2 class="subtitle ml-3">{{ besta.titulo }}</h2>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-center">
+        <div class="flex-1">
+            <h1 class="text-3xl font-bold text-gray-800">{{ besta.nome }}</h1>
+            {% if besta.titulo %}
+            <p class="text-xl text-gray-600 italic mt-1">"{{ besta.titulo }}"</p>
+            {% endif %}
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'besta-update' besta.pk %}" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span>Editar</span>
+            </a>
+            <a href="{% url 'besta-delete' besta.pk %}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Excluir</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Coluna Principal -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Card de Nível de Ameaça -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="
+                    {% if besta.nivel_ameaca <= '03' %}bg-gradient-to-r from-green-600 to-emerald-600
+                    {% elif besta.nivel_ameaca <= '05' %}bg-gradient-to-r from-yellow-600 to-amber-600
+                    {% elif besta.nivel_ameaca <= '07' %}bg-gradient-to-r from-orange-600 to-red-600
+                    {% else %}bg-gradient-to-r from-red-600 to-rose-600{% endif %}
+                    px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Nível de Ameaça: {{ besta.get_nivel_ameaca_display }}
+                    </h2>
                 </div>
-                <div class="level-right">
-                    <div class="buttons">
-                        <a href="{% url 'besta-update' besta.pk %}" class="button is-warning">
-                            <span class="icon">
-                                <i class="fas fa-edit"></i>
-                            </span>
-                            <span>Editar</span>
-                        </a>
-                        <a href="{% url 'besta-delete' besta.pk %}" class="button is-danger">
-                            <span class="icon">
-                                <i class="fas fa-trash"></i>
-                            </span>
-                            <span>Excluir</span>
-                        </a>
+                <div class="p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <div class="w-full bg-gray-200 rounded-full h-4">
+                                <div class="
+                                    {% if besta.nivel_ameaca <= '03' %}bg-green-500
+                                    {% elif besta.nivel_ameaca <= '05' %}bg-yellow-500
+                                    {% elif besta.nivel_ameaca <= '07' %}bg-orange-500
+                                    {% else %}bg-red-500{% endif %}
+                                    h-4 rounded-full transition-all"
+                                    style="width: {{ besta.nivel_ameaca }}0%"></div>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-bold 
+                            {% if besta.nivel_ameaca <= '03' %}text-green-600
+                            {% elif besta.nivel_ameaca <= '05' %}text-yellow-600
+                            {% elif besta.nivel_ameaca <= '07' %}text-orange-600
+                            {% else %}text-red-600{% endif %}">
+                            {{ besta.nivel_ameaca }}/10
+                        </span>
                     </div>
                 </div>
             </div>
-            
-            <div class="columns">
-                {% if besta.imagem %}
-                <div class="column is-one-third">
-                    <figure class="image">
-                        <img src="{{ besta.imagem.url }}" alt="Imagem de {{ besta.nome }}">
-                    </figure>
+
+            <!-- Card de Aparência -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        Aparência
+                    </h2>
                 </div>
-                {% endif %}
-                <div class="column">
-                    <div class="tags has-addons">
-                        <span class="tag is-dark">Nível de Ameaça</span>
-                        <span class="tag is-{{ besta.nivel_ameaca|lower }}">
-                            {{ besta.get_nivel_ameaca_display }}
-                        </span>
+                <div class="p-6">
+                    <p class="text-gray-700 leading-relaxed">{{ besta.aparencia }}</p>
+                </div>
+            </div>
+
+            <!-- Card de Habilidades -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Habilidades
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 leading-relaxed">{{ besta.habilidades }}</p>
+                </div>
+            </div>
+
+            <!-- Card de Contágio (se aplicável) -->
+            {% if besta.pode_contaminar and besta.contagio %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-red-600 to-orange-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Contágio - PERIGO
+                    </h2>
+                </div>
+                <div class="p-6 bg-red-50">
+                    <p class="text-gray-700 leading-relaxed">{{ besta.contagio }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card de Anotações -->
+            {% if besta.anotacoes %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-600 to-slate-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Anotações Adicionais
+                    </h2>
+                </div>
+                <div class="p-6 bg-gray-50">
+                    <p class="text-gray-700 leading-relaxed">{{ besta.anotacoes }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Ações Rápidas -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Ações Rápidas</h3>
+                <div class="space-y-2">
+                    <a href="{% url 'besta-list' %}" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Voltar ao Bestiário
+                    </a>
+                    <a href="{% url 'besta-update' besta.pk %}" class="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar Criatura
+                    </a>
+                    <a href="{% url 'besta-delete' besta.pk %}" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Excluir Criatura
+                    </a>
+                </div>
+            </div>
+
+            <!-- Características -->
+            <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg p-6 text-white">
+                <h3 class="text-lg font-bold mb-4">Características</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        {% if besta.pode_contaminar %}
+                        <svg class="w-5 h-5 text-red-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm">Pode contaminar</span>
+                        {% else %}
+                        <svg class="w-5 h-5 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm">Não contamina</span>
+                        {% endif %}
                     </div>
                     
-                    <div class="content mt-5">
-                        <h3 class="title is-4">Aparência</h3>
-                        <p>{{ besta.aparencia }}</p>
-                        
-                        <h3 class="title is-4 mt-5">Habilidades</h3>
-                        <p>{{ besta.habilidades }}</p>
-                        
-                        <h3 class="title is-4 mt-5">Doenças Associadas</h3>
-                        {% if besta.doenca_relacionada.exists %}
-                            {% for doenca in besta.doenca_relacionada.all %}
-                            <a href="{% url 'doenca-detail' doenca.pk %}" class="tag is-danger">
-                                {{ doenca.nome }}
-                            </a>
-                            {% endfor %}
+                    <div class="flex items-center gap-2">
+                        {% if besta.relacionada_com_essencia %}
+                        <svg class="w-5 h-5 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm">Relacionada com essência</span>
                         {% else %}
-                            <span class="tag is-light">Nenhuma doença associada</span>
+                        <svg class="w-5 h-5 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm">Sem relação com essência</span>
                         {% endif %}
-                        
-                        {% if besta.anotacoes %}
-                        <h3 class="title is-4 mt-5">Anotações</h3>
-                        <div class="box">
-                            {{ besta.anotacoes }}
-                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        {% if besta.corrompida_por_essencia %}
+                        <svg class="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm">Corrompida por essência</span>
+                        {% else %}
+                        <svg class="w-5 h-5 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm">Não corrompida</span>
                         {% endif %}
                     </div>
                 </div>
+            </div>
+
+            <!-- Doenças Associadas -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Doenças Associadas</h3>
+                {% if besta.doenca_relacionada.exists %}
+                <div class="space-y-2">
+                    {% for doenca in besta.doenca_relacionada.all %}
+                    <a href="{% url 'doenca-detail' doenca.pk %}" class="block p-3 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors">
+                        <p class="font-medium text-rose-700">{{ doenca.nome }}</p>
+                        <p class="text-xs text-rose-600 mt-1">{{ doenca.get_tipo_display }}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500 text-center py-4">Nenhuma doença associada</p>
+                {% endif %}
             </div>
         </div>
     </div>
-</section>
+</div>
 {% endblock %}

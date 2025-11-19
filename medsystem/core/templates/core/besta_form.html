@@ -2,175 +2,201 @@
 
 {% block title %}{% if object %}Editar{% else %}Nova{% endif %} Criatura{% endblock %}
 
-{% block extra_css %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">
+            {% if object %}Editar Criatura{% else %}Nova Criatura{% endif %}
+        </h1>
+        <p class="text-gray-600 mt-1">Preencha as informações sobre a criatura</p>
+    </div>
+
+    <!-- Formulário -->
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Informações Básicas -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Informações Básicas
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome da Criatura <span class="text-red-500">*</span></label>
+                    {{ form.nome }}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Título/Alcunha</label>
+                    {{ form.titulo }}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nível de Ameaça <span class="text-red-500">*</span></label>
+                    {{ form.nivel_ameaca }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Descrição -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                Aparência e Características
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Aparência <span class="text-red-500">*</span></label>
+                    {{ form.aparencia }}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Habilidades <span class="text-red-500">*</span></label>
+                    {{ form.habilidades }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contágio -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                Informações de Contágio
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="flex items-center cursor-pointer">
+                        {{ form.pode_contaminar }}
+                        <span class="ml-2 text-sm font-medium text-gray-700">Esta criatura pode contaminar</span>
+                    </label>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição do Contágio</label>
+                    {{ form.contagio }}
+                    <p class="text-xs text-gray-500 mt-1">Descreva como a criatura contamina outros (se aplicável)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Essência -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                Relação com Essência
+            </h2>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="flex items-center cursor-pointer">
+                        {{ form.relacionada_com_essencia }}
+                        <span class="ml-2 text-sm font-medium text-gray-700">Relacionada com essência</span>
+                    </label>
+                </div>
+                
+                <div>
+                    <label class="flex items-center cursor-pointer">
+                        {{ form.corrompida_por_essencia }}
+                        <span class="ml-2 text-sm font-medium text-gray-700">Corrompida por essência</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doenças Associadas -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Doenças Associadas
+            </h2>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Selecione as doenças</label>
+                {{ form.doenca_relacionada }}
+                <p class="text-xs text-gray-500 mt-1">Segure Ctrl/Cmd para selecionar múltiplas doenças</p>
+            </div>
+        </div>
+
+        <!-- Anotações -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Anotações Adicionais
+            </h2>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+                {{ form.anotacoes }}
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex gap-3 pb-6">
+            <button type="submit" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 font-medium shadow-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Salvar Criatura</span>
+            </button>
+            <a href="{% url 'besta-list' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>Cancelar</span>
+            </a>
+        </div>
+    </form>
+</div>
+
 <style>
-    .select2-container {
-        width: 100% !important;
-        min-height: 2.5em;
+    input[type="text"], textarea, select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
     }
     
-    .select2-selection {
-        min-height: 2.5em !important;
-        height: auto !important;
+    input[type="text"]:focus, textarea:focus, select:focus {
+        outline: none;
+        ring: 2px;
+        ring-color: #9333ea;
+        border-color: transparent;
     }
     
     textarea {
         min-height: 120px;
+        resize: vertical;
+    }
+    
+    select[multiple] {
+        min-height: 200px;
+    }
+    
+    input[type="checkbox"] {
+        width: 1rem;
+        height: 1rem;
+        color: #9333ea;
+        border-radius: 0.25rem;
     }
 </style>
-{% endblock %}
-
-{% block content %}
-<section class="section">
-    <div class="container">
-        <div class="columns is-centered">
-            <div class="column is-two-thirds">
-                <h1 class="title">{% if object %}Editar{% else %}Nova{% endif %} Criatura</h1>
-                
-                {% if form.errors %}
-                <div class="notification is-danger">
-                    <button class="delete"></button>
-                    Corrija os erros abaixo antes de salvar.
-                </div>
-                {% endif %}
-                
-                <!-- Adicione enctype="multipart/form-data" aqui -->
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <!-- Campos básicos -->
-                    <div class="field">
-                        <label class="label">{{ form.nome.label }}</label>
-                        <div class="control">
-                            {{ form.nome }}
-                            {% if form.nome.errors %}
-                            <p class="help is-danger">{{ form.nome.errors }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.titulo.label }}</label>
-                        <div class="control">
-                            {{ form.titulo }}
-                            {% if form.titulo.errors %}
-                            <p class="help is-danger">{{ form.titulo.errors }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <!-- Adicione o campo de imagem -->
-                    <div class="field">
-                        <label class="label">{{ form.imagem.label }}</label>
-                        <div class="control">
-                            {{ form.imagem }}
-                            {% if form.imagem.errors %}
-                            <p class="help is-danger">{{ form.imagem.errors }}</p>
-                            {% endif %}
-                            {% if object and object.imagem %}
-                            <p class="help">Imagem atual: <a href="{{ object.imagem.url }}" target="_blank">{{ object.imagem.name }}</a></p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.nivel_ameaca.label }}</label>
-                        <div class="control">
-                            <div class="select is-fullwidth">
-                                {{ form.nivel_ameaca }}
-                            </div>
-                            {% if form.nivel_ameaca.errors %}
-                            <p class="help is-danger">{{ form.nivel_ameaca.errors }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.aparencia.label }}</label>
-                        <div class="control">
-                            {{ form.aparencia }}
-                            {% if form.aparencia.errors %}
-                            <p class="help is-danger">{{ form.aparencia.errors }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.habilidades.label }}</label>
-                        <div class="control">
-                            {{ form.habilidades }}
-                            {% if form.habilidades.errors %}
-                            <p class="help is-danger">{{ form.habilidades.errors }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <!-- Campo de doenças -->
-                    <div class="field">
-                        <label class="label">Doenças associadas</label>
-                        <div class="control">
-                            <div class="select is-multiple is-fullwidth">
-                                {{ form.doenca_relacionada }}  <!-- Corrigido para usar o nome correto do campo -->
-                            </div>
-                            {% if form.doenca_relacionada.errors %}
-                            <p class="help is-danger">{{ form.doenca_relacionada.errors }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="label">{{ form.anotacoes.label }}</label>
-                        <div class="control">
-                            {{ form.anotacoes }}
-                            {% if form.anotacoes.errors %}
-                            <p class="help is-danger">{{ form.anotacoes.errors }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="field is-grouped">
-                        <div class="control">
-                            <button type="submit" class="button is-primary">
-                                <span class="icon">
-                                    <i class="fas fa-save"></i>
-                                </span>
-                                <span>Salvar</span>
-                            </button>
-                        </div>
-                        <div class="control">
-                            <a href="{% url 'besta-list' %}" class="button is-light">
-                                <span class="icon">
-                                    <i class="fas fa-times"></i>
-                                </span>
-                                <span>Cancelar</span>
-                            </a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</section>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar Select2 para o campo de doenças
-    $('select').select2({
-        placeholder: "Selecione as doenças",
-        allowClear: true,
-        width: '100%',
-        dropdownAutoWidth: true,
-        closeOnSelect: false
-    });
-    
-    // Fechar notificações
-    document.querySelectorAll('.notification .delete').forEach(function(deleteButton) {
-        deleteButton.addEventListener('click', function() {
-            this.parentNode.remove();
-        });
-    });
-});
-</script>
 {% endblock %}

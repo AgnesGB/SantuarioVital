@@ -1,0 +1,188 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ raca.nome }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-center">
+        <div class="flex-1">
+            <h1 class="text-3xl font-bold text-gray-800">{{ raca.nome }}</h1>
+            <p class="text-gray-600 mt-1">Informações detalhadas sobre a raça</p>
+        </div>
+        {% if is_admin %}
+        <div class="flex gap-3">
+            <a href="{% url 'raca-update' raca.pk %}" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span>Editar</span>
+            </a>
+            <a href="{% url 'raca-delete' raca.pk %}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Excluir</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Coluna Principal -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Card de Características Físicas -->
+            {% if raca.caracteristicas_fisicas %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Características Físicas
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ raca.caracteristicas_fisicas }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card de Alimentação -->
+            {% if raca.alimentacao %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                        Alimentação
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ raca.alimentacao }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card de Cuidados Especiais -->
+            {% if raca.cuidados_especiais %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-orange-600 to-red-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Cuidados Especiais
+                    </h2>
+                </div>
+                <div class="p-6 bg-orange-50">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ raca.cuidados_especiais }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card de Peculiaridades -->
+            {% if raca.peculiaridades %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Peculiaridades
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ raca.peculiaridades }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card de Observações -->
+            {% if raca.observacoes %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-600 to-slate-600 px-6 py-4">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Observações
+                    </h2>
+                </div>
+                <div class="p-6 bg-gray-50">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ raca.observacoes }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Ações Rápidas -->
+            {% if is_admin %}
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Ações Rápidas</h3>
+                <div class="space-y-2">
+                    <a href="{% url 'raca-update' raca.pk %}" class="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar Raça
+                    </a>
+                    <a href="{% url 'raca-list' %}" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Voltar à Lista
+                    </a>
+                    <a href="{% url 'raca-delete' raca.pk %}" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Excluir Raça
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Navegação</h3>
+                <a href="{% url 'raca-list' %}" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Voltar à Lista
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Informações Rápidas -->
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                <h3 class="text-lg font-bold mb-4">Informações Rápidas</h3>
+                <div class="space-y-3">
+                    {% if raca.longevidade %}
+                    <div>
+                        <p class="text-indigo-100 text-sm">Longevidade</p>
+                        <p class="font-bold">{{ raca.longevidade }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if raca.cor_sangue %}
+                    <div>
+                        <p class="text-indigo-100 text-sm">Cor do Sangue</p>
+                        <p class="font-bold">{{ raca.cor_sangue }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if raca.afinidade_magica %}
+                    <div>
+                        <p class="text-indigo-100 text-sm">Afinidade Mágica</p>
+                        <p class="font-bold">{{ raca.afinidade_magica }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
