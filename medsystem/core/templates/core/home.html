@@ -226,7 +226,7 @@
                 </div>
                 <h2 class="text-xl font-bold text-gray-800 ml-3">Membros</h2>
             </div>
-            
+
             {% if user.is_authenticated %}
                 <div class="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto">
                     {% for usuario in usuarios %}
@@ -244,7 +244,7 @@
                                 {% endif %}
                                 {% if usuario.tipo == 'ADM' %}
                                 <span class="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
-                                    Administrador
+                                    Admin
                                 </span>
                                 {% endif %}
                                 {% if usuario.tipo == 'OUT' %}
@@ -305,14 +305,14 @@
 function toggleUserMenu(userId) {
     const menu = document.getElementById(`user-menu-${userId}`);
     const allMenus = document.querySelectorAll('[id^="user-menu-"]');
-    
+
     // Fecha todos os outros menus
     allMenus.forEach(m => {
         if (m.id !== `user-menu-${userId}`) {
             m.classList.add('hidden');
         }
     });
-    
+
     // Toggle do menu clicado
     menu.classList.toggle('hidden');
 }
