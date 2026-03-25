@@ -135,7 +135,7 @@
                                             class="w-full px-3 py-2.5 border-2 border-green-300 rounded-lg focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm">
                                         <option value="">🔍 Selecione um ingrediente...</option>
                                         {% for ingrediente in form.ingrediente.field.queryset %}
-                                        <option value="{{ ingrediente.pk }}" {% if form.ingrediente.value == ingrediente.pk|stringformat:"s" %}selected{% endif %}>
+                                        <option value="{{ ingrediente.pk }}" {% if form.ingrediente.value == ingrediente.pk or form.ingrediente.value|stringformat:"s" == ingrediente.pk|stringformat:"s" %}selected{% endif %}>
                                             {{ ingrediente.nome }}
                                         </option>
                                         {% endfor %}
@@ -241,7 +241,7 @@
                     <!-- Hidden inputs container -->
                     <div id="doencas-hidden-inputs">
                         {% for doenca in form.doencas.value %}
-                        <input type="hidden" name="doencas" value="{{ doenca }}">
+                        <input type="hidden" name="doencas" value="{{ doenca }}" data-doenca-id="{{ doenca }}">
                         {% endfor %}
                     </div>
                     
@@ -265,9 +265,8 @@
                             <div class="flex items-start gap-3 mb-3">
                                 <div class="flex-shrink-0 w-5 h-5 mt-0.5">
                                     <input type="checkbox" 
-                                           class="w-5 h-5 text-rose-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-rose-500 cursor-pointer"
-                                           {% if doenca.pk in form.doencas.value %}checked{% endif %}
-                                           onclick="event.stopPropagation()">
+                                           class="doenca-checkbox w-5 h-5 text-rose-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-rose-500 cursor-pointer pointer-events-none"
+                                           {% if doenca.pk in form.doencas.value %}checked{% endif %}>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h4 class="font-bold text-gray-800 text-sm mb-1 group-hover:text-rose-600 transition-colors truncate">
@@ -349,7 +348,7 @@
 
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <style>
     /* Animação de entrada */
     @keyframes slideIn {
@@ -394,34 +393,86 @@ document.addEventListener('DOMContentLoaded', () => {
 let formCount = {{ ingredientes_formset.total_form_count }};
 
 function addIngrediente() {
+    console.log('Adicionando ingrediente, form count atual:', formCount);
+    
     const container = document.getElementById('ingredientes-list');
-    const emptyForm = container.querySelector('.ingrediente-form').cloneNode(true);
+    const totalFormsInput = document.querySelector('#id_remedioingrediente_set-TOTAL_FORMS');
     
-    // Atualizar índices do formulário
-    const formRegex = /form-\d+-/g;
-    emptyForm.innerHTML = emptyForm.innerHTML.replace(formRegex, `form-${formCount}-`);
+    if (!totalFormsInput) {
+        console.error('Elemento TOTAL_FORMS não encontrado!');
+        return;
+    }
     
-    // Limpar valores
-    emptyForm.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
-    emptyForm.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
-    emptyForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
+    // Pegar as opções do primeiro select para copiar
+    const firstSelect = container.querySelector('select');
+    let optionsHtml = '';
+    if (firstSelect) {
+        Array.from(firstSelect.options).forEach(option => {
+            optionsHtml += `<option value="${option.value}">${option.textContent}</option>`;
+        });
+    }
     
-    // Remover classe de seleção (para forms já existentes que poderiam ser clonados)
-    emptyForm.classList.remove('border-green-500', 'shadow-md');
+    // Criar novo form HTML
+    const newForm = document.createElement('div');
+    newForm.className = 'ingrediente-form bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 hover:shadow-md transition-all duration-200';
+    newForm.innerHTML = `
+        <div class="grid grid-cols-12 gap-4 items-start">
+            <div class="col-span-12 sm:col-span-5">
+                <label class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    Ingrediente
+                </label>
+                <select name="remedioingrediente_set-${formCount}-ingrediente" 
+                        id="id_remedioingrediente_set-${formCount}-ingrediente"
+                        class="w-full px-3 py-2.5 border-2 border-green-300 rounded-lg focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm">
+                    ${optionsHtml}
+                </select>
+            </div>
+            
+            <div class="col-span-12 sm:col-span-5">
+                <label class="block text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    Quantidade / Dose
+                </label>
+                <input type="text" name="remedioingrediente_set-${formCount}-quantidade" 
+                       id="id_remedioingrediente_set-${formCount}-quantidade"
+                       class="w-full px-3 py-2.5 border-2 border-green-300 rounded-lg focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm"
+                       placeholder="📏 Ex: 2 colheres, 100g, 5 gotas...">
+                <input type="hidden" name="remedioingrediente_set-${formCount}-id" id="id_remedioingrediente_set-${formCount}-id">
+            </div>
+            
+            <div class="col-span-12 sm:col-span-2 flex items-end justify-end">
+                <button type="button" onclick="removeIngrediente(this)" 
+                        class="px-3 py-2.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 hover:scale-105 transition-all text-sm font-medium flex items-center gap-2 group">
+                    <svg class="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Remover
+                </button>
+            </div>
+        </div>
+    `;
     
-    container.appendChild(emptyForm);
+    // Adicionar ao container
+    container.appendChild(newForm);
     
     // Atualizar total de forms
     formCount++;
-    document.querySelector('#id_remedioingrediente_set-TOTAL_FORMS').value = formCount;
+    totalFormsInput.value = formCount;
+    
+    console.log('Novo form count:', formCount);
     
     // Animação de entrada
-    emptyForm.style.opacity = '0';
-    emptyForm.style.transform = 'translateY(10px)';
+    newForm.style.opacity = '0';
+    newForm.style.transform = 'translateY(10px)';
     setTimeout(() => {
-        emptyForm.style.transition = 'all 0.3s ease-out';
-        emptyForm.style.opacity = '1';
-        emptyForm.style.transform = 'translateY(0)';
+        newForm.style.transition = 'all 0.3s ease-out';
+        newForm.style.opacity = '1';
+        newForm.style.transform = 'translateY(0)';
     }, 10);
 }
 
@@ -457,20 +508,27 @@ function toggleDoencaCard(card) {
         card.classList.add('border-rose-600', 'bg-rose-50', 'shadow-md');
         card.classList.remove('border-gray-200', 'bg-white');
         
-        // Adicionar hidden input
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'doencas';
-        input.value = doencaId;
-        input.setAttribute('data-doenca-id', doencaId);
-        hiddenInputsContainer.appendChild(input);
+        // Adicionar hidden input se não existir
+        const existingInput = hiddenInputsContainer.querySelector(`input[data-doenca-id="${doencaId}"]`);
+        if (!existingInput) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'doencas';
+            input.value = doencaId;
+            input.setAttribute('data-doenca-id', doencaId);
+            hiddenInputsContainer.appendChild(input);
+        }
     } else {
         card.classList.remove('border-rose-600', 'bg-rose-50', 'shadow-md');
         card.classList.add('border-gray-200', 'bg-white');
         
-        // Remover hidden input
-        const input = hiddenInputsContainer.querySelector(`input[data-doenca-id="${doencaId}"]`);
-        if (input) input.remove();
+        // Remover todos os hidden inputs com esse ID
+        const inputs = hiddenInputsContainer.querySelectorAll(`input[data-doenca-id="${doencaId}"]`);
+        inputs.forEach(input => input.remove());
+        
+        // Remover também inputs sem data-doenca-id mas com o mesmo value (para compatibilidade com servidor)
+        const valueInputs = hiddenInputsContainer.querySelectorAll(`input[value="${doencaId}"]:not([data-doenca-id])`);
+        valueInputs.forEach(input => input.remove());
     }
     
     // Atualizar contador
