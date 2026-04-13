@@ -15,7 +15,8 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "bradlc.vscode-tailwindcss",
-        "batisteo.vscode-django"
+        "batisteo.vscode-django",
+        "github.vscode-github-actions"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
