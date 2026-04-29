@@ -14,22 +14,12 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from datetime import datetime
 from django.contrib.auth import get_user_model
-import deprecation
-import warnings
-
-@deprecation.deprecated(deprecated_in="1.2", removed_in="2.0", current_version="1.5",
-                       details="Use validar_usuario_novo() em vez disso")
-def validar_usuario(username):
-    """Função deprecada - Use validar_usuario_novo() em vez disso."""
-    return bool(username)
 
 def registrar(request):
     if request.method == 'POST':
         form = UsuarioCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Teste de deprecação: gerar warning
-            warnings.warn('Esta função de registro usa método depreciado', DeprecationWarning)
             login(request, user)
             return redirect('home')
     else:
