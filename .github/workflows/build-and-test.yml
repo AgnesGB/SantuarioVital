@@ -37,7 +37,11 @@ jobs:
     - name: Check for deprecations
       run: |
         cd medsystem
-        python -W all manage.py check --deploy 2>&1 | grep -i "deprecat" || echo "✓ No deprecations found"
+        python -W error::DeprecationWarning manage.py check
+    
+    - name: Run deprecation detector
+      run: |
+        python check_deprecations.py
     
     - name: Run migrations
       run: |
