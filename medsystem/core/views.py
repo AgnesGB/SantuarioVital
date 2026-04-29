@@ -11,10 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from .mixins import MedicoRequiredMixin, AdminRequiredMixin
 from django.views.decorators.http import require_POST
-from django.utils import timezone, force_text
+from django.utils import timezone
 from datetime import datetime
 from django.contrib.auth import get_user_model
-from deprecation import deprecated
 
 def registrar(request):
     if request.method == 'POST':
@@ -928,27 +927,4 @@ class RemedioDeleteView(MedicoRequiredMixin, DeleteView):
     
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Remédio excluído com sucesso!')
-
-
-@deprecated(reason='Esta função será removida. Use a função newer_paciente_info() ao invés.')
-def old_paciente_info(paciente_id):
-    """
-    Função deprecada para obter informações do paciente.
-    Usa force_text que foi removido em versões recentes do Django.
-    """
-    paciente = get_object_or_404(Paciente, pk=paciente_id)
-    # force_text é deprecated - deve usar force_str em vez disso
-    paciente_str = force_text(paciente.nome)
-    return paciente_str
-
-
-def newer_paciente_info(paciente_id):
-    """
-    Função nova que substitui old_paciente_info.
-    Usa force_str que é a API recomendada.
-    """
-    from django.utils import force_str
-    paciente = get_object_or_404(Paciente, pk=paciente_id)
-    paciente_str = force_str(paciente.nome)
-    return paciente_str
         return super().delete(request, *args, **kwargs)

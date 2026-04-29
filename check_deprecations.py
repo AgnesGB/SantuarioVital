@@ -128,7 +128,7 @@ def main():
     """
     print("🔍 Analisando código deprecado no projeto...\n")
     
-    directories = ['medsystem', '.']
+    directories = ['medsystem']
     all_issues = []
     
     for directory in directories:
