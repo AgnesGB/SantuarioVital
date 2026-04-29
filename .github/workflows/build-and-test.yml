@@ -56,3 +56,7 @@ jobs:
         # Ignore migrations and settings
         flake8 medsystem/core --max-line-length=120 --exclude=migrations,settings.py
       continue-on-error: true
+    
+    - name: Check for deprecated code
+      run: |
+        python check_deprecations.py
