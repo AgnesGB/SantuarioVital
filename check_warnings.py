@@ -26,12 +26,12 @@ def check_deprecations():
         deprecations = [warning for warning in w if issubclass(warning.category, (DeprecationWarning, PendingDeprecationWarning))]
         
         if deprecations:
-            print(f"❌ {len(deprecations)} avisos de deprecação encontrados:")
+            print(f"{len(deprecations)} avisos de deprecação encontrados:")
             for warning in deprecations:
                 print(f"  - {warning.category.__name__}: {warning.message}")
             return 1
         else:
-            print("✓ Nenhum aviso de deprecação detectado!")
+            print("Nenhum aviso de deprecação detectado!")
             return 0
 
 if __name__ == '__main__':
