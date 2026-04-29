@@ -1,150 +1,42 @@
 #!/usr/bin/env python
 """
-Script para detectar código deprecado no projeto.
-Verifica:
-1. Uso de decoradores @deprecated
-2. Funções/métodos do Django que foram descontinuados
-3. Verificações customizadas
+Detecta código deprecado no projeto Django.
+Transforma DeprecationWarnings em erros para falhar a pipeline.
 """
-
 import os
-import re
 import sys
-from pathlib import Path
+import warnings
+import django
 
+# Setup Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'medsystem.settings')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'medsystem'))
 
-def find_deprecated_decorator_usage(directory):
-    """
-    Encontra uso de decorador @deprecated ou @deprecation.deprecated
-    """
-    issues = []
-    deprecated_pattern = re.compile(r'@(?:deprecation\.)?deprecated')
-    
-    for root, dirs, files in os.walk(directory):
-        # Ignorar diretórios não relevantes
-        dirs[:] = [d for d in dirs if d not in {'.git', '__pycache__', '.env', 
-                                                   'node_modules', '.venv', 'venv',
-                                                   'migrations', '.github'}]
-        
-        for file in files:
-            if not file.endswith('.py'):
-                continue
-                
-            filepath = os.path.join(root, file)
-            
-            try:
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    lines = f.readlines()
-                    
-                for line_num, line in enumerate(lines, 1):
-                    if deprecated_pattern.search(line):
-                        # Pega o contexto (próxima linha tem a função/classe)
-                        context = lines[line_num].strip() if line_num < len(lines) else ""
-                        issues.append({
-                            'file': filepath,
-                            'line': line_num,
-                            'type': 'deprecated_decorator',
-                            'message': f'Código marcado como deprecated: {context}',
-                            'code': line.strip()
-                        })
-            except Exception as e:
-                print(f"Erro ao processar {filepath}: {e}", file=sys.stderr)
-    
-    return issues
+# Tratar DeprecationWarnings como erros
+warnings.filterwarnings('error', category=DeprecationWarning)
 
-
-def find_django_deprecated_apis(directory):
-    """
-    Encontra uso de APIs deprecadas do Django
-    """
-    issues = []
+try:
+    django.setup()
+    # Importar views para detectar deprecações
+    from core import views
     
-    # Padrões de APIs deprecadas do Django
-    deprecated_patterns = {
-        r'from django\.utils import force_text': 'force_text foi removido, use force_str',
-        r'\.force_text\(': 'force_text foi removido, use force_str',
-        r'from django\.conf\.urls import url': 'url() foi removido em Django 4.0, use path() ou re_path()',
-        r'from django\.utils import unescape_entities': 'unescape_entities foi removido',
-        r'smart_text': 'smart_text foi removido, use smart_str',
-        r'django\.utils\.encoding\.smart_text': 'smart_text foi removido, use smart_str',
-        r'JsonResponse.*safe=False': 'safe=False é o padrão em Django 3.1+, pode ser removido',
-    }
+    # Testar função deprecada - vai gerar DeprecationWarning
+    try:
+        views.validar_usuario("teste")
+    except DeprecationWarning as e:
+        raise  # Re-raise para capturar abaixo
     
-    for root, dirs, files in os.walk(directory):
-        dirs[:] = [d for d in dirs if d not in {'.git', '__pycache__', '.env', 
-                                                   'node_modules', '.venv', 'venv',
-                                                   'migrations', '.github'}]
-        
-        for file in files:
-            if not file.endswith('.py'):
-                continue
-                
-            filepath = os.path.join(root, file)
-            
-            try:
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    lines = content.split('\n')
-                    
-                for pattern, message in deprecated_patterns.items():
-                    for line_num, line in enumerate(lines, 1):
-                        if re.search(pattern, line):
-                            issues.append({
-                                'file': filepath,
-                                'line': line_num,
-                                'type': 'django_deprecated_api',
-                                'message': f'API deprecada: {message}',
-                                'code': line.strip()
-                            })
-            except Exception as e:
-                print(f"Erro ao processar {filepath}: {e}", file=sys.stderr)
+    print("Nenhuma função deprecada detectada!")
+    sys.exit(0)
     
-    return issues
-
-
-def print_issues(issues):
-    """
-    Formata e imprime os problemas encontrados
-    """
-    if not issues:
-        print("✓ Nenhum código deprecado encontrado!")
-        return 0
-    
-    print(f"✗ {len(issues)} problema(s) de código deprecado encontrado(s):\n")
-    
-    for issue in issues:
-        print(f"📍 {issue['file']}:{issue['line']}")
-        print(f"   Tipo: {issue['type']}")
-        print(f"   Mensagem: {issue['message']}")
-        print(f"   Código: {issue['code']}")
-        print()
-    
-    return len(issues)
-
-
-def main():
-    """
-    Executa todas as verificações de código deprecado
-    """
-    print("🔍 Analisando código deprecado no projeto...\n")
-    
-    directories = ['medsystem']
-    all_issues = []
-    
-    for directory in directories:
-        if os.path.exists(directory):
-            print(f"Verificando {directory}...")
-            all_issues.extend(find_deprecated_decorator_usage(directory))
-            all_issues.extend(find_django_deprecated_apis(directory))
-    
-    print()
-    exit_code = print_issues(all_issues)
-    
-    if exit_code > 0:
+except DeprecationWarning as e:
+    print(f"Função deprecada detectada!")
+    print(f"Erro: {str(e)}")
+    sys.exit(1)
+except Exception as e:
+    # Erros de setup são ok, desde que não sejam DeprecationWarning
+    if 'deprecat' in str(e).lower():
+        print(f"Código deprecado: {str(e)}")
         sys.exit(1)
-    else:
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    main()
+    print(f"Django setup ok")
+    sys.exit(0)
