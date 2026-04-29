@@ -12,6 +12,7 @@ from django.contrib.auth import login
 from .mixins import MedicoRequiredMixin, AdminRequiredMixin
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.utils.encoding import force_text
 from datetime import datetime
 from django.contrib.auth import get_user_model
 
@@ -20,6 +21,8 @@ def registrar(request):
         form = UsuarioCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Teste de deprecação para pipeline
+            username_str = force_text(user.username)
             login(request, user)
             return redirect('home')
     else:
