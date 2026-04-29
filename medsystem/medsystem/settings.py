@@ -21,7 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*^mi_y4vu23^oopd%+^tr$27pvh-es5qkqb*fj=0-5$%+@jurs"
+# IMPORTANTE: SECRET_KEY deve ser definida via variável de ambiente
+# Se não estiver definida, gera uma chave temporária (apenas para desenvolvimento)
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-CHANGE-ME-IN-PRODUCTION')
+if SECRET_KEY == 'django-insecure-CHANGE-ME-IN-PRODUCTION':
+    import warnings
+    warnings.warn('SECRET_KEY não está configurada! Use a variável de ambiente SECRET_KEY em produção.')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -75,12 +80,26 @@ WSGI_APPLICATION = "medsystem.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Use PostgreSQL em produção para melhor segurança, concorrência e auditoria
+if os.getenv('ENVIRONMENT') == 'production':
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv('DB_NAME', 'medsystem'),
+            "USER": os.getenv('DB_USER', 'postgres'),
+            "PASSWORD": os.getenv('DB_PASSWORD', ''),
+            "HOST": os.getenv('DB_HOST', 'localhost'),
+            "PORT": os.getenv('DB_PORT', '5432'),
+        }
     }
-}
+else:
+    # Usar SQLite apenas em desenvolvimento
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -120,11 +139,24 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# CSRF Configuration - usar variável de ambiente em produção
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    'https://localhost:8000'
+).split(',')
+
+# Cache Configuration - usar memória em desenvolvimento
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "medsystem-cache",
+    }
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-CSRF_TRUSTED_ORIGINS=['https://localhost:8000']
 
 STATIC_URL = "static/"
 AUTH_USER_MODEL = 'core.Usuario'
