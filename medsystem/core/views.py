@@ -645,19 +645,40 @@ class AnotacaoDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 def recuperar_senha(request):
+    """
+    Recuperação de senha com rate limiting para prevenir brute force attacks.
+    Limite: 5 tentativas por IP em 1 hora.
+    """
+    from django.core.cache import cache
+    
     if request.method == 'POST':
+        # Rate limiting: máximo 5 tentativas por IP em 1 hora
+        ip = request.META.get('REMOTE_ADDR')
+        cache_key = f'pwd_reset_attempts_{ip}'
+        attempts = cache.get(cache_key, 0)
+        
+        if attempts >= 5:
+            messages.error(request, 'Você excedeu o limite de tentativas. Tente novamente em 1 hora.')
+            return render(request, 'core/recuperar_senha.html')
+        
         username = request.POST.get('username')
         new_password = request.POST.get('new_password')
+        
+        # Incrementar tentativas
+        cache.set(cache_key, attempts + 1, 3600)  # 1 hora
         
         User = get_user_model()
         try:
             user = User.objects.get(username=username)
             user.set_password(new_password)
             user.save()
+            # Limpar limite de tentativas após sucesso
+            cache.delete(cache_key)
             messages.success(request, "Senha alterada com sucesso!")
             return redirect('login')
         except User.DoesNotExist:
-            messages.error(request, "Usuário não encontrado!")
+            # Não revelar se o usuário existe (proteção contra enumeration)
+            messages.error(request, "Verifique o username e tente novamente.")
     
     return render(request, 'core/recuperar_senha.html')
 
