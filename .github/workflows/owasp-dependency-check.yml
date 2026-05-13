@@ -9,7 +9,7 @@ on:
     paths:
       - 'requirements.txt'
   schedule:
-    - cron: '0 8 * * 1'
+    - cron: '38 12 * * 3'
   workflow_dispatch:
 
 permissions:
