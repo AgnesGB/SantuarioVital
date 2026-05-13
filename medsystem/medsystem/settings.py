@@ -23,15 +23,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # IMPORTANTE: SECRET_KEY deve ser definida via variável de ambiente
 # Se não estiver definida, gera uma chave temporária (apenas para desenvolvimento)
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-CHANGE-ME-IN-PRODUCTION')
-if SECRET_KEY == 'django-insecure-CHANGE-ME-IN-PRODUCTION':
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-CHANGE-ME-IN-PRODUCTION")
+if SECRET_KEY == "django-insecure-CHANGE-ME-IN-PRODUCTION":
     import warnings
-    warnings.warn('SECRET_KEY não está configurada! Use a variável de ambiente SECRET_KEY em produção.')
+
+    warnings.warn(
+        "SECRET_KEY não está configurada! Use a variável de ambiente SECRET_KEY em produção."
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,agnesgb.pythonanywhere.com').split(',')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,agnesgb.pythonanywhere.com").split(
+    ","
+)
 
 
 # Application definition
@@ -43,7 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'core',
+    "core",
 ]
 
 MIDDLEWARE = [
@@ -68,7 +73,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                'core.context_processors.medico_context',
+                "core.context_processors.medico_context",
             ],
         },
     },
@@ -81,15 +86,15 @@ WSGI_APPLICATION = "medsystem.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Use PostgreSQL em produção para melhor segurança, concorrência e auditoria
-if os.getenv('ENVIRONMENT') == 'production':
+if os.getenv("ENVIRONMENT") == "production":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv('DB_NAME', 'medsystem'),
-            "USER": os.getenv('DB_USER', 'postgres'),
-            "PASSWORD": os.getenv('DB_PASSWORD', ''),
-            "HOST": os.getenv('DB_HOST', 'localhost'),
-            "PORT": os.getenv('DB_PORT', '5432'),
+            "NAME": os.getenv("DB_NAME", "medsystem"),
+            "USER": os.getenv("DB_USER", "postgres"),
+            "PASSWORD": os.getenv("DB_PASSWORD", ""),
+            "HOST": os.getenv("DB_HOST", "localhost"),
+            "PORT": os.getenv("DB_PORT", "5432"),
         }
     }
 else:
@@ -136,14 +141,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # CSRF Configuration - usar variável de ambiente em produção
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    'CSRF_TRUSTED_ORIGINS',
-    'https://localhost:8000'
-).split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://localhost:8000").split(",")
 
 # Cache Configuration - usar memória em desenvolvimento
 CACHES = {
@@ -159,8 +161,8 @@ CACHES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATIC_URL = "static/"
-AUTH_USER_MODEL = 'core.Usuario'
+AUTH_USER_MODEL = "core.Usuario"
 
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
