@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 
+
 class MedicoRequiredMixin(LoginRequiredMixin):
     """Verifica se o usuário é médico ou administrador"""
     def dispatch(self, request, *args, **kwargs):

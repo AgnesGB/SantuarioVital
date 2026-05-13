@@ -1,23 +1,65 @@
-from django.urls import path
-from django.contrib.auth.views import LogoutView
-from .views import (
-    DoencaListView, DoencaDetailView, DoencaCreateView,
-    PacienteListView, PacienteDetailView, PacienteUpdateView, PacienteCreateView, PacienteDeleteView,
-    RegistroMedicoCreateView, NovaDoencaView, DoencaDeleteView,
-    BunkertListView, BunkerDetailView, 
-    DiagnosticoCreateView, DiagnosticoUpdateView, DiagnosticoDeleteView,
-    DoencaUpdateView, BestaCreateView, BestaDetailView, BestaListView, 
-    BestaUpdateView, AdicionarDiagnosticoView, HomeView, RelatorioExpedicaoCreateView,
-    RelatorioExpedicaoListView, registrar, RelatorioExpedicaoDeleteView, 
-    RelatorioExpedicaoDetailView, RelatorioExpedicao, RelatorioExpedicaoUpdateView, BestaDeleteView,
-    AnotacaoListView, AnotacaoCreateView, AnotacaoDetailView, AnotacaoUpdateView, AnotacaoDeleteView, recuperar_senha, DiagnosticoDetailView,
-    RacaListView, RacaDetailView, RacaCreateView, RacaUpdateView, RacaDeleteView,
-    IngredienteListView, IngredienteDetailView, IngredienteCreateView, IngredienteUpdateView, IngredienteDeleteView,
-    RemedioListView, RemedioDetailView, RemedioCreateView, RemedioUpdateView, RemedioDeleteView, alterar_tipo_usuario
-)
-from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.views import LogoutView
+from django.urls import path
+
+from .views import (
+    AdicionarDiagnosticoView,
+    AnotacaoCreateView,
+    AnotacaoDeleteView,
+    AnotacaoDetailView,
+    AnotacaoListView,
+    AnotacaoUpdateView,
+    BestaCreateView,
+    BestaDeleteView,
+    BestaDetailView,
+    BestaListView,
+    BestaUpdateView,
+    BunkerDetailView,
+    BunkertListView,
+    DiagnosticoCreateView,
+    DiagnosticoDeleteView,
+    DiagnosticoDetailView,
+    DiagnosticoUpdateView,
+    DoencaCreateView,
+    DoencaDeleteView,
+    DoencaDetailView,
+    DoencaListView,
+    DoencaUpdateView,
+    HomeView,
+    IngredienteCreateView,
+    IngredienteDeleteView,
+    IngredienteDetailView,
+    IngredienteListView,
+    IngredienteUpdateView,
+    NovaDoencaView,
+    PacienteCreateView,
+    PacienteDeleteView,
+    PacienteDetailView,
+    PacienteListView,
+    PacienteUpdateView,
+    RacaCreateView,
+    RacaDeleteView,
+    RacaDetailView,
+    RacaListView,
+    RacaUpdateView,
+    RegistroMedicoCreateView,
+    RelatorioExpedicao,
+    RelatorioExpedicaoCreateView,
+    RelatorioExpedicaoDeleteView,
+    RelatorioExpedicaoDetailView,
+    RelatorioExpedicaoListView,
+    RelatorioExpedicaoUpdateView,
+    RemedioCreateView,
+    RemedioDeleteView,
+    RemedioDetailView,
+    RemedioListView,
+    RemedioUpdateView,
+    alterar_tipo_usuario,
+    recuperar_senha,
+    registrar,
+)
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),

@@ -1,19 +1,55 @@
-from django.views.generic import DeleteView, ListView, DetailView, CreateView, UpdateView, TemplateView
-from django.urls import reverse_lazy, reverse
+from datetime import datetime
+
+from django.contrib import messages
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Doenca, RelatorioExpedicao, Usuario, Besta, Cidade, Paciente, RegistroMedico, Diagnostico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente
-from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, CidadeForm, DiagnosticoForm, AnotacaoPessoalForm, RacaForm, IngredienteForm, RemedioForm, RemedioIngredienteFormSet
-from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login
-from .mixins import MedicoRequiredMixin, AdminRequiredMixin
-from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from datetime import datetime
-from django.contrib.auth import get_user_model
+from django.views.decorators.http import require_POST
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
+
+from .forms import (
+    AnotacaoPessoalForm,
+    BestaForm,
+    CidadeForm,
+    DiagnosticoForm,
+    DoencaForm,
+    IngredienteForm,
+    PacienteForm,
+    RacaForm,
+    RegistroMedicoForm,
+    RemedioForm,
+    RemedioIngredienteFormSet,
+    UsuarioCreationForm,
+)
+from .mixins import AdminRequiredMixin, MedicoRequiredMixin
+from .models import (
+    AnotacaoPessoal,
+    Besta,
+    Cidade,
+    Diagnostico,
+    Doenca,
+    Ingrediente,
+    Paciente,
+    Raca,
+    RegistroMedico,
+    RelatorioExpedicao,
+    Remedio,
+    RemedioIngrediente,
+    Usuario,
+)
+
 
 def registrar(request):
     if request.method == 'POST':

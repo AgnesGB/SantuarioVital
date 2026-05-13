@@ -1,19 +1,21 @@
 from django.contrib import admin
+
 from .models import (
-    Usuario,
-    Doenca,
-    Paciente,
-    Cidade,
+    AnotacaoPessoal,
     Besta,
-    RelatorioExpedicao,
+    Cidade,
     Diagnostico,
-    RegistroMedico,
-    Raca,
+    Doenca,
     Ingrediente,
+    Paciente,
+    Raca,
+    RegistroMedico,
+    RelatorioExpedicao,
     Remedio,
     RemedioIngrediente,
-    AnotacaoPessoal
+    Usuario,
 )
+
 
 class RemedioIngredienteInline(admin.TabularInline):
     model = RemedioIngrediente
