@@ -31,12 +31,11 @@ jobs:
           project: 'SantuarioVital'
           path: '.'
           format: 'HTML'
+          out: '.'
           args: >
             --enableExperimental
-
           
       - name: Upload HTML report
-        if: always() && hashFiles('dependency-check-report.html') != ''
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
