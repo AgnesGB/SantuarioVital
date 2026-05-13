@@ -3,6 +3,7 @@
 Detecta código deprecado no projeto Django.
 Transforma DeprecationWarnings em erros para falhar a pipeline.
 """
+
 import os
 import sys
 import warnings
