@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "12:10"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "AgnesGB"
+    assignees:
+      - "AgnesGB"
+    labels:
+      - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "chore(deps):"
+      include: "scope"

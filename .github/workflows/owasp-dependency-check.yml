@@ -1,0 +1,50 @@
+name: OWASP Dependency Check
+
+on:
+  push:
+    paths:
+      - 'requirements.txt'
+      - '.github/workflows/owasp-dependency-check.yml'
+  pull_request:
+    paths:
+      - 'requirements.txt'
+  schedule:
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  owasp-check:
+    runs-on: ubuntu-latest
+    name: OWASP Dependency Check
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'SantuarioVital'
+          path: '.'
+          format: 'SARIF'
+          args: >
+            --enableExperimental
+          
+      - name: Upload SARIF to GitHub Security
+        if: always() && hashFiles('dependency-check-report.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: dependency-check-report.sarif
+          category: dependency-check
+          
+      - name: Upload HTML report
+        if: always() && hashFiles('dependency-check-report.html') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: dependency-check-report.html
+          retention-days: 30
