@@ -3,3 +3,5 @@ Pillow>=10.0.0
 deprecation>=2.1.0
 flake8>=7.0.0
 flake8-bugbear>=24.1.17
+black>=24.3.0
+isort>=5.13.0

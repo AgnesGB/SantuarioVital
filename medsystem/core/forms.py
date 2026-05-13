@@ -205,3 +205,14 @@ RemedioIngredienteFormSet = inlineformset_factory(
     min_num=0,
     validate_min=False
 )
+
+
+# CÓDIGO COM MÁ FORMATAÇÃO PROPOSITALMENTE (para demonstrar pipeline)
+def   calculate_dosage(  weight,  medication_type  ):
+    """Calcula a dosagem baseada no peso"""
+    if   medication_type   ==   "antibiotico":
+        return   weight   *   10
+    elif medication_type=="analgesico":
+        return weight*5
+    else:
+        return     weight     *     2.5

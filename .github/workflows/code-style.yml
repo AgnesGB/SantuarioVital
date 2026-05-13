@@ -1,0 +1,54 @@
+name: Code Style Checks (Black + Flake8 + isort)
+
+on:
+  push:
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - '.github/workflows/code-style.yml'
+  pull_request:
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  code-style:
+    runs-on: ubuntu-latest
+    name: Check Code Style with Black, Flake8, and isort
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black flake8 isort
+          
+      - name: Check with isort
+        run: |
+          echo "🔍 Checking import sorting with isort..."
+          isort --check-only --diff medsystem/
+          
+      - name: Check with Black
+        run: |
+          echo "🎨 Checking code formatting with Black..."
+          black --check --diff medsystem/
+          
+      - name: Check with Flake8
+        run: |
+          echo "🔗 Checking code style with Flake8..."
+          flake8 medsystem/ --count --show-source --statistics
