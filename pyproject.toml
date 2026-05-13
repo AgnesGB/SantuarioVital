@@ -17,17 +17,6 @@ extend-exclude = '''
 )/
 '''
 
-[tool.isort]
-profile = "black"
-line_length = 100
-skip_glob = ["*/migrations/*"]
-known_django = ["django"]
-known_first_party = ["medsystem", "core"]
-sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-
-[tool.pylint]
-max-line-length = 100
-
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
