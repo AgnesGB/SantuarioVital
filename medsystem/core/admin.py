@@ -1,29 +1,33 @@
 from django.contrib import admin
+
 from .models import (
-    Usuario,
-    Doenca,
-    Paciente,
-    Cidade,
+    AnotacaoPessoal,
     Besta,
-    RelatorioExpedicao,
+    Cidade,
     Diagnostico,
-    RegistroMedico,
-    Raca,
+    Doenca,
     Ingrediente,
+    Paciente,
+    Raca,
+    RegistroMedico,
+    RelatorioExpedicao,
     Remedio,
     RemedioIngrediente,
-    AnotacaoPessoal
+    Usuario,
 )
+
 
 class RemedioIngredienteInline(admin.TabularInline):
     model = RemedioIngrediente
     extra = 1
-    fields = ['ingrediente', 'quantidade']
+    fields = ["ingrediente", "quantidade"]
+
 
 class RemedioAdmin(admin.ModelAdmin):
     inlines = [RemedioIngredienteInline]
-    list_display = ['nome', 'descricao']
-    filter_horizontal = ['doencas']
+    list_display = ["nome", "descricao"]
+    filter_horizontal = ["doencas"]
+
 
 admin.site.register(Usuario)
 admin.site.register(Doenca)
