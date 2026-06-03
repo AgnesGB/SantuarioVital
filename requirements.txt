@@ -4,3 +4,4 @@ deprecation>=2.1.0
 flake8>=7.0.0
 flake8-bugbear>=25.11.29
 black>=24.3.0
+pylint>=3.0.0

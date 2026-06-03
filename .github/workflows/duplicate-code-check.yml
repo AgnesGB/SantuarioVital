@@ -1,0 +1,39 @@
+name: Duplicate Code Check
+
+on:
+  push:
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - 'detect_duplicates.py'
+      - '.github/workflows/duplicate-code-check.yml'
+  pull_request:
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - 'detect_duplicates.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  duplicate-code-check:
+    runs-on: ubuntu-latest
+    name: Check for Duplicate Code
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Check for duplicate code
+        run: |
+          echo "🔍 Checking for duplicate code..."
+          python detect_duplicates.py medsystem/core
+

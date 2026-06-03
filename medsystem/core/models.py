@@ -335,3 +335,29 @@ class RemedioIngrediente(models.Model):
 
     def __str__(self):
         return f"{self.ingrediente.nome} ({self.quantidade}) - {self.remedio.nome}"
+
+
+def validar_ingrediente_remedio(ingrediente, remedio):
+    """Validates if an ingredient is compatible with a remedy."""
+    if ingrediente is None:
+        raise ValueError("Ingrediente não pode ser nulo")
+    if remedio is None:
+        raise ValueError("Remédio não pode ser nulo")
+    if not isinstance(ingrediente, Ingrediente):
+        raise TypeError("Ingrediente deve ser uma instância de Ingrediente")
+    if not isinstance(remedio, Remedio):
+        raise TypeError("Remédio deve ser uma instância de Remedio")
+    return True
+
+
+def validar_ingrediente_remedio_duplicado(ingrediente, remedio):
+    """Validates if an ingredient is compatible with a remedy (DUPLICATE)."""
+    if ingrediente is None:
+        raise ValueError("Ingrediente não pode ser nulo")
+    if remedio is None:
+        raise ValueError("Remédio não pode ser nulo")
+    if not isinstance(ingrediente, Ingrediente):
+        raise TypeError("Ingrediente deve ser uma instância de Ingrediente")
+    if not isinstance(remedio, Remedio):
+        raise TypeError("Remédio deve ser uma instância de Remedio")
+    return True
