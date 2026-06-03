@@ -58,6 +58,20 @@ jobs:
         cd medsystem
         python manage.py collectstatic --noinput --dry-run --clear
       continue-on-error: true
+
+    - name: Instalar Graphviz
+      run: sudo apt-get update && sudo apt-get install -y graphviz
+
+    - name: Gerar Diagrama de Classes UML
+      run: |
+        cd medsystem
+        python manage.py graph_models -a -o diagrama_classes.png
+
+    - name: Fazer upload do Diagrama de Classes
+      uses: actions/upload-artifact@v4
+      with:
+        name: diagrama-de-classes
+        path: medsystem/diagrama_classes.png
     
     - name: Check code with flake8 (optional linting)
       run: |
@@ -65,3 +79,5 @@ jobs:
         # Ignore migrations and settings
         flake8 medsystem/core --max-line-length=120 --exclude=migrations,settings.py
       continue-on-error: true
+
+      
