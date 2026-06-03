@@ -139,7 +139,6 @@ def generate_uml_diagram():
                 "core",
                 "medsystem/core/models.py",
             ],
-            cwd="/workspaces/SantuarioVital",
             capture_output=True,
             text=True,
         )
@@ -147,10 +146,13 @@ def generate_uml_diagram():
         if result.returncode != 0:
             print(f"⚠️  Aviso ao executar pyreverse: {result.stderr}")
 
-        # Move files to docs directory
-        classes_dot = Path("classes_core.dot")
+        # Find the generated dot file
+        classes_dot = None
+        for dot_file in Path(".").glob("classes_core.dot"):
+            classes_dot = dot_file
+            break
 
-        if classes_dot.exists():
+        if classes_dot and classes_dot.exists():
             classes_dot.rename(output_dir / "classes.dot")
             print(f"✅ Diagrama de classes gerado: {output_dir / 'classes.dot'}")
 
