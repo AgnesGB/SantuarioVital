@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SantuarioVital - Diagrama de Classes UML</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/@hpcc-js/wasm@1.14.8/dist/graphviz.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .info {
+            background-color: #e8f4f8;
+            padding: 12px;
+            border-left: 4px solid #0066cc;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        #graphviz {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            background-color: #fafafa;
+            overflow: auto;
+            min-height: 600px;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 SantuarioVital - Diagrama de Classes UML</h1>
+        <div class="info">
+            <strong>📊 Diagrama de Classes do Domínio:</strong> Visualização das classes de modelo da aplicação Django
+        </div>
+        <div id="graphviz">
+            <div class="loading">Carregando diagrama...</div>
+        </div>
+    </div>
+
+    <script>
+        async function renderDiagram() {
+            const graphviz = await Graphviz.load();
+            const dotSource = `digraph "classes_core" {
+rankdir=BT
+charset="utf-8"
+"core.models.AnotacaoPessoal" [color="black", fontcolor="black", label=<{AnotacaoPessoal|conteudo : TextField<br ALIGN="LEFT"/>data_atualizacao : DateTimeField<br ALIGN="LEFT"/>data_criacao : DateTimeField<br ALIGN="LEFT"/>tags : CharField<br ALIGN="LEFT"/>titulo : CharField<br ALIGN="LEFT"/>usuario : ForeignKey<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Besta" [color="black", fontcolor="black", label=<{Besta|NIVEL_AMEAÇA_CHOICES : list<br ALIGN="LEFT"/>anotacoes : TextField<br ALIGN="LEFT"/>aparencia : TextField<br ALIGN="LEFT"/>contagio : TextField<br ALIGN="LEFT"/>corrompida_por_essencia : BooleanField<br ALIGN="LEFT"/>doenca_relacionada : ManyToManyField<br ALIGN="LEFT"/>habilidades : TextField<br ALIGN="LEFT"/>nivel_ameaca : CharField<br ALIGN="LEFT"/>nome : CharField<br ALIGN="LEFT"/>pode_contaminar : BooleanField<br ALIGN="LEFT"/>relacionada_com_essencia : BooleanField<br ALIGN="LEFT"/>titulo : CharField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Cidade" [color="black", fontcolor="black", label=<{Cidade|funcao : CharField<br ALIGN="LEFT"/>nome : CharField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Diagnostico" [color="black", fontcolor="black", label=<{Diagnostico|data : DateTimeField<br ALIGN="LEFT"/>doenca : ForeignKey<br ALIGN="LEFT"/>hipoteses : ManyToManyField<br ALIGN="LEFT"/>observacoes : TextField<br ALIGN="LEFT"/>paciente : ForeignKey<br ALIGN="LEFT"/>remedios : ManyToManyField<br ALIGN="LEFT"/>responsavel : ForeignKey<br ALIGN="LEFT"/>sintomas : TextField<br ALIGN="LEFT"/>tratado : BooleanField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Doenca" [color="black", fontcolor="black", label=<{Doenca|contagiosa : BooleanField<br ALIGN="LEFT"/>forma_contagio : CharField<br ALIGN="LEFT"/>nome : CharField<br ALIGN="LEFT"/>origem : TextField<br ALIGN="LEFT"/>parte_afetada : CharField<br ALIGN="LEFT"/>reacoes_esperadas : TextField<br ALIGN="LEFT"/>sintomas : TextField<br ALIGN="LEFT"/>tipo : CharField<br ALIGN="LEFT"/>tratamento : TextField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Ingrediente" [color="black", fontcolor="black", label=<{Ingrediente|contra_indicacoes : TextField<br ALIGN="LEFT"/>cuidados_ao_uso : TextField<br ALIGN="LEFT"/>nome : CharField<br ALIGN="LEFT"/>o_que_e : TextField<br ALIGN="LEFT"/>o_que_faz : TextField<br ALIGN="LEFT"/>reacoes_adversas : TextField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Doenca.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>verbose_name : str<br ALIGN="LEFT"/>verbose_name_plural : str<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Raca.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>verbose_name : str<br ALIGN="LEFT"/>verbose_name_plural : str<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Paciente.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>verbose_name_plural : str<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Diagnostico.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.RegistroMedico.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>verbose_name : str<br ALIGN="LEFT"/>verbose_name_plural : str<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.RelatorioExpedicao.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.AnotacaoPessoal.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>verbose_name_plural : str<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Ingrediente.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>verbose_name : str<br ALIGN="LEFT"/>verbose_name_plural : str<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Remedio.Meta" [color="black", fontcolor="black", label=<{Meta|ordering : list<br ALIGN="LEFT"/>verbose_name : str<br ALIGN="LEFT"/>verbose_name_plural : str<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.RemedioIngrediente.Meta" [color="black", fontcolor="black", label=<{Meta|unique_together : list<br ALIGN="LEFT"/>verbose_name : str<br ALIGN="LEFT"/>verbose_name_plural : str<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Paciente" [color="black", fontcolor="black", label=<{Paciente|AFINIDADE : list<br ALIGN="LEFT"/>STATUS_CHOICES : list<br ALIGN="LEFT"/>afinidade : CharField<br ALIGN="LEFT"/>cidade : ForeignKey<br ALIGN="LEFT"/>contatos_emergencia : TextField<br ALIGN="LEFT"/>doencas : ManyToManyField<br ALIGN="LEFT"/>fay_normal : CharField<br ALIGN="LEFT"/>idade : PositiveIntegerField<br ALIGN="LEFT"/>nome : CharField<br ALIGN="LEFT"/>observacoes : TextField<br ALIGN="LEFT"/>raca : ManyToManyField<br ALIGN="LEFT"/>status : CharField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Raca" [color="black", fontcolor="black", label=<{Raca|afinidade_magica : CharField<br ALIGN="LEFT"/>alimentacao : TextField<br ALIGN="LEFT"/>bpm : CharField<br ALIGN="LEFT"/>caracteristicas_fisicas : TextField<br ALIGN="LEFT"/>cor_sangue : CharField<br ALIGN="LEFT"/>cuidados_especiais : TextField<br ALIGN="LEFT"/>longevidade : CharField<br ALIGN="LEFT"/>nome : CharField<br ALIGN="LEFT"/>observacoes : TextField<br ALIGN="LEFT"/>peculiaridades : TextField<br ALIGN="LEFT"/>pressao_arterial : CharField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.RegistroMedico" [color="black", fontcolor="black", label=<{RegistroMedico|data : DateTimeField<br ALIGN="LEFT"/>doenca : ForeignKey<br ALIGN="LEFT"/>observacoes : TextField<br ALIGN="LEFT"/>paciente : ForeignKey<br ALIGN="LEFT"/>sintomas_observados : TextField<br ALIGN="LEFT"/>tratamento_aplicado : TextField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.RelatorioExpedicao" [color="black", fontcolor="black", label=<{RelatorioExpedicao|autor : ForeignKey<br ALIGN="LEFT"/>data : DateTimeField<br ALIGN="LEFT"/>descobertas : TextField<br ALIGN="LEFT"/>localizacao : CharField<br ALIGN="LEFT"/>observacoes : TextField<br ALIGN="LEFT"/>titulo : CharField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Remedio" [color="black", fontcolor="black", label=<{Remedio|descricao : TextField<br ALIGN="LEFT"/>doencas : ManyToManyField<br ALIGN="LEFT"/>ingredientes : ManyToManyField<br ALIGN="LEFT"/>modo_uso : TextField<br ALIGN="LEFT"/>nome : CharField<br ALIGN="LEFT"/>observacoes : TextField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.RemedioIngrediente" [color="black", fontcolor="black", label=<{RemedioIngrediente|ingrediente : ForeignKey<br ALIGN="LEFT"/>quantidade : CharField<br ALIGN="LEFT"/>remedio : ForeignKey<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"core.models.Usuario" [color="black", fontcolor="black", label=<{Usuario|TIPO_CHOICES : list<br ALIGN="LEFT"/>cidade : ForeignKey<br ALIGN="LEFT"/>nickname : CharField<br ALIGN="LEFT"/>tipo : CharField<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+}
+`;
+            
+            try {
+                const svg = graphviz.renderSVGElement(dotSource);
+                const container = document.getElementById('graphviz');
+                container.innerHTML = '';
+                container.appendChild(svg);
+            } catch (error) {
+                document.getElementById('graphviz').innerHTML = 
+                    '<div class="loading" style="color: red;">Erro ao renderizar diagrama: ' + error.message + '</div>';
+            }
+        }
+        
+        renderDiagram();
+    </script>
+</body>
+</html>
