@@ -60,12 +60,17 @@ jobs:
       continue-on-error: true
 
     - name: Instalar Graphviz
-      run: sudo apt-get update && sudo apt-get install -y graphviz
+      run: |
+        sudo apt-get update && sudo apt-get install -y graphviz
+        pip install pyparsing pydot
 
     - name: Gerar Diagrama de Classes UML
       run: |
         cd medsystem
         python manage.py graph_models -a -o diagrama_classes.png
+      env:
+        SECRET_KEY: "chave-fake-so-para-ci"
+        DEBUG: "True"
 
     - name: Fazer upload do Diagrama de Classes
       uses: actions/upload-artifact@v4
@@ -82,4 +87,3 @@ jobs:
 
       
 
-      
