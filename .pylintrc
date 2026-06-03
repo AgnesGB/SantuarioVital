@@ -1,0 +1,13 @@
+[MASTER]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    line-too-long,
+    import-error,
+    django-not-configured,
+
+[DESIGN]
+max-locals=15
+max-branches=15
+max-attributes=10
