@@ -1,9 +1,13 @@
 [MASTER]
+load-plugins=pylint_django
 disable=
     missing-module-docstring,
     missing-class-docstring,
     missing-function-docstring,
     line-too-long,
+    too-many-lines,
+    too-many-ancestors,
+    attribute-defined-outside-init,
     import-error,
     django-not-configured,
 
@@ -11,3 +15,6 @@ disable=
 max-locals=15
 max-branches=15
 max-attributes=10
+
+[django]
+django-settings-module=medsystem.settings

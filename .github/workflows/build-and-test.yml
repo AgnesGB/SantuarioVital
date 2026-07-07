@@ -42,6 +42,11 @@ jobs:
     - name: Run deprecation detector
       run: |
         python check_deprecations.py
+
+    - name: Run code smell detector
+      run: |
+        cd medsystem
+        SECRET_KEY=ci DJANGO_SETTINGS_MODULE=medsystem.settings python -m pylint --rcfile=../.pylintrc core/views.py core/models.py
     
     - name: Run migrations
       run: |
