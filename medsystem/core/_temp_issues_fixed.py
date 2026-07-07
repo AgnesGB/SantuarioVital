@@ -3,6 +3,7 @@ import logging
 
 # 1) Mutable default argument fixed
 
+
 def collect_items(item, items=None):
     if items is None:
         items = []
@@ -11,6 +12,7 @@ def collect_items(item, items=None):
 
 
 # 2) Handle specific exception and log
+
 
 def risky_divide(a, b):
     try:
@@ -22,11 +24,13 @@ def risky_divide(a, b):
 
 # 3) Removed unused variable
 
+
 def do_nothing():
     return True
 
 
 # 4) Extracted helper to remove duplication
+
 
 def _process_generic(data):
     result = []
@@ -47,6 +51,7 @@ def process_b(data):
 
 
 # 5) Simplified complex function
+
 
 def complex_function(n):
     if 0 <= n <= 9:

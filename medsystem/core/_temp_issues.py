@@ -4,12 +4,14 @@ import logging
 
 # 1) Mutable default argument (bug)
 
+
 def collect_items(item, items=[]):
     items.append(item)
     return items
 
 
 # 2) Bare except (code smell)
+
 
 def risky_divide(a, b):
     try:
@@ -20,12 +22,14 @@ def risky_divide(a, b):
 
 # 3) Unused variable (code smell)
 
+
 def do_nothing():
     x = 42
     return True
 
 
 # 4) Duplicate code blocks (duplication)
+
 
 def process_a(data):
     result = []
@@ -48,6 +52,7 @@ def process_b(data):
 
 
 # 5) Long function with many branches (complexity)
+
 
 def complex_function(n):
     if n == 0:
