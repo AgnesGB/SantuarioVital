@@ -58,16 +58,15 @@ jobs:
         echo "$PWD/sonar-scanner/bin" >> $GITHUB_PATH
 
     - name: Run SonarScanner
+      uses: SonarSource/sonarqube-scan-action@v5
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_ORG: ${{ secrets.SONAR_ORG }}
-      run: |
-        sonar-scanner \
-          -Dsonar.organization=${SONAR_ORG} \
-          -Dsonar.projectKey=AgnesGB_SantuarioVital \
-          -Dsonar.projectName=SantuarioVital \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=${SONAR_TOKEN}
+      with:
+        args: >
+          -Dsonar.organization=${{ secrets.SONAR_ORG }}
+          -Dsonar.projectKey=AgnesGB_SantuarioVital
+          -Dsonar.projectName=SantuarioVital
+          -Dsonar.host.url=https://sonarcloud.io
 
     - name: Run code smell detector
       run: |
