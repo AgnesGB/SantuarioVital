@@ -30,10 +30,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Check for duplicate code
         run: |
           echo "🔍 Checking for duplicate code..."
           python detect_duplicates.py medsystem/core
-

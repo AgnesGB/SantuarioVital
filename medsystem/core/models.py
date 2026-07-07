@@ -199,11 +199,13 @@ class RegistroMedico(models.Model):
         verbose_name_plural = "Registros Médicos"
 
     def __str__(self):
-        return f"{self.paciente.nome} - {self.doenca.nome if self.doenca else 'Sem diagnóstico'} - {self.data.strftime('%d/%m/%Y')}"
+        doenca_nome = self.doenca.nome if self.doenca else "Sem diagnóstico"
+        data_formatada = self.data.strftime("%d/%m/%Y")
+        return f"{self.paciente.nome} - {doenca_nome} - {data_formatada}"
 
 
 class Besta(models.Model):
-    NIVEL_AMEAÇA_CHOICES = [
+    NIVEL_AMEACA_CHOICES = [
         ("01", "1/10"),
         ("02", "2/10"),
         ("03", "3/10"),
@@ -218,7 +220,7 @@ class Besta(models.Model):
 
     nome = models.CharField(max_length=100)
     titulo = models.CharField(max_length=200, blank=True)
-    nivel_ameaca = models.CharField(max_length=2, choices=NIVEL_AMEAÇA_CHOICES, default="01")
+    nivel_ameaca = models.CharField(max_length=2, choices=NIVEL_AMEACA_CHOICES, default="01")
     aparencia = models.TextField()
     pode_contaminar = models.BooleanField(default=False)
     contagio = models.TextField(

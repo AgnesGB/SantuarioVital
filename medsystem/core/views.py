@@ -4,11 +4,10 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.db.models import Q
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic import (
     CreateView,
@@ -22,7 +21,6 @@ from django.views.generic import (
 from .forms import (
     AnotacaoPessoalForm,
     BestaForm,
-    CidadeForm,
     DiagnosticoForm,
     DoencaForm,
     IngredienteForm,
@@ -219,18 +217,6 @@ class RegistroMedicoCreateView(MedicoRequiredMixin, CreateView):
             if sintomas_texto.lower() in sintomas_doenca.lower():
                 return doenca
         return None
-
-
-class DoencaCreateView(MedicoRequiredMixin, CreateView):
-    model = Doenca
-    form_class = DoencaForm
-    template_name = "core/doenca_form.html"
-    success_url = reverse_lazy("doenca-list")
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        # Você pode adicionar lógica adicional aqui se necessário
-        return response
 
 
 class NovaDoencaView(MedicoRequiredMixin, CreateView):
@@ -453,13 +439,9 @@ class PacienteCreateView(MedicoRequiredMixin, CreateView):
     template_name = "core/paciente_form.html"
 
     def form_valid(self, form):
-        try:
-            self.object = form.save()
-            messages.success(self.request, "Salvo com sucesso!")
-            return redirect("paciente-list")
-        except Exception as e:
-            messages.error(self.request, f"ERRO GRAVE: {str(e)}")
-            return self.form_invalid(form)
+        form.save()
+        messages.success(self.request, "Salvo com sucesso!")
+        return redirect("paciente-list")
 
 
 class PacienteUpdateView(MedicoRequiredMixin, UpdateView):
@@ -728,8 +710,6 @@ def recuperar_senha(request):
     Recuperação de senha com rate limiting para prevenir brute force attacks.
     Limite: 5 tentativas por IP em 1 hora.
     """
-    from django.core.cache import cache
-
     if request.method == "POST":
         # Rate limiting: máximo 5 tentativas por IP em 1 hora
         ip = request.META.get("REMOTE_ADDR")
@@ -748,16 +728,16 @@ def recuperar_senha(request):
         # Incrementar tentativas
         cache.set(cache_key, attempts + 1, 3600)  # 1 hora
 
-        User = get_user_model()
+        user_model = get_user_model()
         try:
-            user = User.objects.get(username=username)
+            user = user_model.objects.get(username=username)
             user.set_password(new_password)
             user.save()
             # Limpar limite de tentativas após sucesso
             cache.delete(cache_key)
             messages.success(request, "Senha alterada com sucesso!")
             return redirect("login")
-        except User.DoesNotExist:
+        except user_model.DoesNotExist:
             # Não revelar se o usuário existe (proteção contra enumeration)
             messages.error(request, "Verifique o username e tente novamente.")
 
@@ -1001,13 +981,13 @@ class RemedioCreateView(MedicoRequiredMixin, CreateView):
         ingredientes_formset = context["ingredientes_formset"]
 
         if ingredientes_formset.is_valid():
-            self.object = form.save()
-            ingredientes_formset.instance = self.object
+            remedio = form.save()
+            ingredientes_formset.instance = remedio
             ingredientes_formset.save()
             messages.success(self.request, "Remédio criado com sucesso!")
             return redirect(self.success_url)
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class RemedioUpdateView(MedicoRequiredMixin, UpdateView):
@@ -1031,13 +1011,13 @@ class RemedioUpdateView(MedicoRequiredMixin, UpdateView):
         ingredientes_formset = context["ingredientes_formset"]
 
         if ingredientes_formset.is_valid():
-            self.object = form.save()
-            ingredientes_formset.instance = self.object
+            remedio = form.save()
+            ingredientes_formset.instance = remedio
             ingredientes_formset.save()
             messages.success(self.request, "Remédio atualizado com sucesso!")
             return redirect(self.success_url)
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class RemedioDeleteView(MedicoRequiredMixin, DeleteView):
