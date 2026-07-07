@@ -43,6 +43,16 @@ jobs:
       run: |
         python check_deprecations.py
 
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@v2
+      with:
+        organization: ${{ secrets.SONAR_ORG }}
+        token: ${{ secrets.SONAR_TOKEN }}
+        projectKey: AgnesGB_SantuarioVital
+        projectName: SantuarioVital
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Run code smell detector
       run: |
         cd medsystem
