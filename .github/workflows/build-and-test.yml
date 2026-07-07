@@ -46,11 +46,15 @@ jobs:
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@e44258b109568baa0df60ed515909fc6c72cba92
       with:
-        organization: ${{ secrets.SONAR_ORG }}
-        token: ${{ secrets.SONAR_TOKEN }}
-        projectKey: AgnesGB_SantuarioVital
-        projectName: SantuarioVital
+        # pass Sonar scanner properties via args
+        args: >
+          -Dsonar.organization=${{ secrets.SONAR_ORG }}
+          -Dsonar.projectKey=AgnesGB_SantuarioVital
+          -Dsonar.projectName=SantuarioVital
+          -Dsonar.host.url=https://sonarcloud.io
       env:
+        # action expects SONAR_TOKEN in env (or use -Dsonar.login)
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run code smell detector
