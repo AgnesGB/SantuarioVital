@@ -43,6 +43,31 @@ jobs:
       run: |
         python check_deprecations.py
 
+    - name: Set up Java 21
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Install SonarScanner CLI
+      run: |
+        wget -q https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip -O sonar-scanner.zip
+        unzip -q sonar-scanner.zip
+        mv sonar-scanner-4.8.0.2856-linux sonar-scanner
+        echo "SONAR_SCANNER_HOME=$PWD/sonar-scanner" >> $GITHUB_ENV
+        echo "$PWD/sonar-scanner/bin" >> $GITHUB_PATH
+
+    - name: Run SonarScanner
+      uses: SonarSource/sonarqube-scan-action@v5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.organization=${{ secrets.SONAR_ORG }}
+          -Dsonar.projectKey=AgnesGB_SantuarioVital
+          -Dsonar.projectName=SantuarioVital
+          -Dsonar.host.url=https://sonarcloud.io
+
     - name: Run code smell detector
       run: |
         cd medsystem
