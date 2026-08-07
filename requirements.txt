@@ -1,7 +1,7 @@
 Django>=5.2,<5.3
 Pillow>=10.0.0
 deprecation>=2.1.0
-flake8>=7.0.0
+flake8>=7.3.0
 flake8-bugbear>=25.11.29
 black>=24.3.0
 pylint>=3.0.0
