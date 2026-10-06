@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <form method="post" class="space-y-6">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
         
         <!-- Mensagens de Erro -->
@@ -352,6 +352,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Imagens -->
+        {% include 'core/_imagens_form.html' %}
 
         <!-- Botões de Ação -->
         <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl shadow-sm border border-gray-200 p-6">

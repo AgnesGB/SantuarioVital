@@ -16,7 +16,8 @@ from .models import (
     Tema,
     Livro,
     ComentarioLivro,
-    MapaTeorizacao
+    MapaTeorizacao,
+    Imagem
 )
 
 class RemedioIngredienteInline(admin.TabularInline):
@@ -45,3 +46,5 @@ admin.site.register(Tema)
 admin.site.register(Livro)
 admin.site.register(ComentarioLivro)
 admin.site.register(MapaTeorizacao)
+
+admin.site.register(Imagem)

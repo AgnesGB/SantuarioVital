@@ -31,6 +31,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Coluna Principal -->
         <div class="lg:col-span-2 space-y-6">
+            {% include 'core/_galeria.html' with imagens=relatorio.imagens.all %}
+
             <!-- Card de Localização -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">

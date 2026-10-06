@@ -1,0 +1,132 @@
+{# Modal de compartilhamento do mapa (só para o dono) #}
+<div id="modal-compartilhar" class="hidden fixed inset-0 z-[90] bg-black/40 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-share-alt text-indigo-600 mr-2"></i>Compartilhar "{{ mapa.titulo }}"</h2>
+            <button type="button" data-fechar class="w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Colaboradores -->
+            <section>
+                <h3 class="font-semibold text-gray-800 mb-1"><i class="fas fa-user-friends text-indigo-500 mr-1"></i>Colaboradores</h3>
+                <p class="text-xs text-gray-500 mb-3">Podem editar o mapa junto com você. As mudanças aparecem para todos em poucos segundos.</p>
+                <form id="form-colaborador" class="flex gap-2">
+                    <input id="campo-colaborador" list="lista-usuarios" placeholder="Apelido ou nome de usuário" autocomplete="off"
+                           class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none">
+                    <datalist id="lista-usuarios"></datalist>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium">Adicionar</button>
+                </form>
+                <p id="erro-colaborador" class="hidden text-sm text-red-600 mt-2"></p>
+                <ul id="lista-colaboradores" class="mt-3 divide-y divide-gray-100"></ul>
+            </section>
+
+            <!-- Link -->
+            <section class="pt-5 border-t border-gray-200">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-1"><i class="fas fa-link text-indigo-500 mr-1"></i>Link de visualização</h3>
+                        <p class="text-xs text-gray-500">Quem tiver o link (e uma conta no Edda) pode ver o mapa, mas não alterar.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                        <input id="link-ativo" type="checkbox" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-indigo-600 transition after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:bg-white after:rounded-full after:transition peer-checked:after:translate-x-5"></div>
+                    </label>
+                </div>
+                <div id="bloco-link" class="mt-3 hidden">
+                    <div class="flex gap-2">
+                        <input id="campo-link" readonly class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-xs bg-gray-50 text-gray-700">
+                        <button id="copiar-link" type="button" class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"><i class="fas fa-copy mr-1"></i><span>Copiar</span></button>
+                    </div>
+                    <button id="novo-link" type="button" class="mt-2 text-xs text-gray-500 hover:text-red-600"><i class="fas fa-redo mr-1"></i>Gerar novo link (o antigo para de funcionar)</button>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const modal = document.getElementById('modal-compartilhar');
+    const url = "{% url 'mapa-compartilhamento' mapa.pk %}";
+    const csrf = "{{ csrf_token }}";
+    const usuarios = JSON.parse(document.getElementById('usuarios-compartilhar').textContent);
+    let estado = {
+        link_ativo: {{ mapa.link_ativo|yesno:"true,false" }},
+        link: "{{ link_compartilhamento|escapejs }}",
+        colaboradores: [{% for u in mapa.colaboradores.all %}{ id: {{ u.pk }}, nickname: "{{ u.nickname|escapejs }}", username: "{{ u.username|escapejs }}" },{% endfor %}],
+    };
+
+    const lista = document.getElementById('lista-usuarios');
+    usuarios.forEach(u => {
+        const op = document.createElement('option');
+        op.value = u.username;
+        op.label = u.nickname;
+        lista.appendChild(op);
+    });
+
+    function render() {
+        document.getElementById('link-ativo').checked = estado.link_ativo;
+        document.getElementById('bloco-link').classList.toggle('hidden', !estado.link_ativo);
+        document.getElementById('campo-link').value = estado.link;
+        const ul = document.getElementById('lista-colaboradores');
+        ul.replaceChildren();
+        if (!estado.colaboradores.length) {
+            ul.innerHTML = '<li class="py-2 text-sm text-gray-400 italic">Ninguém ainda.</li>';
+        }
+        estado.colaboradores.forEach(c => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center gap-3 py-2';
+            li.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-sky-500 to-cyan-600 text-white text-xs font-semibold flex items-center justify-center"></div>
+                <div class="flex-1 min-w-0"><p class="text-sm font-medium text-gray-800 truncate"></p><p class="text-xs text-gray-400 truncate"></p></div>
+                <button type="button" class="text-xs text-red-600 hover:underline">Remover</button>`;
+            li.children[0].textContent = c.nickname.charAt(0).toUpperCase();
+            li.querySelector('p').textContent = c.nickname;
+            li.querySelectorAll('p')[1].textContent = '@' + c.username + ' · pode editar';
+            li.querySelector('button').addEventListener('click', () => enviar({ acao: 'remover', usuario_id: c.id }));
+            ul.appendChild(li);
+        });
+    }
+
+    async function enviar(dados) {
+        const erro = document.getElementById('erro-colaborador');
+        erro.classList.add('hidden');
+        const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+            body: JSON.stringify(dados),
+        });
+        const r = await resp.json().catch(() => ({ erro: 'Erro inesperado.' }));
+        if (!resp.ok) { erro.textContent = r.erro; erro.classList.remove('hidden'); return false; }
+        estado = r;
+        render();
+        return true;
+    }
+
+    document.getElementById('abrir-compartilhar').addEventListener('click', () => {
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+        document.getElementById('campo-colaborador').focus();
+    });
+    function fechar() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    modal.addEventListener('click', (e) => { if (e.target === modal || e.target.closest('[data-fechar]')) fechar(); });
+
+    document.getElementById('form-colaborador').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const campo = document.getElementById('campo-colaborador');
+        if (campo.value.trim() && await enviar({ acao: 'adicionar', usuario: campo.value.trim() })) campo.value = '';
+    });
+    document.getElementById('link-ativo').addEventListener('change', (e) => enviar({ acao: 'link', ativo: e.target.checked }));
+    document.getElementById('novo-link').addEventListener('click', () => {
+        if (confirm('Gerar um novo link? Quem tem o link antigo perde o acesso.')) enviar({ acao: 'novo_link' });
+    });
+    document.getElementById('copiar-link').addEventListener('click', async (e) => {
+        const campo = document.getElementById('campo-link');
+        try { await navigator.clipboard.writeText(campo.value); } catch { campo.select(); document.execCommand('copy'); }
+        const span = e.currentTarget.querySelector('span');
+        span.textContent = 'Copiado!';
+        setTimeout(() => span.textContent = 'Copiar', 1500);
+    });
+    render();
+})();
+</script>

@@ -106,6 +106,9 @@
                 {% for relatorio in object_list %}
                 <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
                     <div class="h-2 bg-gradient-to-r from-amber-600 to-orange-600"></div>
+                    {% with capa=relatorio.imagens.all.0 %}{% if capa %}
+                    <img src="{{ capa.arquivo.url }}" alt="" class="w-full h-40 object-cover">
+                    {% endif %}{% endwith %}
                     <div class="p-6 flex-1">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">

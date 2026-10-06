@@ -1,0 +1,70 @@
+{# Galeria de imagens para páginas de detalhe. Uso: {% include 'core/_galeria.html' with imagens=objeto.imagens.all %} #}
+{% if imagens %}
+<div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-gradient-to-r from-sky-600 to-cyan-600 px-6 py-4">
+        <h2 class="text-white font-bold text-lg flex items-center gap-2"><i class="fas fa-images"></i> Imagens <span class="text-sky-100 font-normal text-sm">({{ imagens|length }})</span></h2>
+    </div>
+    <div class="p-4">
+        {% with primeira=imagens.0 %}
+        <figure class="mb-3">
+            <img src="{{ primeira.arquivo.url }}" alt="{{ primeira.legenda }}" data-galeria-src="{{ primeira.arquivo.url }}" data-galeria-legenda="{{ primeira.legenda }}"
+                 class="galeria-item w-full max-h-[28rem] object-contain bg-gray-100 rounded-lg cursor-zoom-in">
+            {% if primeira.legenda %}<figcaption class="text-sm text-gray-600 mt-2 text-center italic">{{ primeira.legenda }}</figcaption>{% endif %}
+        </figure>
+        {% endwith %}
+        {% if imagens|length > 1 %}
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+            {% for img in imagens|slice:"1:" %}
+            <img src="{{ img.arquivo.url }}" alt="{{ img.legenda }}" title="{{ img.legenda }}" data-galeria-src="{{ img.arquivo.url }}" data-galeria-legenda="{{ img.legenda }}"
+                 class="galeria-item w-full h-24 object-cover rounded-lg cursor-zoom-in hover:opacity-80 transition">
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+(function () {
+    if (window.__galeriaPronta) return;
+    window.__galeriaPronta = true;
+    const fundo = document.createElement('div');
+    fundo.className = 'fixed inset-0 z-[100] bg-black/85 hidden items-center justify-center p-4 flex-col';
+    fundo.innerHTML = `
+        <button type="button" data-fechar class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20"><i class="fas fa-times"></i></button>
+        <button type="button" data-ant class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 text-white hover:bg-white/20"><i class="fas fa-chevron-left"></i></button>
+        <button type="button" data-prox class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 text-white hover:bg-white/20"><i class="fas fa-chevron-right"></i></button>
+        <img class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
+        <p class="text-white/90 mt-3 text-center"></p>`;
+    document.body.appendChild(fundo);
+    const img = fundo.querySelector('img'), legenda = fundo.querySelector('p');
+    let itens = [], atual = 0;
+
+    function mostrar(i) {
+        atual = (i + itens.length) % itens.length;
+        img.src = itens[atual].dataset.galeriaSrc;
+        legenda.textContent = itens[atual].dataset.galeriaLegenda || '';
+        fundo.querySelectorAll('[data-ant],[data-prox]').forEach(b => b.classList.toggle('hidden', itens.length < 2));
+    }
+    function fechar() { fundo.classList.add('hidden'); fundo.classList.remove('flex'); }
+
+    document.addEventListener('click', (e) => {
+        const alvo = e.target.closest('.galeria-item');
+        if (!alvo) return;
+        itens = [...document.querySelectorAll('.galeria-item')];
+        mostrar(itens.indexOf(alvo));
+        fundo.classList.remove('hidden'); fundo.classList.add('flex');
+    });
+    fundo.addEventListener('click', (e) => {
+        if (e.target.closest('[data-ant]')) mostrar(atual - 1);
+        else if (e.target.closest('[data-prox]')) mostrar(atual + 1);
+        else if (e.target !== img) fechar();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (fundo.classList.contains('hidden')) return;
+        if (e.key === 'Escape') fechar();
+        if (e.key === 'ArrowLeft') mostrar(atual - 1);
+        if (e.key === 'ArrowRight') mostrar(atual + 1);
+    });
+})();
+</script>
+{% endif %}

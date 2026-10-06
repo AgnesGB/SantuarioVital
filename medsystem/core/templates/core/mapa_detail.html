@@ -18,6 +18,7 @@
         border-radius: .75rem; background: #fff; border: 2px solid #e5e7eb;
         box-shadow: 0 4px 10px -2px rgba(0,0,0,.08);
     }
+    .no.no-imagem { width: 260px; }
     .no.selecionado { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,.2); }
     .no.alvo { border-color: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.25); }
     .no .alca {
@@ -31,7 +32,9 @@
     .aresta-hit { stroke: transparent; stroke-width: 14; fill: none; cursor: pointer; }
     .aresta.selecionada .aresta-linha { stroke: #6366f1; stroke-width: 3; }
     .aresta-rotulo { font-size: 12px; fill: #475569; font-family: Inter, sans-serif; pointer-events: none; }
-    .item-livro[draggable="true"] { cursor: grab; }
+    .item-registro[draggable="true"] { cursor: grab; }
+    .somente-leitura .alca { display: none; }
+    .somente-leitura .no { cursor: pointer; }
 </style>
 {% endblock %}
 
@@ -40,31 +43,64 @@
     <div class="min-w-0">
         <a href="{% url 'mapa-list' %}" class="text-sm text-gray-500 hover:text-indigo-700"><i class="fas fa-arrow-left mr-1"></i>Teorização</a>
         <h1 class="text-2xl font-bold text-gray-900 truncate">{{ mapa.titulo }}</h1>
+        {% if somente_leitura %}
+        <p class="text-sm text-gray-500 mt-0.5">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium mr-1"><i class="fas fa-eye"></i>Somente leitura</span>
+            Mapa de {{ mapa.usuario.nickname }}
+        </p>
+        {% endif %}
     </div>
     <div class="flex items-center gap-2 flex-wrap">
         <span id="status-salvo" class="text-xs text-gray-400 mr-2"><i class="fas fa-check mr-1"></i>Tudo salvo</span>
+        {% if not somente_leitura %}
+        <div class="flex -space-x-2 mr-1" title="Quem edita este mapa">
+            {% for p in participantes %}
+            <div class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-semibold {% if forloop.first %}bg-gradient-to-r from-indigo-500 to-purple-600{% else %}bg-gradient-to-r from-sky-500 to-cyan-600{% endif %}"
+                 title="{{ p.nickname }}{% if forloop.first %} (dono){% endif %}">{{ p.nickname|first|upper }}</div>
+            {% endfor %}
+        </div>
+        {% if eh_dono %}
+        <button id="abrir-compartilhar" type="button" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium"><i class="fas fa-share-alt mr-1"></i>Compartilhar</button>
+        {% endif %}
         <a href="{% url 'mapa-update' mapa.pk %}" class="px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 text-sm" title="Renomear"><i class="fas fa-pen"></i></a>
+        {% if eh_dono %}
         <a href="{% url 'mapa-delete' mapa.pk %}" class="px-3 py-2 bg-white border border-gray-200 text-red-600 rounded-lg hover:bg-red-50 text-sm" title="Excluir mapa"><i class="fas fa-trash"></i></a>
+        {% else %}
+        <form method="post" action="{% url 'mapa-sair' mapa.pk %}" onsubmit="return confirm('Sair deste mapa? Você deixará de poder editá-lo.');">
+            {% csrf_token %}
+            <button type="submit" class="px-3 py-2 bg-white border border-gray-200 text-red-600 rounded-lg hover:bg-red-50 text-sm" title="Sair do mapa"><i class="fas fa-sign-out-alt mr-1"></i>Sair</button>
+        </form>
+        {% endif %}
+        {% endif %}
     </div>
 </div>
 
 <div class="flex flex-col lg:flex-row gap-4">
     <!-- Painel lateral -->
+    {% if not somente_leitura %}
     <aside class="lg:w-72 shrink-0 bg-white rounded-xl shadow-md p-4 flex flex-col lg:h-[calc(100vh-230px)] lg:min-h-[480px]">
-        <button id="nova-ideia" type="button" class="w-full mb-4 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition text-sm font-medium">
-            <i class="fas fa-lightbulb mr-2"></i>Nova ideia
-        </button>
-        <p class="text-sm font-semibold text-gray-800 mb-2"><i class="fas fa-landmark text-amber-600 mr-1"></i>Livros do acervo</p>
-        <input id="busca-livro" type="text" placeholder="Buscar livro..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-2 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none">
-        <ul id="lista-livros" class="flex-1 overflow-y-auto space-y-1 max-h-64 lg:max-h-none -mx-1 px-1"></ul>
+        <div class="flex gap-2 mb-4">
+            <button id="nova-ideia" type="button" class="flex-1 px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition text-sm font-medium">
+                <i class="fas fa-lightbulb mr-1"></i>Ideia
+            </button>
+            <button id="nova-imagem" type="button" class="flex-1 px-3 py-2 bg-gradient-to-r from-sky-500 to-cyan-600 text-white rounded-lg hover:shadow-lg transition text-sm font-medium">
+                <i class="fas fa-image mr-1"></i>Imagem
+            </button>
+            <input id="arquivo-imagem" type="file" accept="image/*" multiple class="hidden">
+        </div>
+        <p class="text-sm font-semibold text-gray-800 mb-2"><i class="fas fa-database text-indigo-500 mr-1"></i>Registros</p>
+        <div id="filtros-tipo" class="flex flex-wrap gap-1 mb-2"></div>
+        <input id="busca-item" type="text" placeholder="Buscar..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-2 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none">
+        <ul id="lista-itens" class="flex-1 overflow-y-auto space-y-1 max-h-64 lg:max-h-none -mx-1 px-1"></ul>
         <div class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500 space-y-1">
-            <p><i class="fas fa-hand-pointer w-4"></i> Arraste um livro para a tela (ou clique em <i class="fas fa-plus"></i>)</p>
+            <p><i class="fas fa-hand-pointer w-4"></i> Arraste um registro (ou um arquivo de imagem) para a tela, ou clique em <i class="fas fa-plus"></i></p>
             <p><i class="fas fa-circle text-indigo-500 w-4"></i> Puxe a bolinha de um cartão até outro para conectar</p>
-            <p><i class="fas fa-mouse w-4"></i> Duplo clique: editar ideia / rótulo da conexão</p>
+            <p><i class="fas fa-mouse w-4"></i> Duplo clique: editar ideia, legenda ou rótulo da conexão</p>
             <p><i class="fas fa-arrows-up-down-left-right w-4"></i> Arraste o fundo para mover; roda do mouse para zoom</p>
             <p><i class="fas fa-delete-left w-4"></i> Delete apaga o item selecionado</p>
         </div>
     </aside>
+    {% endif %}
 
     <!-- Tela -->
     <section class="flex-1 min-w-0 bg-white rounded-xl shadow-md overflow-hidden flex flex-col">
@@ -77,11 +113,11 @@
             <div id="acoes-selecao" class="hidden ml-auto items-center gap-2">
                 <div id="cores" class="flex items-center gap-1"></div>
                 <button id="editar-selecao" type="button" class="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-100"><i class="fas fa-pen mr-1"></i><span>Editar</span></button>
-                <a id="abrir-livro" href="#" class="hidden px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-100 text-amber-700"><i class="fas fa-book-open mr-1"></i>Abrir livro</a>
+                <a id="abrir-item" href="#" target="_blank" class="hidden px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-100 text-indigo-700"><i class="fas fa-external-link-alt mr-1"></i>Abrir</a>
                 <button id="excluir-selecao" type="button" class="px-3 py-1.5 text-sm bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50"><i class="fas fa-trash mr-1"></i>Excluir</button>
             </div>
         </div>
-        <div id="tela">
+        <div id="tela"{% if somente_leitura %} class="somente-leitura"{% endif %}>
             <div id="mundo">
                 <svg id="arestas">
                     <defs>
@@ -100,24 +136,41 @@
             <div id="vazio" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div class="text-center text-gray-400">
                     <i class="fas fa-project-diagram text-5xl mb-3"></i>
-                    <p>Arraste livros do painel ou crie uma ideia para começar.</p>
+                    <p>{% if somente_leitura %}Este mapa ainda está vazio.{% else %}Arraste livros, expedições, criaturas... do painel, ou crie uma ideia para começar.{% endif %}</p>
                 </div>
             </div>
         </div>
     </section>
 </div>
 
-{{ livros_json|json_script:"livros-acervo" }}
+{{ itens_json|json_script:"itens-mapa" }}
+{{ imagens_mapa_json|json_script:"imagens-mapa" }}
 {{ dados_json|json_script:"dados-mapa" }}
+{% if eh_dono and not somente_leitura %}{{ usuarios_json|json_script:"usuarios-compartilhar" }}{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
 (function () {
-    const livros = JSON.parse(document.getElementById('livros-acervo').textContent);
-    const livroPorId = Object.fromEntries(livros.map(l => [l.id, l]));
+    // Tipos de registro que podem ir para o mapa
+    const TIPOS = {
+        livro:       { nome: 'Livro',      plural: 'Livros',      icone: 'fa-book',          cor: '#d97706', faixa: 'from-amber-500 to-orange-600' },
+        relatorio:   { nome: 'Expedição',  plural: 'Expedições',  icone: 'fa-map-marked-alt', cor: '#0d9488', faixa: 'from-teal-500 to-emerald-600' },
+        besta:       { nome: 'Criatura',   plural: 'Bestiário',   icone: 'fa-paw',           cor: '#dc2626', faixa: 'from-red-500 to-rose-600' },
+        doenca:      { nome: 'Doença',     plural: 'Doenças',     icone: 'fa-disease',       cor: '#db2777', faixa: 'from-pink-500 to-fuchsia-600' },
+        raca:        { nome: 'Raça',       plural: 'Raças',       icone: 'fa-users',         cor: '#4f46e5', faixa: 'from-indigo-500 to-blue-600' },
+        ingrediente: { nome: 'Ingrediente',plural: 'Ingredientes',icone: 'fa-leaf',          cor: '#16a34a', faixa: 'from-green-500 to-lime-600' },
+        remedio:     { nome: 'Remédio',    plural: 'Remédios',    icone: 'fa-pills',         cor: '#9333ea', faixa: 'from-purple-500 to-violet-600' },
+        paciente:    { nome: 'Paciente',   plural: 'Pacientes',   icone: 'fa-user-injured',  cor: '#2563eb', faixa: 'from-blue-500 to-sky-600' },
+    };
+    const itens = JSON.parse(document.getElementById('itens-mapa').textContent);
+    const itemPorChave = Object.fromEntries(itens.map(i => [i.tipo + ':' + i.id, i]));
+    const imagensMapa = JSON.parse(document.getElementById('imagens-mapa').textContent);
     const estado = JSON.parse(document.getElementById('dados-mapa').textContent);
+    // Mapas antigos guardavam livros como {tipo: 'livro', livro_id}
+    estado.nos.forEach(n => { if (n.livro_id !== undefined && n.ref_id === undefined) { n.ref_id = n.livro_id; delete n.livro_id; } });
     const urlSalvar = "{% url 'mapa-salvar' mapa.pk %}";
+    const urlImagem = "{% url 'mapa-imagem-enviar' mapa.pk %}";
     const csrf = "{{ csrf_token }}";
 
     const CORES = ['#ffffff', '#fef3c7', '#dcfce7', '#dbeafe', '#fce7f3', '#ede9fe', '#fee2e2'];
@@ -135,29 +188,129 @@
     const novoId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     const no = (id) => estado.nos.find(n => n.id === id);
 
-    // ---------- Salvamento automático ----------
-    let timerSalvar = null;
+    // ---------- Salvamento e sincronização entre colaboradores ----------
+    const SOMENTE_LEITURA = {{ somente_leitura|yesno:"true,false" }};
+    const urlEstado = "{{ url_estado }}";
+    let versao = estado.versao || 0;
+    delete estado.versao;
+    const clonar = (x) => JSON.parse(JSON.stringify(x));
+    // Último estado em comum com o servidor; serve de base para juntar edições simultâneas
+    let base = clonar({ nos: estado.nos, conexoes: estado.conexoes });
+    let timerSalvar = null, salvando = false, pendente = false;
+    const semAcesso = new Set();   // registros que este usuário não pode ver (ex.: pacientes)
+
+    function mostrarStatus(tipo, extra) {
+        const html = {
+            salvando: '<i class="fas fa-circle-notch fa-spin mr-1"></i>Salvando...',
+            salvo: '<i class="fas fa-check mr-1 text-green-500"></i>Salvo às ' + extra,
+            erro: '<i class="fas fa-exclamation-triangle mr-1 text-red-500"></i>Erro ao salvar — tentando de novo...',
+            atualizado: '<i class="fas fa-sync-alt mr-1 text-indigo-500"></i>Atualizado com as mudanças de outra pessoa',
+            aovivo: '<i class="fas fa-circle text-green-500 text-[8px] mr-1 align-middle"></i>Visualização ao vivo',
+        }[tipo];
+        statusSalvo.innerHTML = html;
+    }
+
+    // Aplica as alterações locais (o que mudou entre base e local) por cima do estado remoto
+    function mesclarLista(b, l, r) {
+        const B = new Map(b.map(x => [x.id, x])), L = new Map(l.map(x => [x.id, x]));
+        const res = new Map(r.map(x => [x.id, x]));
+        for (const [id, x] of L) {
+            const orig = B.get(id);
+            if (!orig || JSON.stringify(orig) !== JSON.stringify(x)) res.set(id, x);
+        }
+        for (const id of B.keys()) if (!L.has(id)) res.delete(id);
+        return [...res.values()];
+    }
+    function mesclar(b, l, r) {
+        const nos = mesclarLista(b.nos, l.nos, r.nos);
+        const ids = new Set(nos.map(n => n.id));
+        const conexoes = mesclarLista(b.conexoes, l.conexoes, r.conexoes).filter(c => ids.has(c.de) && ids.has(c.para));
+        return { nos, conexoes };
+    }
+    function aplicarEstado(novo) {
+        estado.nos = clonar(novo.nos);
+        estado.conexoes = clonar(novo.conexoes);
+        if (selecao && selecao.tipo === 'no' && !no(selecao.id)) selecao = null;
+        if (selecao && selecao.tipo === 'aresta' && !estado.conexoes.some(c => c.id === selecao.id)) selecao = null;
+        renderTudo();
+    }
+
     function alterado() {
-        statusSalvo.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i>Salvando...';
+        if (SOMENTE_LEITURA) return;
+        pendente = true;
+        mostrarStatus('salvando');
         clearTimeout(timerSalvar);
         timerSalvar = setTimeout(salvar, 700);
     }
     async function salvar() {
+        timerSalvar = null;
+        // Espera terminar de digitar: juntar com edições de outra pessoa redesenha os cartões
+        const editandoTexto = document.activeElement && document.activeElement.isContentEditable;
+        if (salvando || editandoTexto) { timerSalvar = setTimeout(salvar, 300); return; }
+        salvando = true;
+        pendente = false;
+        const enviado = clonar({ nos: estado.nos, conexoes: estado.conexoes });
         try {
             const resp = await fetch(urlSalvar, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-                body: JSON.stringify(estado),
+                body: JSON.stringify(Object.assign({ versao }, enviado)),
             });
             const dados = await resp.json();
-            if (!resp.ok) throw new Error(dados.erro);
-            statusSalvo.innerHTML = '<i class="fas fa-check mr-1 text-green-500"></i>Salvo às ' + dados.salvo_em;
+            if (resp.status === 409) {
+                // Outra pessoa salvou antes: junta as duas versões e salva de novo
+                Object.assign(imagensMapa, dados.imagens);
+                const juntado = mesclar(base, { nos: estado.nos, conexoes: estado.conexoes }, dados);
+                base = clonar({ nos: dados.nos, conexoes: dados.conexoes });
+                versao = dados.versao;
+                aplicarEstado(juntado);
+                pendente = true;
+                timerSalvar = setTimeout(salvar, 0);
+            } else if (!resp.ok) {
+                throw new Error(dados.erro);
+            } else {
+                versao = dados.versao;
+                base = enviado;
+                if (!pendente) mostrarStatus('salvo', dados.salvo_em);
+            }
         } catch (e) {
-            statusSalvo.innerHTML = '<i class="fas fa-exclamation-triangle mr-1 text-red-500"></i>Erro ao salvar — tentando de novo...';
+            mostrarStatus('erro');
+            pendente = true;
             timerSalvar = setTimeout(salvar, 4000);
+        } finally {
+            salvando = false;
         }
     }
-    window.addEventListener('beforeunload', (e) => { if (timerSalvar && statusSalvo.textContent.includes('Salvando')) { e.preventDefault(); e.returnValue = ''; } });
+    window.addEventListener('beforeunload', (e) => { if (pendente || salvando) { e.preventDefault(); e.returnValue = ''; } });
+
+    // Busca de tempos em tempos o que os outros fizeram (e os registros que ainda não conhecemos)
+    async function sincronizar() {
+        const editandoTexto = document.activeElement && document.activeElement.isContentEditable;
+        if (!salvando && !pendente && !acao && !editandoTexto) {
+            const faltam = [...new Set(estado.nos.filter(n => TIPOS[n.tipo]).map(n => n.tipo + ':' + n.ref_id))]
+                .filter(k => !itemPorChave[k] && !semAcesso.has(k));
+            try {
+                const resp = await fetch(urlEstado + (faltam.length ? '?faltam=' + encodeURIComponent(faltam.join(',')) : ''));
+                if (resp.ok) {
+                    const dados = await resp.json();
+                    let redesenhar = false;
+                    dados.itens.forEach(i => { itemPorChave[i.tipo + ':' + i.id] = i; redesenhar = true; });
+                    faltam.filter(k => !itemPorChave[k]).forEach(k => semAcesso.add(k));
+                    Object.assign(imagensMapa, dados.imagens);
+                    // Confere de novo: o usuário pode ter mexido enquanto o pedido estava no ar
+                    if (dados.versao > versao && !salvando && !pendente && !acao) {
+                        versao = dados.versao;
+                        base = clonar({ nos: dados.nos, conexoes: dados.conexoes });
+                        aplicarEstado(dados);
+                        mostrarStatus(SOMENTE_LEITURA ? 'aovivo' : 'atualizado');
+                    } else if (redesenhar) {
+                        renderTudo();
+                    }
+                }
+            } catch (e) { /* sem conexão: tenta na próxima */ }
+        }
+        setTimeout(sincronizar, document.hidden ? 15000 : 4000);
+    }
 
     // ---------- Câmera ----------
     function aplicarView() {
@@ -216,19 +369,36 @@
     // ---------- Nós ----------
     function conteudoNo(n, el) {
         el.style.background = n.cor || '#ffffff';
-        if (n.tipo === 'livro') {
-            const l = livroPorId[n.livro_id];
+        el.classList.toggle('no-imagem', n.tipo === 'imagem');
+        if (TIPOS[n.tipo]) {
+            const t = TIPOS[n.tipo];
+            const item = itemPorChave[n.tipo + ':' + n.ref_id];
             el.innerHTML = `
-                <div class="h-1.5 rounded-t-[10px] bg-gradient-to-r from-amber-500 to-orange-600"></div>
+                <div class="h-1.5 rounded-t-[10px] bg-gradient-to-r ${t.faixa}"></div>
+                <img class="capa hidden w-full h-28 object-cover" draggable="false">
                 <div class="p-3">
-                    <p class="text-[10px] uppercase tracking-wide text-amber-700 font-semibold mb-1"><i class="fas fa-book mr-1"></i><span class="tema"></span></p>
+                    <p class="text-[10px] uppercase tracking-wide font-semibold mb-1" style="color:${t.cor}"><i class="fas ${t.icone} mr-1"></i>${t.nome}</p>
                     <p class="titulo font-bold text-gray-800 leading-snug"></p>
-                    <p class="autor text-xs text-gray-500 mt-0.5"></p>
+                    <p class="sub text-xs text-gray-500 mt-0.5"></p>
                 </div>`;
-            el.querySelector('.tema').textContent = l ? l.tema : 'Livro';
-            el.querySelector('.titulo').textContent = l ? l.titulo : 'Livro removido do acervo';
-            el.querySelector('.autor').textContent = l ? l.autor : '';
-            if (l && l.resumo) el.title = l.resumo;
+            el.querySelector('.titulo').textContent = item ? item.titulo : t.nome + ' removido(a)';
+            el.querySelector('.sub').textContent = item ? item.subtitulo : '';
+            if (item && item.imagem) {
+                const capa = el.querySelector('.capa');
+                capa.src = item.imagem;
+                capa.classList.remove('hidden');
+                capa.addEventListener('load', renderArestas);
+            }
+            if (item && item.resumo) el.title = item.resumo;
+        } else if (n.tipo === 'imagem') {
+            const img = imagensMapa[n.ref_id];
+            el.innerHTML = `
+                <img class="foto w-full rounded-t-[10px] max-h-72 object-contain bg-gray-50" draggable="false">
+                <p class="legenda px-3 py-2 text-xs text-gray-600 italic whitespace-pre-wrap break-words empty:hidden"></p>`;
+            const foto = el.querySelector('.foto');
+            if (img) { foto.src = img.url; foto.addEventListener('load', renderArestas); }
+            else foto.alt = 'Imagem não encontrada';
+            el.querySelector('.legenda').textContent = n.texto || '';
         } else {
             el.innerHTML = `
                 <div class="p-3">
@@ -258,7 +428,7 @@
             elementos[n.id] = el;
         });
         document.getElementById('vazio').classList.toggle('hidden', estado.nos.length > 0);
-        renderListaLivros();
+        renderListaItens();
     }
 
     // ---------- Arestas ----------
@@ -339,11 +509,22 @@
         acoes.classList.toggle('flex', !!selecao);
         if (!selecao) return;
         const cores = document.getElementById('cores');
-        const abrir = document.getElementById('abrir-livro');
+        const abrir = document.getElementById('abrir-item');
         const editar = document.getElementById('editar-selecao');
         cores.replaceChildren();
         abrir.classList.add('hidden');
         editar.classList.remove('hidden');
+        if (SOMENTE_LEITURA) {
+            // Quem só visualiza pode apenas abrir o registro
+            editar.classList.add('hidden');
+            document.getElementById('excluir-selecao').classList.add('hidden');
+            const n = selecao.tipo === 'no' ? no(selecao.id) : null;
+            const alvo = n && (TIPOS[n.tipo] ? itemPorChave[n.tipo + ':' + n.ref_id] : n.tipo === 'imagem' ? imagensMapa[n.ref_id] : null);
+            if (alvo) { abrir.href = alvo.url; abrir.classList.remove('hidden'); }
+            acoes.classList.toggle('hidden', !alvo);
+            acoes.classList.toggle('flex', !!alvo);
+            return;
+        }
         if (selecao.tipo === 'no') {
             const n = no(selecao.id);
             CORES.forEach(cor => {
@@ -355,10 +536,14 @@
                 b.addEventListener('click', () => { n.cor = cor; elementos[n.id].style.background = cor; renderSelecao(); alterado(); });
                 cores.appendChild(b);
             });
-            if (n.tipo === 'livro') {
+            if (TIPOS[n.tipo]) {
                 editar.classList.add('hidden');
-                const l = livroPorId[n.livro_id];
-                if (l) { abrir.href = l.url; abrir.classList.remove('hidden'); }
+                const item = itemPorChave[n.tipo + ':' + n.ref_id];
+                if (item) { abrir.href = item.url; abrir.classList.remove('hidden'); }
+            } else if (n.tipo === 'imagem') {
+                editar.querySelector('span').textContent = 'Legenda';
+                const img = imagensMapa[n.ref_id];
+                if (img) { abrir.href = img.url; abrir.classList.remove('hidden'); }
             } else {
                 editar.querySelector('span').textContent = 'Editar ideia';
             }
@@ -386,6 +571,20 @@
         renderArestas();
         alterado();
     }
+    function editarLegenda(id) {
+        const n = no(id);
+        const valor = prompt('Legenda da imagem:', n.texto || '');
+        if (valor === null) return;
+        n.texto = valor.trim();
+        elementos[id].querySelector('.legenda').textContent = n.texto;
+        renderArestas();
+        alterado();
+    }
+    function editarNo(id) {
+        const n = no(id);
+        if (n.tipo === 'ideia') editarIdeia(id);
+        else if (n.tipo === 'imagem') editarLegenda(id);
+    }
     function editarIdeia(id) {
         const el = elementos[id];
         const t = el.querySelector('.texto-ideia');
@@ -406,24 +605,41 @@
     }
 
     // ---------- Adicionar ----------
-    function adicionarLivro(livroId, pos) {
-        const existente = estado.nos.find(n => n.tipo === 'livro' && n.livro_id === livroId);
-        if (existente) { selecionar({ tipo: 'no', id: existente.id }); focarNo(existente); return; }
+    function adicionarNo(dados, pos) {
         const p = pos || centroDaTela();
-        const n = { id: novoId('n'), tipo: 'livro', livro_id: livroId, texto: '', x: Math.round(p.x), y: Math.round(p.y), cor: '#ffffff' };
+        const n = Object.assign({ id: novoId('n'), texto: '', cor: '#ffffff' }, dados, { x: Math.round(p.x), y: Math.round(p.y) });
         estado.nos.push(n);
         selecao = { tipo: 'no', id: n.id };
         renderTudo();
         alterado();
+        return n;
+    }
+    function adicionarItem(tipo, refId, pos) {
+        const existente = estado.nos.find(n => n.tipo === tipo && n.ref_id === refId);
+        if (existente) { selecionar({ tipo: 'no', id: existente.id }); focarNo(existente); return; }
+        adicionarNo({ tipo, ref_id: refId }, pos);
     }
     function adicionarIdeia() {
-        const p = centroDaTela();
-        const n = { id: novoId('n'), tipo: 'ideia', texto: 'Nova ideia', x: Math.round(p.x), y: Math.round(p.y), cor: '#ede9fe' };
-        estado.nos.push(n);
-        selecao = { tipo: 'no', id: n.id };
-        renderTudo();
-        alterado();
+        const n = adicionarNo({ tipo: 'ideia', texto: 'Nova ideia', cor: '#ede9fe' });
         editarIdeia(n.id);
+    }
+    async function enviarImagens(files, pos) {
+        const lista = [...files].filter(f => f.type.startsWith('image/'));
+        for (const [i, file] of lista.entries()) {
+            statusSalvo.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i>Enviando imagem...';
+            const fd = new FormData();
+            fd.append('imagem', file);
+            try {
+                const resp = await fetch(urlImagem, { method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf } });
+                const dados = await resp.json();
+                if (!resp.ok) throw new Error(dados.erro || 'Falha no envio');
+                imagensMapa[dados.id] = { url: dados.url, legenda: '' };
+                const p = pos ? { x: pos.x + i * 30, y: pos.y + i * 30 } : undefined;
+                adicionarNo({ tipo: 'imagem', ref_id: dados.id }, p);
+            } catch (e) {
+                statusSalvo.innerHTML = '<i class="fas fa-exclamation-triangle mr-1 text-red-500"></i>' + e.message;
+            }
+        }
     }
     function focarNo(n) {
         const r = tela.getBoundingClientRect(), el = elementos[n.id];
@@ -432,46 +648,94 @@
         aplicarView();
     }
 
-    // ---------- Lista de livros ----------
-    const buscaLivro = document.getElementById('busca-livro');
-    function renderListaLivros() {
-        const lista = document.getElementById('lista-livros');
-        const termo = buscaLivro.value.trim().toLowerCase();
-        const noMapa = new Set(estado.nos.filter(n => n.tipo === 'livro').map(n => n.livro_id));
+    // ---------- Lista de registros ----------
+    const buscaItem = document.getElementById('busca-item');
+    const filtrosTipo = document.getElementById('filtros-tipo');
+    let filtroTipo = '';
+    function renderFiltros() {
+        if (SOMENTE_LEITURA) return;
+        const presentes = Object.keys(TIPOS).filter(t => itens.some(i => i.tipo === t));
+        filtrosTipo.replaceChildren();
+        [''].concat(presentes).forEach(t => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            const ativo = filtroTipo === t;
+            b.className = 'px-2 py-0.5 rounded-full text-xs border transition ' + (ativo ? 'text-white border-transparent' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50');
+            if (ativo) b.style.background = t ? TIPOS[t].cor : '#6366f1';
+            b.innerHTML = t ? `<i class="fas ${TIPOS[t].icone} mr-1"></i>${TIPOS[t].plural}` : 'Todos';
+            b.addEventListener('click', () => { filtroTipo = t; renderFiltros(); renderListaItens(); });
+            filtrosTipo.appendChild(b);
+        });
+    }
+    function renderListaItens() {
+        if (SOMENTE_LEITURA) return;
+        const lista = document.getElementById('lista-itens');
+        const termo = buscaItem.value.trim().toLowerCase();
+        const noMapa = new Set(estado.nos.map(n => n.tipo + ':' + n.ref_id));
         lista.replaceChildren();
-        const filtrados = livros.filter(l => !termo || (l.titulo + ' ' + l.autor + ' ' + l.tema).toLowerCase().includes(termo));
+        const filtrados = itens.filter(i => (!filtroTipo || i.tipo === filtroTipo) &&
+            (!termo || (i.titulo + ' ' + i.subtitulo + ' ' + i.resumo).toLowerCase().includes(termo)));
         if (!filtrados.length) {
-            lista.innerHTML = '<li class="text-sm text-gray-400 italic px-2 py-1">' + (livros.length ? 'Nenhum livro encontrado.' : 'O acervo ainda não tem livros.') + '</li>';
+            lista.innerHTML = '<li class="text-sm text-gray-400 italic px-2 py-1">Nada encontrado.</li>';
             return;
         }
-        filtrados.forEach(l => {
+        filtrados.forEach(i => {
+            const t = TIPOS[i.tipo], chave = i.tipo + ':' + i.id, esta = noMapa.has(chave);
             const li = document.createElement('li');
-            li.className = 'item-livro flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-indigo-50 group';
+            li.className = 'item-registro flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-indigo-50';
             li.draggable = true;
             li.innerHTML = `
-                <i class="fas fa-book text-amber-500 text-sm"></i>
+                <span class="w-7 h-7 rounded-md shrink-0 flex items-center justify-center overflow-hidden" style="background:${t.cor}1a;color:${t.cor}"><i class="fas ${t.icone} text-xs"></i></span>
                 <div class="flex-1 min-w-0"><p class="t text-sm text-gray-800 truncate"></p><p class="a text-xs text-gray-400 truncate"></p></div>
                 <button type="button" class="w-7 h-7 rounded-lg text-indigo-600 hover:bg-indigo-100 shrink-0"></button>`;
-            li.querySelector('.t').textContent = l.titulo;
-            li.querySelector('.a').textContent = l.tema;
+            if (i.imagem) {
+                const mini = li.querySelector('span');
+                mini.innerHTML = '';
+                mini.style.background = `center/cover url("${i.imagem}")`;
+            }
+            li.querySelector('.t').textContent = i.titulo;
+            li.querySelector('.a').textContent = t.nome + (i.subtitulo ? ' · ' + i.subtitulo : '');
             const b = li.querySelector('button');
-            b.innerHTML = noMapa.has(l.id) ? '<i class="fas fa-crosshairs text-xs"></i>' : '<i class="fas fa-plus text-xs"></i>';
-            b.title = noMapa.has(l.id) ? 'Já está no mapa — mostrar' : 'Adicionar ao mapa';
-            if (noMapa.has(l.id)) li.querySelector('.t').classList.add('text-indigo-700', 'font-medium');
-            b.addEventListener('click', () => adicionarLivro(l.id));
-            li.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/livro-id', String(l.id)));
+            b.innerHTML = esta ? '<i class="fas fa-crosshairs text-xs"></i>' : '<i class="fas fa-plus text-xs"></i>';
+            b.title = esta ? 'Já está no mapa — mostrar' : 'Adicionar ao mapa';
+            if (esta) li.querySelector('.t').classList.add('text-indigo-700', 'font-medium');
+            b.addEventListener('click', () => adicionarItem(i.tipo, i.id));
+            li.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/item-mapa', chave));
             lista.appendChild(li);
         });
     }
-    buscaLivro.addEventListener('input', renderListaLivros);
+    if (buscaItem) buscaItem.addEventListener('input', renderListaItens);
 
-    tela.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('text/livro-id')) e.preventDefault(); });
+    tela.addEventListener('dragover', (e) => {
+        if (SOMENTE_LEITURA) return;
+        if (e.dataTransfer.types.includes('text/item-mapa') || e.dataTransfer.types.includes('Files')) e.preventDefault();
+    });
     tela.addEventListener('drop', (e) => {
-        const id = Number(e.dataTransfer.getData('text/livro-id'));
-        if (!id) return;
-        e.preventDefault();
+        if (SOMENTE_LEITURA) return;
         const p = telaParaMundo(e.clientX, e.clientY);
-        adicionarLivro(id, { x: p.x - 105, y: p.y - 30 });
+        const pos = { x: p.x - 105, y: p.y - 30 };
+        if (e.dataTransfer.files.length) {
+            e.preventDefault();
+            enviarImagens(e.dataTransfer.files, pos);
+            return;
+        }
+        const chave = e.dataTransfer.getData('text/item-mapa');
+        if (!chave) return;
+        e.preventDefault();
+        const [tipo, id] = chave.split(':');
+        adicionarItem(tipo, Number(id), pos);
+    });
+    const arquivoImagem = document.getElementById('arquivo-imagem');
+    if (!SOMENTE_LEITURA) {
+        document.getElementById('nova-imagem').addEventListener('click', () => arquivoImagem.click());
+        arquivoImagem.addEventListener('change', () => { enviarImagens(arquivoImagem.files); arquivoImagem.value = ''; });
+    }
+    // Colar uma imagem (Ctrl+V) também adiciona ao mapa
+    document.addEventListener('paste', (e) => {
+        if (SOMENTE_LEITURA) return;
+        if (e.target.isContentEditable || ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+        const files = [...e.clipboardData.files];
+        if (files.length) { e.preventDefault(); enviarImagens(files); }
     });
 
     // ---------- Interações com o ponteiro ----------
@@ -484,7 +748,7 @@
         const elNo = e.target.closest('.no');
         const elAresta = e.target.closest('.aresta');
 
-        if (alca && elNo) {
+        if (alca && elNo && !SOMENTE_LEITURA) {
             const n = no(elNo.dataset.id);
             acao = { tipo: 'conectar', de: n };
             const c = centro(n);
@@ -494,6 +758,7 @@
         } else if (elNo) {
             const n = no(elNo.dataset.id);
             selecionar({ tipo: 'no', id: n.id });
+            if (SOMENTE_LEITURA) return;
             const p = telaParaMundo(e.clientX, e.clientY);
             acao = { tipo: 'mover', no: n, dx: p.x - n.x, dy: p.y - n.y, moveu: false };
         } else if (elAresta) {
@@ -562,9 +827,10 @@
     window.addEventListener('pointercancel', terminarAcao);
 
     tela.addEventListener('dblclick', (e) => {
+        if (SOMENTE_LEITURA) return;
         const elNo = e.target.closest('.no');
         const elAresta = e.target.closest('.aresta');
-        if (elNo && no(elNo.dataset.id).tipo === 'ideia') editarIdeia(elNo.dataset.id);
+        if (elNo) editarNo(elNo.dataset.id);
         else if (elAresta) editarRotulo(elAresta.dataset.id);
     });
 
@@ -576,23 +842,27 @@
     document.addEventListener('keydown', (e) => {
         const editando = e.target.isContentEditable || ['INPUT', 'TEXTAREA'].includes(e.target.tagName);
         if (editando) return;
-        if ((e.key === 'Delete' || e.key === 'Backspace') && selecao) { e.preventDefault(); excluirSelecao(); }
+        if ((e.key === 'Delete' || e.key === 'Backspace') && selecao && !SOMENTE_LEITURA) { e.preventDefault(); excluirSelecao(); }
         if (e.key === 'Escape') selecionar(null);
     });
 
     document.querySelectorAll('[data-zoom]').forEach(b => b.addEventListener('click', () => zoom(Number(b.dataset.zoom))));
     document.getElementById('enquadrar').addEventListener('click', enquadrar);
-    document.getElementById('nova-ideia').addEventListener('click', adicionarIdeia);
+    if (!SOMENTE_LEITURA) document.getElementById('nova-ideia').addEventListener('click', adicionarIdeia);
     document.getElementById('excluir-selecao').addEventListener('click', excluirSelecao);
     document.getElementById('editar-selecao').addEventListener('click', () => {
         if (!selecao) return;
         if (selecao.tipo === 'aresta') editarRotulo(selecao.id);
-        else editarIdeia(selecao.id);
+        else editarNo(selecao.id);
     });
 
+    renderFiltros();
     aplicarView();
     renderTudo();
     if (estado.nos.length) enquadrar();
+    if (SOMENTE_LEITURA) mostrarStatus('aovivo');
+    setTimeout(sincronizar, 4000);
 })();
 </script>
+{% if eh_dono and not somente_leitura %}{% include 'core/_mapa_compartilhar.html' %}{% endif %}
 {% endblock %}

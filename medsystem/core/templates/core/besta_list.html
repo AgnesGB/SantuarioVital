@@ -126,6 +126,9 @@
                         {% elif besta.nivel_ameaca <= '07' %}bg-orange-500
                         {% else %}bg-red-500{% endif %}">
                     </div>
+                    {% with capa=besta.imagens.all.0 %}{% if capa %}
+                    <img src="{{ capa.arquivo.url }}" alt="" class="w-full h-40 object-cover">
+                    {% endif %}{% endwith %}
                     <div class="p-6 flex-1">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">

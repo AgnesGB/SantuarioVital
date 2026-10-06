@@ -1,5 +1,11 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 class Usuario(AbstractUser):
     TIPO_CHOICES = [
@@ -64,6 +70,7 @@ class Doenca(models.Model):
     sintomas = models.TextField('Sintomas', blank=True, help_text="Descreva os sintomas, separados por vírgula")
     tratamento = models.TextField(blank=True, help_text="Protocolo de tratamento recomendado")
     reacoes_esperadas = models.TextField(blank=True, help_text="Reações esperadas ao tratamento")
+    imagens = GenericRelation('Imagem')
 
     class Meta:
         verbose_name = "Doença"
@@ -92,6 +99,7 @@ class Raca(models.Model):
     alimentacao = models.TextField(blank=True, verbose_name="Alimentação")
     peculiaridades = models.TextField(blank=True, verbose_name="Peculiaridades")
     observacoes = models.TextField(blank=True, verbose_name="Observações")
+    imagens = GenericRelation('Imagem')
 
     class Meta:
         verbose_name = "Raça"
@@ -202,6 +210,7 @@ class Besta(models.Model):
         related_name='bestas'
     )
     anotacoes = models.TextField(blank=True)
+    imagens = GenericRelation('Imagem')
 
     def __str__(self):
         return f"{self.nome} - {self.get_nivel_ameaca_display()}"
@@ -213,6 +222,7 @@ class RelatorioExpedicao(models.Model):
     descobertas = models.TextField()
     observacoes = models.TextField(blank=True)
     autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    imagens = GenericRelation('Imagem')
 
     class Meta:
         ordering = ['-data']
@@ -243,6 +253,7 @@ class Ingrediente(models.Model):
     contra_indicacoes = models.TextField(blank=True, verbose_name="Contraindicações", help_text="Situações em que não deve ser usado")
     reacoes_adversas = models.TextField(blank=True, verbose_name="Reações adversas", help_text="Possíveis efeitos colaterais")
     cuidados_ao_uso = models.TextField(blank=True, verbose_name="Cuidados ao uso", help_text="Precauções necessárias")
+    imagens = GenericRelation('Imagem')
 
     class Meta:
         verbose_name = "Ingrediente"
@@ -260,6 +271,7 @@ class Remedio(models.Model):
     ingredientes = models.ManyToManyField(Ingrediente, through='RemedioIngrediente', related_name='remedios')
     doencas = models.ManyToManyField(Doenca, blank=True, related_name='remedios', verbose_name="Doenças", help_text="Doenças que este remédio trata")
     observacoes = models.TextField(blank=True, verbose_name="Observações")
+    imagens = GenericRelation('Imagem')
 
     class Meta:
         verbose_name = "Remédio"
@@ -327,6 +339,7 @@ class Livro(models.Model):
     adicionado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
+    imagens = GenericRelation('Imagem')
 
     class Meta:
         verbose_name = "Livro"
@@ -373,9 +386,18 @@ class MapaTeorizacao(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='mapas')
     titulo = models.CharField(max_length=150, verbose_name="Título")
     descricao = models.TextField(blank=True, verbose_name="Descrição")
-    # {"nos": [{"id", "tipo": "livro"|"ideia", "livro_id", "texto", "x", "y", "cor"}],
+    # {"nos": [{"id", "tipo", "ref_id", "texto", "x", "y", "cor"}],
     #  "conexoes": [{"id", "de", "para", "rotulo"}]}
+    # tipo: "ideia", "imagem" (ref_id = Imagem deste mapa) ou um registro do sistema
+    # ("livro", "relatorio", "besta", "doenca", "raca", "ingrediente", "remedio", "paciente")
     dados = models.JSONField(default=dict, blank=True)
+    imagens = GenericRelation('Imagem')
+    # Aumenta a cada salvamento; usado para detectar edições simultâneas de colaboradores
+    versao = models.PositiveIntegerField(default=0)
+    # Compartilhamento: colaboradores editam; quem tem o link (se ativo) só visualiza
+    colaboradores = models.ManyToManyField(Usuario, blank=True, related_name='mapas_colaborando')
+    link_ativo = models.BooleanField(default=False, verbose_name="Link de visualização ativo")
+    token_link = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
 
@@ -386,3 +408,36 @@ class MapaTeorizacao(models.Model):
 
     def __str__(self):
         return f"{self.titulo} - {self.usuario.nickname}"
+
+    def pode_editar(self, usuario):
+        return usuario.pk == self.usuario_id or self.colaboradores.filter(pk=usuario.pk).exists()
+
+
+# Imagens (galeria genérica: expedições, bestiário, livros, doenças...)
+
+def caminho_imagem(instancia, nome_arquivo):
+    return f"imagens/{instancia.content_type.model}/{instancia.object_id}/{nome_arquivo}"
+
+
+class Imagem(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    item = GenericForeignKey('content_type', 'object_id')
+    arquivo = models.ImageField(upload_to=caminho_imagem, verbose_name="Imagem")
+    legenda = models.CharField(max_length=200, blank=True, verbose_name="Legenda")
+    enviada_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    data_envio = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Imagem"
+        verbose_name_plural = "Imagens"
+        ordering = ['data_envio', 'pk']
+        indexes = [models.Index(fields=['content_type', 'object_id'])]
+
+    def __str__(self):
+        return self.legenda or self.arquivo.name
+
+
+@receiver(post_delete, sender=Imagem)
+def apagar_arquivo_imagem(sender, instance, **kwargs):
+    instance.arquivo.delete(save=False)

@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from .mixins import MedicoRequiredMixin, AdminRequiredMixin
+from .imagens import ImagensMixin, salvar_imagens
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from datetime import datetime
@@ -100,13 +101,13 @@ class DoencaDetailView(LoginRequiredMixin, DetailView):
     template_name = 'core/doenca_detail.html'
     context_object_name = 'doenca'
 
-class DoencaCreateView(MedicoRequiredMixin, CreateView):
+class DoencaCreateView(ImagensMixin, MedicoRequiredMixin, CreateView):
     model = Doenca
     form_class = DoencaForm
     template_name = 'core/doenca_form.html'
     success_url = reverse_lazy('doenca-list')
 
-class DoencaUpdateView(MedicoRequiredMixin, UpdateView):
+class DoencaUpdateView(ImagensMixin, MedicoRequiredMixin, UpdateView):
     model = Doenca
     form_class = DoencaForm
     template_name = 'core/doenca_form.html'
@@ -170,7 +171,7 @@ class RegistroMedicoCreateView(MedicoRequiredMixin, CreateView):
                 return doenca
         return None
 
-class DoencaCreateView(MedicoRequiredMixin, CreateView):
+class DoencaCreateView(ImagensMixin, MedicoRequiredMixin, CreateView):
     model = Doenca
     form_class = DoencaForm
     template_name = 'core/doenca_form.html'
@@ -200,7 +201,7 @@ class BestaListView(LoginRequiredMixin, ListView):
     context_object_name = 'bestas'
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().prefetch_related('imagens')
         
         # Filtros
         nome = self.request.GET.get('nome')
@@ -222,7 +223,7 @@ class BestaListView(LoginRequiredMixin, ListView):
         context['request'] = self.request
         return context
 
-class BestaCreateView(LoginRequiredMixin, CreateView):
+class BestaCreateView(ImagensMixin, LoginRequiredMixin, CreateView):
     model = Besta
     form_class = BestaForm
     template_name = 'core/besta_form.html'
@@ -235,7 +236,7 @@ class BestaCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse('besta-detail', kwargs={'pk': self.object.pk})
 
-class BestaUpdateView(LoginRequiredMixin, UpdateView):
+class BestaUpdateView(ImagensMixin, LoginRequiredMixin, UpdateView):
     model = Besta
     form_class = BestaForm
     template_name = 'core/besta_form.html'
@@ -479,7 +480,7 @@ class RelatorioExpedicaoListView(LoginRequiredMixin, ListView):
     ordering = ['-data']
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().prefetch_related('imagens')
         
         # Filtro por título
         titulo = self.request.GET.get('titulo')
@@ -508,7 +509,7 @@ class RelatorioExpedicaoListView(LoginRequiredMixin, ListView):
         
         return queryset
 
-class RelatorioExpedicaoCreateView(LoginRequiredMixin, CreateView):
+class RelatorioExpedicaoCreateView(ImagensMixin, LoginRequiredMixin, CreateView):
     model = RelatorioExpedicao
     fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
     template_name = 'core/relatorio_form.html'
@@ -524,7 +525,7 @@ class RelatorioExpedicaoDetailView(LoginRequiredMixin, DetailView):
     template_name = 'core/relatorio_detail.html'
     context_object_name = 'relatorio'  # Isso define o nome da variável no template
 
-class RelatorioExpedicaoUpdateView(LoginRequiredMixin, UpdateView):
+class RelatorioExpedicaoUpdateView(ImagensMixin, LoginRequiredMixin, UpdateView):
     model = RelatorioExpedicao
     fields = ['titulo', 'localizacao', 'descobertas', 'observacoes']
     template_name = 'core/relatorio_form.html'
@@ -704,7 +705,7 @@ class RacaDetailView(LoginRequiredMixin, DetailView):
     template_name = 'core/raca_detail.html'
     context_object_name = 'raca'
 
-class RacaCreateView(AdminRequiredMixin, CreateView):
+class RacaCreateView(ImagensMixin, AdminRequiredMixin, CreateView):
     model = Raca
     form_class = RacaForm
     template_name = 'core/raca_form.html'
@@ -714,7 +715,7 @@ class RacaCreateView(AdminRequiredMixin, CreateView):
         messages.success(self.request, 'Raça criada com sucesso!')
         return super().form_valid(form)
 
-class RacaUpdateView(AdminRequiredMixin, UpdateView):
+class RacaUpdateView(ImagensMixin, AdminRequiredMixin, UpdateView):
     model = Raca
     form_class = RacaForm
     template_name = 'core/raca_form.html'
@@ -774,7 +775,7 @@ class IngredienteDetailView(LoginRequiredMixin, DetailView):
     template_name = 'core/ingrediente_detail.html'
     context_object_name = 'ingrediente'
 
-class IngredienteCreateView(MedicoRequiredMixin, CreateView):
+class IngredienteCreateView(ImagensMixin, MedicoRequiredMixin, CreateView):
     model = Ingrediente
     form_class = IngredienteForm
     template_name = 'core/ingrediente_form.html'
@@ -784,7 +785,7 @@ class IngredienteCreateView(MedicoRequiredMixin, CreateView):
         messages.success(self.request, 'Ingrediente criado com sucesso!')
         return super().form_valid(form)
 
-class IngredienteUpdateView(MedicoRequiredMixin, UpdateView):
+class IngredienteUpdateView(ImagensMixin, MedicoRequiredMixin, UpdateView):
     model = Ingrediente
     form_class = IngredienteForm
     template_name = 'core/ingrediente_form.html'
@@ -888,6 +889,7 @@ class RemedioCreateView(MedicoRequiredMixin, CreateView):
             self.object = form.save()
             ingredientes_formset.instance = self.object
             ingredientes_formset.save()
+            salvar_imagens(self.request, self.object)
             messages.success(self.request, 'Remédio criado com sucesso!')
             return redirect(self.success_url)
         else:
@@ -915,6 +917,7 @@ class RemedioUpdateView(MedicoRequiredMixin, UpdateView):
             self.object = form.save()
             ingredientes_formset.instance = self.object
             ingredientes_formset.save()
+            salvar_imagens(self.request, self.object)
             messages.success(self.request, 'Remédio atualizado com sucesso!')
             return redirect(self.success_url)
         else:

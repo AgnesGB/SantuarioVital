@@ -1,9 +1,14 @@
 import json
+import os
+import tempfile
+from datetime import timedelta
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import ComentarioLivro, Livro, MapaTeorizacao, Tema, Usuario
+from .models import (Besta, Cidade, ComentarioLivro, Imagem, Livro, MapaTeorizacao, Paciente, RelatorioExpedicao, Tema,
+                     Usuario)
 
 
 class AcervoTests(TestCase):
@@ -96,3 +101,155 @@ class TeorizacaoTests(TestCase):
         resp = self.client.post(reverse('mapa-salvar', args=[self.mapa.pk]),
                                 json.dumps({'nos': [], 'conexoes': []}), content_type='application/json')
         self.assertEqual(resp.status_code, 404)
+
+
+def imagem_teste(nome='teste.png'):
+    from io import BytesIO
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from PIL import Image as PILImage
+    buf = BytesIO()
+    PILImage.new('RGB', (8, 8), 'red').save(buf, 'PNG')
+    return SimpleUploadedFile(nome, buf.getvalue(), content_type='image/png')
+
+
+MEDIA_TESTE = tempfile.mkdtemp()
+
+
+@override_settings(MEDIA_ROOT=MEDIA_TESTE)
+class ImagensTests(TestCase):
+    def setUp(self):
+        self.ana = Usuario.objects.create_user(username='ana', password='x', nickname='Ana', tipo='ADM')
+        self.client.force_login(self.ana)
+
+    def test_relatorio_com_imagens_e_legenda(self):
+        resp = self.client.post(reverse('relatorio-create'), {
+            'titulo': 'Vale', 'localizacao': 'Norte', 'descobertas': 'Ruínas',
+            'imagens_novas': [imagem_teste('a.png'), imagem_teste('b.png')], 'legenda_nova': ['Entrada', ''],
+        })
+        self.assertEqual(resp.status_code, 302)
+        relatorio = RelatorioExpedicao.objects.get()
+        self.assertEqual([i.legenda for i in relatorio.imagens.all()], ['Entrada', ''])
+        self.assertContains(self.client.get(reverse('relatorio-detail', args=[relatorio.pk])), 'Entrada')
+
+    def test_arquivo_que_nao_e_imagem_e_ignorado(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        self.client.post(reverse('relatorio-create'), {
+            'titulo': 'Vale', 'localizacao': 'Norte', 'descobertas': 'Ruínas',
+            'imagens_novas': [SimpleUploadedFile('x.png', b'nada', content_type='image/png')],
+        })
+        self.assertEqual(Imagem.objects.count(), 0)
+
+    def test_remover_imagem_ao_editar(self):
+        besta = Besta.objects.create(nome='Lobo', aparencia='Cinza', habilidades='Uivar')
+        img = Imagem.objects.create(item=besta, arquivo=imagem_teste())
+        caminho = img.arquivo.path
+        resp = self.client.post(reverse('besta-update', args=[besta.pk]), {
+            'nome': 'Lobo', 'titulo': '', 'nivel_ameaca': '02', 'aparencia': 'Cinza', 'habilidades': 'Uivar',
+            'remover_imagem': [img.pk],
+        })
+        self.assertEqual(resp.status_code, 302, getattr(resp, 'context', None) and resp.context['form'].errors)
+        self.assertFalse(besta.imagens.exists())
+        self.assertFalse(os.path.exists(caminho))
+
+    def test_mapa_imagem_e_catalogo(self):
+        mapa = MapaTeorizacao.objects.create(usuario=self.ana, titulo='M', dados={'nos': [], 'conexoes': []})
+        Besta.objects.create(nome='Lobo', aparencia='Cinza', habilidades='Uivar')
+        Paciente.objects.create(nome='Joana', idade=30, cidade=Cidade.objects.create(nome='Norte', funcao='Vila'))
+        resp = self.client.post(reverse('mapa-imagem-enviar', args=[mapa.pk]), {'imagem': imagem_teste()})
+        self.assertEqual(resp.status_code, 201)
+        img_id = resp.json()['id']
+        tela = self.client.get(reverse('mapa-detail', args=[mapa.pk]))
+        tipos = {i['tipo'] for i in tela.context['itens_json']}
+        self.assertTrue({'besta', 'paciente'} <= tipos)
+        self.assertIn(img_id, tela.context['imagens_mapa_json'])
+
+        # Imagem que saiu do mapa é apagada (depois do tempo de folga)
+        Imagem.objects.filter(pk=img_id).update(data_envio=timezone.now() - timedelta(hours=1))
+        self.client.post(reverse('mapa-salvar', args=[mapa.pk]), json.dumps({'nos': [], 'conexoes': []}),
+                         content_type='application/json')
+        self.assertFalse(Imagem.objects.filter(pk=img_id).exists())
+
+    def test_paciente_fora_do_catalogo_para_nao_medicos(self):
+        from .views_acervo import catalogo_teorizacao
+        Paciente.objects.create(nome='Joana', idade=30, cidade=Cidade.objects.create(nome='Norte', funcao='Vila'))
+        comum = Usuario.objects.create_user(username='c', password='x', nickname='C', tipo='OUT')
+        self.assertNotIn('paciente', {i['tipo'] for i in catalogo_teorizacao(comum)})
+
+
+class CompartilhamentoTests(TestCase):
+    def setUp(self):
+        self.ana = Usuario.objects.create_user(username='ana', password='x', nickname='Ana')
+        self.bia = Usuario.objects.create_user(username='bia', password='x', nickname='Bia')
+        self.caio = Usuario.objects.create_user(username='caio', password='x', nickname='Caio')
+        self.livro = Livro.objects.create(titulo='Herbário', tema=Tema.objects.create(nome='Ervas'))
+        Livro.objects.create(titulo='Fora do mapa', tema=self.livro.tema)
+        self.mapa = MapaTeorizacao.objects.create(usuario=self.ana, titulo='Teoria', dados={
+            'nos': [{'id': 'n1', 'tipo': 'livro', 'ref_id': self.livro.pk, 'x': 0, 'y': 0}], 'conexoes': []})
+        self.link = reverse('mapa-compartilhado', args=[self.mapa.token_link])
+
+    def salvar(self, usuario, versao, nos):
+        self.client.force_login(usuario)
+        return self.client.post(reverse('mapa-salvar', args=[self.mapa.pk]),
+                                json.dumps({'versao': versao, 'nos': nos, 'conexoes': []}), content_type='application/json')
+
+    def compartilhar(self, quem, **dados):
+        self.client.force_login(quem)
+        return self.client.post(reverse('mapa-compartilhamento', args=[self.mapa.pk]), json.dumps(dados),
+                                content_type='application/json')
+
+    def test_link_desativado_nao_abre(self):
+        self.client.force_login(self.bia)
+        self.assertEqual(self.client.get(self.link).status_code, 404)
+
+    def test_link_ativo_abre_somente_leitura(self):
+        self.compartilhar(self.ana, acao='link', ativo=True)
+        self.client.force_login(self.bia)
+        resp = self.client.get(self.link)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.context['somente_leitura'])
+        self.assertEqual([i['titulo'] for i in resp.context['itens_json']], ['Herbário'])
+        self.assertEqual(self.client.get(reverse('mapa-compartilhado-estado', args=[self.mapa.token_link])).status_code, 200)
+        # Quem só tem o link não edita nem abre o editor
+        self.assertEqual(self.salvar(self.bia, 0, []).status_code, 404)
+        self.assertEqual(self.client.get(reverse('mapa-detail', args=[self.mapa.pk])).status_code, 404)
+
+    def test_link_exige_login(self):
+        self.compartilhar(self.ana, acao='link', ativo=True)
+        self.client.logout()
+        self.assertEqual(self.client.get(self.link).status_code, 302)
+
+    def test_novo_link_invalida_o_antigo(self):
+        self.compartilhar(self.ana, acao='link', ativo=True)
+        self.compartilhar(self.ana, acao='novo_link')
+        self.client.force_login(self.bia)
+        self.assertEqual(self.client.get(self.link).status_code, 404)
+
+    def test_colaborador_edita(self):
+        resp = self.compartilhar(self.ana, acao='adicionar', usuario='Bia')
+        self.assertEqual([c['username'] for c in resp.json()['colaboradores']], ['bia'])
+        self.client.force_login(self.bia)
+        tela = self.client.get(reverse('mapa-detail', args=[self.mapa.pk]))
+        self.assertFalse(tela.context['somente_leitura'])
+        self.assertFalse(tela.context['eh_dono'])
+        self.assertEqual(self.salvar(self.bia, 0, []).status_code, 200)
+        self.assertIn(self.mapa, [m for m in self.client.get(reverse('mapa-list')).context['compartilhados']])
+        # Pelo link, o colaborador vai direto para o editor
+        self.assertRedirects(self.client.get(self.link), reverse('mapa-detail', args=[self.mapa.pk]))
+
+    def test_conflito_de_versao(self):
+        self.compartilhar(self.ana, acao='adicionar', usuario='bia')
+        self.assertEqual(self.salvar(self.ana, 0, []).status_code, 200)
+        resp = self.salvar(self.bia, 0, [{'id': 'n2', 'tipo': 'ideia', 'x': 0, 'y': 0}])
+        self.assertEqual(resp.status_code, 409)
+        self.assertEqual(resp.json()['versao'], 1)
+        self.assertEqual(self.salvar(self.bia, 1, [{'id': 'n2', 'tipo': 'ideia', 'x': 0, 'y': 0}]).status_code, 200)
+
+    def test_so_dono_gerencia_e_exclui(self):
+        self.compartilhar(self.ana, acao='adicionar', usuario='bia')
+        self.assertEqual(self.compartilhar(self.bia, acao='adicionar', usuario='caio').status_code, 404)
+        self.assertEqual(self.client.post(reverse('mapa-delete', args=[self.mapa.pk])).status_code, 404)
+        self.client.post(reverse('mapa-sair', args=[self.mapa.pk]))
+        self.assertFalse(self.mapa.colaboradores.exists())
+
+    def test_usuario_inexistente(self):
+        self.assertEqual(self.compartilhar(self.ana, acao='adicionar', usuario='ninguem').status_code, 400)

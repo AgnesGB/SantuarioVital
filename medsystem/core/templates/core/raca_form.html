@@ -23,7 +23,7 @@
 
 
     <!-- Formulário -->
-    <form method="post" class="space-y-6">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
         
         <!-- Seção 1: Informações Básicas -->
@@ -296,6 +296,9 @@ Ex: Raça predominante no continente. Adaptáveis a diversos climas. Boa relaç�
                 </div>
             </div>
         </div>
+
+        <!-- Imagens -->
+        {% include 'core/_imagens_form.html' %}
 
         <!-- Botões de Ação -->
         <div class="flex flex-wrap gap-4 pb-8 justify-end">

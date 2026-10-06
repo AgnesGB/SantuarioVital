@@ -22,7 +22,7 @@
     </div>
 
     <!-- Formulário -->
-    <form method="post" class="space-y-6">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
         
         <!-- Seção 1: Informações Básicas -->
@@ -176,6 +176,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Imagens -->
+        {% include 'core/_imagens_form.html' %}
 
         <!-- Botões de Ação -->
         <div class="flex gap-3 justify-end pb-6">

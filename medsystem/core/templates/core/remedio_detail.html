@@ -15,6 +15,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Coluna Principal -->
         <div class="lg:col-span-2 space-y-6">
+            {% include 'core/_galeria.html' with imagens=remedio.imagens.all %}
+
             <!-- Card: Descrição -->
             {% if remedio.descricao %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">

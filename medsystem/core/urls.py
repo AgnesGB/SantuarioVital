@@ -119,5 +119,11 @@ urlpatterns = [
     path('teorizacao/<int:pk>/editar/', views_acervo.MapaUpdateView.as_view(), name='mapa-update'),
     path('teorizacao/<int:pk>/excluir/', views_acervo.MapaDeleteView.as_view(), name='mapa-delete'),
     path('teorizacao/<int:pk>/salvar/', views_acervo.mapa_salvar, name='mapa-salvar'),
+    path('teorizacao/<int:pk>/imagens/', views_acervo.mapa_imagem_enviar, name='mapa-imagem-enviar'),
+    path('teorizacao/<int:pk>/estado/', views_acervo.mapa_estado, name='mapa-estado'),
+    path('teorizacao/<int:pk>/compartilhamento/', views_acervo.mapa_compartilhamento, name='mapa-compartilhamento'),
+    path('teorizacao/<int:pk>/sair/', views_acervo.mapa_sair, name='mapa-sair'),
+    path('teorizacao/compartilhado/<uuid:token>/', views_acervo.mapa_compartilhado, name='mapa-compartilhado'),
+    path('teorizacao/compartilhado/<uuid:token>/estado/', views_acervo.mapa_compartilhado_estado, name='mapa-compartilhado-estado'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

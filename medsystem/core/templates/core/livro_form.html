@@ -22,9 +22,12 @@
     </div>
     {% endif %}
 
-    <form method="post" enctype="multipart/form-data" class="acervo-form bg-white rounded-2xl shadow-lg border border-gray-200 p-6 space-y-5">
+    <form method="post" enctype="multipart/form-data" class="acervo-form space-y-6">
         {% csrf_token %}
-        {% include 'core/_acervo_form_campos.html' %}
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 space-y-5">
+            {% include 'core/_acervo_form_campos.html' %}
+        </div>
+        {% include 'core/_imagens_form.html' %}
         <div class="flex justify-end gap-3 pt-2">
             <a href="{% if form.instance.pk %}{% url 'livro-detail' form.instance.pk %}{% else %}{% url 'acervo' %}{% endif %}" class="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Cancelar</a>
             <button type="submit" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition font-medium">Salvar</button>
