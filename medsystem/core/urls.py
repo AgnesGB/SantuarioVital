@@ -13,7 +13,8 @@ from .views import (
     AnotacaoListView, AnotacaoCreateView, AnotacaoDetailView, AnotacaoUpdateView, AnotacaoDeleteView, recuperar_senha, DiagnosticoDetailView,
     RacaListView, RacaDetailView, RacaCreateView, RacaUpdateView, RacaDeleteView,
     IngredienteListView, IngredienteDetailView, IngredienteCreateView, IngredienteUpdateView, IngredienteDeleteView,
-    RemedioListView, RemedioDetailView, RemedioCreateView, RemedioUpdateView, RemedioDeleteView, alterar_tipo_usuario
+    RemedioListView, RemedioDetailView, RemedioCreateView, RemedioUpdateView, RemedioDeleteView, alterar_tipo_usuario,
+    UsuarioUpdateView, UsuarioDeleteView
 )
 from . import views_acervo
 from django.contrib.auth import views as auth_views
@@ -27,6 +28,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
     path('recuperar-senha/', recuperar_senha, name='recuperar_senha'),
     path('usuario/<int:usuario_id>/alterar-tipo/', alterar_tipo_usuario, name='alterar-tipo-usuario'),
+    path('usuario/<int:pk>/editar/', UsuarioUpdateView.as_view(), name='usuario-update'),
+    path('usuario/<int:pk>/excluir/', UsuarioDeleteView.as_view(), name='usuario-delete'),
     
     # Doenças
     path('doencas/', DoencaListView.as_view(), name='doenca-list'),

@@ -8,15 +8,36 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
 class Usuario(AbstractUser):
+    # Só MED e ADM têm permissões especiais; as demais profissões são apenas identificação
     TIPO_CHOICES = [
         ('MED', 'Médico'),
+        ('ENG', 'Engenheiro'),
+        ('FER', 'Ferreiro'),
+        ('COZ', 'Cozinheiro'),
+        ('ALQ', 'Alquimista'),
+        ('BRU', 'Bruxo'),
         ('OUT', 'Outro'),
         ('ADM', 'Administrador'),
     ]
+    CORES_TIPO = {
+        'MED': 'bg-green-100 text-green-700',
+        'ENG': 'bg-slate-200 text-slate-700',
+        'FER': 'bg-orange-100 text-orange-700',
+        'COZ': 'bg-red-100 text-red-700',
+        'ALQ': 'bg-teal-100 text-teal-700',
+        'BRU': 'bg-purple-100 text-purple-700',
+        'OUT': 'bg-gray-100 text-gray-700',
+        'ADM': 'bg-yellow-100 text-yellow-700',
+    }
 
     nickname = models.CharField(max_length=100)
     tipo = models.CharField(max_length=3, choices=TIPO_CHOICES, default='OUT')
     cidade = models.ForeignKey('Cidade', on_delete=models.SET_NULL, null=True, blank=True)
+
+    @property
+    def classes_tipo(self):
+        """Classes Tailwind da etiqueta da profissão."""
+        return self.CORES_TIPO.get(self.tipo, self.CORES_TIPO['OUT'])
 
     def __str__(self):
         return self.nickname

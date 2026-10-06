@@ -3,12 +3,12 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.http import JsonResponse
 from .models import Doenca, RelatorioExpedicao, Usuario, Besta, Cidade, Paciente, RegistroMedico, Diagnostico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente
-from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, CidadeForm, DiagnosticoForm, AnotacaoPessoalForm, RacaForm, IngredienteForm, RemedioForm, RemedioIngredienteFormSet
+from .forms import UsuarioCreationForm, DoencaForm, BestaForm, PacienteForm, RegistroMedicoForm, CidadeForm, DiagnosticoForm, AnotacaoPessoalForm, RacaForm, IngredienteForm, RemedioForm, RemedioIngredienteFormSet, UsuarioAdminForm
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from .mixins import MedicoRequiredMixin, AdminRequiredMixin
 from .imagens import ImagensMixin, salvar_imagens
 from django.views.decorators.http import require_POST
@@ -38,7 +38,9 @@ def alterar_tipo_usuario(request, usuario_id):
     usuario = get_object_or_404(Usuario, id=usuario_id)
     novo_tipo = request.POST.get('tipo')
     
-    if novo_tipo in ['MED', 'OUT', 'ADM']:
+    if usuario.pk == request.user.pk and novo_tipo != 'ADM':
+        messages.error(request, 'Você não pode remover o seu próprio acesso de administrador.')
+    elif novo_tipo in dict(Usuario.TIPO_CHOICES):
         usuario.tipo = novo_tipo
         usuario.save()
         messages.success(request, f'Tipo de usuário de {usuario.nickname} alterado para {usuario.get_tipo_display()}.')
@@ -52,8 +54,56 @@ class HomeView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['usuarios'] = Usuario.objects.all().order_by('nickname')
+        context['usuarios'] = Usuario.objects.select_related('cidade').order_by('nickname')
+        context['tipos_usuario'] = Usuario.TIPO_CHOICES
         return context
+
+
+class UsuarioUpdateView(AdminRequiredMixin, UpdateView):
+    model = Usuario
+    form_class = UsuarioAdminForm
+    template_name = 'core/usuario_form.html'
+    context_object_name = 'usuario'
+    success_url = reverse_lazy('home')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['editor'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        resposta = super().form_valid(form)
+        if self.object.pk == self.request.user.pk and form.cleaned_data.get('nova_senha'):
+            update_session_auth_hash(self.request, self.object)   # não desloga quem trocou a própria senha
+        messages.success(self.request, f'Usuário {self.object.nickname} atualizado com sucesso!')
+        return resposta
+
+
+class UsuarioDeleteView(AdminRequiredMixin, DeleteView):
+    model = Usuario
+    template_name = 'core/usuario_confirm_delete.html'
+    context_object_name = 'usuario'
+    success_url = reverse_lazy('home')
+
+    def get_queryset(self):
+        # Ninguém exclui a própria conta por aqui
+        return super().get_queryset().exclude(pk=self.request.user.pk)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        u = self.object
+        # O que é apagado junto com a conta
+        context['apagados'] = [(nome, total) for nome, total in [
+            ('relatório(s) de expedição', u.relatorioexpedicao_set.count()),
+            ('anotação(ões) pessoal(is)', u.anotacoes.count()),
+            ('mapa(s) de teorização', u.mapas.count()),
+            ('comentário(s) em livros', u.comentarios_livro.count()),
+        ] if total]
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Usuário {self.object.nickname} excluído.')
+        return super().form_valid(form)
 
 class BunkerDetailView(DetailView):
     model = Cidade

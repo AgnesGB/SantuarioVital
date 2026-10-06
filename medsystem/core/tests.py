@@ -253,3 +253,56 @@ class CompartilhamentoTests(TestCase):
 
     def test_usuario_inexistente(self):
         self.assertEqual(self.compartilhar(self.ana, acao='adicionar', usuario='ninguem').status_code, 400)
+
+
+class UsuariosAdminTests(TestCase):
+    def setUp(self):
+        self.adm = Usuario.objects.create_user(username='adm', password='x', nickname='Adm', tipo='ADM')
+        self.joao = Usuario.objects.create_user(username='joao', password='x', nickname='João', tipo='OUT')
+        self.client.force_login(self.adm)
+
+    def dados(self, u, **extra):
+        return {'username': u.username, 'nickname': u.nickname, 'tipo': u.tipo, 'cidade': '', 'is_active': 'on', **extra}
+
+    def test_home_mostra_profissoes(self):
+        self.joao.tipo = 'BRU'
+        self.joao.save()
+        resp = self.client.get(reverse('home'))
+        self.assertContains(resp, 'Bruxo')
+        self.assertContains(resp, 'Alquimista')   # opção no menu do admin
+
+    def test_alterar_tipo_para_nova_profissao(self):
+        self.client.post(reverse('alterar-tipo-usuario', args=[self.joao.pk]), {'tipo': 'FER'})
+        self.joao.refresh_from_db()
+        self.assertEqual(self.joao.get_tipo_display(), 'Ferreiro')
+
+    def test_admin_edita_usuario_e_senha(self):
+        resp = self.client.post(reverse('usuario-update', args=[self.joao.pk]),
+                                self.dados(self.joao, nickname='Joãozinho', tipo='ALQ', nova_senha='SenhaNova!2026'))
+        self.assertRedirects(resp, reverse('home'))
+        self.joao.refresh_from_db()
+        self.assertEqual((self.joao.nickname, self.joao.tipo), ('Joãozinho', 'ALQ'))
+        self.assertTrue(self.joao.check_password('SenhaNova!2026'))
+
+    def test_admin_nao_se_rebaixa_nem_se_desativa(self):
+        resp = self.client.post(reverse('usuario-update', args=[self.adm.pk]), self.dados(self.adm, tipo='OUT'))
+        self.assertEqual(resp.status_code, 200)
+        dados = self.dados(self.adm)
+        del dados['is_active']
+        self.assertEqual(self.client.post(reverse('usuario-update', args=[self.adm.pk]), dados).status_code, 200)
+        self.client.post(reverse('alterar-tipo-usuario', args=[self.adm.pk]), {'tipo': 'MED'})
+        self.adm.refresh_from_db()
+        self.assertEqual((self.adm.tipo, self.adm.is_active), ('ADM', True))
+
+    def test_excluir_usuario(self):
+        RelatorioExpedicao.objects.create(titulo='T', localizacao='L', descobertas='D', autor=self.joao)
+        tela = self.client.get(reverse('usuario-delete', args=[self.joao.pk]))
+        self.assertContains(tela, '1 relatório(s) de expedição')
+        self.client.post(reverse('usuario-delete', args=[self.joao.pk]))
+        self.assertFalse(Usuario.objects.filter(pk=self.joao.pk).exists())
+        self.assertEqual(self.client.get(reverse('usuario-delete', args=[self.adm.pk])).status_code, 404)
+
+    def test_nao_admin_nao_gerencia(self):
+        self.client.force_login(self.joao)
+        self.assertEqual(self.client.get(reverse('usuario-update', args=[self.adm.pk])).status_code, 403)
+        self.assertEqual(self.client.post(reverse('usuario-delete', args=[self.adm.pk])).status_code, 403)

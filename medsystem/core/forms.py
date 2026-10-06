@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth import password_validation
 from .models import Usuario, RelatorioExpedicao, Cidade, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente, Tema, Livro, MapaTeorizacao
 from django.forms.widgets import DateInput
 from django.contrib.auth.forms import UserCreationForm
@@ -267,3 +268,52 @@ class MapaTeorizacaoForm(forms.ModelForm):
             'titulo': forms.TextInput(attrs={'class': 'input'}),
             'descricao': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
         }
+
+class UsuarioAdminForm(forms.ModelForm):
+    """Edição de usuários feita por um administrador."""
+    nova_senha = forms.CharField(
+        required=False, label='Nova senha',
+        widget=forms.PasswordInput(attrs={'class': 'input', 'autocomplete': 'new-password'}),
+        help_text='Deixe em branco para manter a senha atual.',
+    )
+
+    class Meta:
+        model = Usuario
+        fields = ['username', 'nickname', 'tipo', 'cidade', 'is_active']
+        labels = {'username': 'Nome de usuário (login)', 'nickname': 'Apelido', 'tipo': 'Profissão',
+                  'is_active': 'Conta ativa (desmarque para bloquear o login sem apagar nada)'}
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'input'}),
+            'nickname': forms.TextInput(attrs={'class': 'input'}),
+            'tipo': forms.Select(attrs={'class': 'select'}),
+            'cidade': forms.Select(attrs={'class': 'select'}),
+        }
+
+    def __init__(self, *args, editor=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.editor = editor
+        self.fields['username'].help_text = ''
+
+    def clean(self):
+        cleaned = super().clean()
+        # Um administrador não pode tirar o próprio acesso de administrador
+        if self.editor is not None and self.instance.pk == self.editor.pk:
+            if cleaned.get('tipo') != 'ADM':
+                self.add_error('tipo', 'Você não pode remover o seu próprio acesso de administrador.')
+            if not cleaned.get('is_active'):
+                self.add_error('is_active', 'Você não pode desativar a sua própria conta.')
+        senha = cleaned.get('nova_senha')
+        if senha:
+            try:
+                password_validation.validate_password(senha, self.instance)
+            except forms.ValidationError as erro:
+                self.add_error('nova_senha', erro)
+        return cleaned
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        if self.cleaned_data.get('nova_senha'):
+            usuario.set_password(self.cleaned_data['nova_senha'])
+        if commit:
+            usuario.save()
+        return usuario
