@@ -1,0 +1,24 @@
+{% for t in temas %}
+<li>
+    {% if t.filhos %}
+    <details {% if t.pk in caminho_ids %}open{% endif %} class="group">
+        <summary class="list-none flex items-center gap-1 rounded-lg cursor-pointer {% if t.pk == tema_atual_id %}bg-amber-100 text-amber-900 font-semibold{% else %}text-gray-700 hover:bg-amber-50{% endif %}">
+            <span class="w-5 h-7 flex items-center justify-center text-gray-400 shrink-0">
+                <i class="fas fa-chevron-right text-[10px] transition-transform group-open:rotate-90"></i>
+            </span>
+            <a href="{% url 'tema-detail' t.pk %}" class="flex-1 py-1.5 pr-2 truncate text-sm" title="{{ t.nome }}">{{ t.nome }}</a>
+            <span class="text-xs text-gray-400 pr-2">{{ t.total_livros }}</span>
+        </summary>
+        <ul class="ml-3 pl-2 border-l border-amber-100 space-y-0.5 mt-0.5">
+            {% include 'core/_arvore_temas.html' with temas=t.filhos %}
+        </ul>
+    </details>
+    {% else %}
+    <div class="flex items-center gap-1 rounded-lg {% if t.pk == tema_atual_id %}bg-amber-100 text-amber-900 font-semibold{% else %}text-gray-700 hover:bg-amber-50{% endif %}">
+        <span class="w-5 h-7 flex items-center justify-center text-gray-300 shrink-0"><i class="fas fa-circle text-[5px]"></i></span>
+        <a href="{% url 'tema-detail' t.pk %}" class="flex-1 py-1.5 pr-2 truncate text-sm" title="{{ t.nome }}">{{ t.nome }}</a>
+        <span class="text-xs text-gray-400 pr-2">{{ t.total_livros }}</span>
+    </div>
+    {% endif %}
+</li>
+{% endfor %}

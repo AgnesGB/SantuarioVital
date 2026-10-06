@@ -1,0 +1,25 @@
+<style>
+    .acervo-form .input, .acervo-form .textarea, .acervo-form .select,
+    .acervo-form input[type="text"], .acervo-form textarea, .acervo-form select {
+        width: 100%; padding: .6rem .9rem; border: 1px solid #d1d5db; border-radius: .5rem; background: #fff;
+    }
+    .acervo-form input:focus, .acervo-form textarea:focus, .acervo-form select:focus {
+        outline: none; border-color: transparent; box-shadow: 0 0 0 2px {{ cor_foco|default:'#f59e0b' }};
+    }
+    .acervo-form textarea[name="conteudo"] { font-family: Georgia, 'Times New Roman', serif; line-height: 1.7; }
+</style>
+
+{% if form.non_field_errors %}
+<div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 text-red-700">{{ form.non_field_errors }}</div>
+{% endif %}
+
+{% for field in form %}
+<div>
+    <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+        {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+    </label>
+    {{ field }}
+    {% if field.help_text %}<p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>{% endif %}
+    {% for error in field.errors %}<p class="text-sm text-red-600 mt-1">{{ error }}</p>{% endfor %}
+</div>
+{% endfor %}

@@ -1,0 +1,39 @@
+<aside class="lg:w-72 flex-shrink-0">
+    <div class="bg-white rounded-xl shadow-md p-5 lg:sticky lg:top-4">
+        <form method="get" action="{% url 'acervo' %}" class="mb-4">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" name="busca" value="{{ busca|default:'' }}" placeholder="Buscar livros..."
+                       class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm">
+            </div>
+        </form>
+
+        <div class="flex items-center justify-between mb-2">
+            <a href="{% url 'acervo' %}" class="text-sm font-semibold text-gray-800 flex items-center gap-2 hover:text-amber-700">
+                <i class="fas fa-landmark text-amber-600"></i> Temas
+            </a>
+            <a href="{% url 'tema-create' %}" class="w-7 h-7 rounded-lg flex items-center justify-center text-amber-700 hover:bg-amber-100 transition" title="Novo tema principal">
+                <i class="fas fa-plus text-xs"></i>
+            </a>
+        </div>
+
+        {% if arvore %}
+        <ul class="space-y-0.5 max-h-[60vh] overflow-y-auto -mx-1 px-1">
+            {% include 'core/_arvore_temas.html' with temas=arvore %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-gray-400 italic py-2">Nenhum tema ainda.</p>
+        {% endif %}
+
+        <div class="mt-5 pt-5 border-t border-gray-200 space-y-2">
+            <a href="{% url 'tema-create' %}{% if tema_atual_id %}?pai={{ tema_atual_id }}{% endif %}"
+               class="block w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition text-center text-sm font-medium">
+                <i class="fas fa-folder-plus mr-2"></i>{% if tema_atual_id %}Novo subtema{% else %}Novo tema{% endif %}
+            </a>
+            <a href="{% url 'livro-create' %}{% if tema_atual_id %}?tema={{ tema_atual_id }}{% endif %}"
+               class="block w-full px-4 py-2 bg-white border border-amber-300 text-amber-800 rounded-lg hover:bg-amber-50 transition text-center text-sm font-medium">
+                <i class="fas fa-book-medical mr-2"></i>Adicionar livro
+            </a>
+        </div>
+    </div>
+</aside>

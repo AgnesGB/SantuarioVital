@@ -1,5 +1,5 @@
 from django import forms
-from .models import Usuario, RelatorioExpedicao, Cidade, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente
+from .models import Usuario, RelatorioExpedicao, Cidade, Besta, Doenca, Paciente, Diagnostico, RegistroMedico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente, Tema, Livro, MapaTeorizacao
 from django.forms.widgets import DateInput
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
@@ -205,3 +205,65 @@ RemedioIngredienteFormSet = inlineformset_factory(
     min_num=0,
     validate_min=False
 )
+
+
+class TemaForm(forms.ModelForm):
+    class Meta:
+        model = Tema
+        fields = ['nome', 'descricao', 'pai']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'input'}),
+            'descricao': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'pai': forms.Select(attrs={'class': 'select'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['pai'].required = False
+        self.fields['pai'].empty_label = '— Nenhum (tema principal) —'
+        if self.instance.pk:
+            # Um tema não pode ficar dentro dele mesmo nem de um subtema seu
+            self.fields['pai'].queryset = Tema.objects.exclude(pk__in=self.instance.descendentes_ids())
+
+
+class LivroForm(forms.ModelForm):
+    arquivo_texto = forms.FileField(
+        required=False,
+        label='Importar texto (.txt)',
+        help_text='Opcional: substitui o conteúdo pelo texto do arquivo',
+        widget=forms.ClearableFileInput(attrs={'accept': '.txt,text/plain'}),
+    )
+
+    class Meta:
+        model = Livro
+        fields = ['titulo', 'autor', 'tema', 'resumo', 'conteudo']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'input'}),
+            'autor': forms.TextInput(attrs={'class': 'input'}),
+            'tema': forms.Select(attrs={'class': 'select'}),
+            'resumo': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+            'conteudo': forms.Textarea(attrs={'class': 'textarea', 'rows': 18}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        arquivo = cleaned.get('arquivo_texto')
+        if arquivo:
+            bruto = arquivo.read()
+            try:
+                cleaned['conteudo'] = bruto.decode('utf-8-sig')
+            except UnicodeDecodeError:
+                cleaned['conteudo'] = bruto.decode('latin-1')
+        # Normaliza quebras de linha para os índices dos comentários baterem com o navegador
+        cleaned['conteudo'] = (cleaned.get('conteudo') or '').replace('\r\n', '\n').replace('\r', '\n')
+        return cleaned
+
+
+class MapaTeorizacaoForm(forms.ModelForm):
+    class Meta:
+        model = MapaTeorizacao
+        fields = ['titulo', 'descricao']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'input'}),
+            'descricao': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
+        }

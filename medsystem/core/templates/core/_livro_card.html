@@ -1,0 +1,16 @@
+<a href="{% url 'livro-detail' livro.pk %}" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex card-hover">
+    <div class="w-16 shrink-0 bg-gradient-to-b from-amber-600 to-orange-700 flex items-center justify-center">
+        <i class="fas fa-book text-white/90 text-2xl"></i>
+    </div>
+    <div class="p-4 flex-1 min-w-0">
+        <h3 class="font-bold text-gray-800 truncate group-hover:text-amber-700">{{ livro.titulo }}</h3>
+        {% if livro.autor %}<p class="text-sm text-gray-500 truncate">{{ livro.autor }}</p>{% endif %}
+        {% if mostrar_tema %}
+        <p class="text-xs text-amber-700 mt-1 truncate"><i class="fas fa-folder mr-1"></i>{{ livro.tema.nome }}</p>
+        {% endif %}
+        {% if livro.resumo %}<p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ livro.resumo|truncatewords:25 }}</p>{% endif %}
+        {% if livro.total_comentarios %}
+        <p class="text-xs text-gray-400 mt-2"><i class="fas fa-comment-dots mr-1"></i>{{ livro.total_comentarios }} comentário{{ livro.total_comentarios|pluralize }}</p>
+        {% endif %}
+    </div>
+</a>

@@ -12,7 +12,11 @@ from .models import (
     Ingrediente,
     Remedio,
     RemedioIngrediente,
-    AnotacaoPessoal
+    AnotacaoPessoal,
+    Tema,
+    Livro,
+    ComentarioLivro,
+    MapaTeorizacao
 )
 
 class RemedioIngredienteInline(admin.TabularInline):
@@ -37,3 +41,7 @@ admin.site.register(Raca)
 admin.site.register(Ingrediente)
 admin.site.register(Remedio, RemedioAdmin)
 admin.site.register(AnotacaoPessoal)
+admin.site.register(Tema)
+admin.site.register(Livro)
+admin.site.register(ComentarioLivro)
+admin.site.register(MapaTeorizacao)

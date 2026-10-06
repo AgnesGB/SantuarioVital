@@ -1,0 +1,34 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Adicionar{% endif %} Livro{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg text-white text-2xl">
+            <i class="fas fa-book-medical"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Editar livro{% else %}Adicionar livro{% endif %}</h1>
+            <p class="text-gray-600">Cole o texto do livro ou importe um arquivo .txt. Depois é só selecionar trechos para comentar.</p>
+        </div>
+    </div>
+
+    {% if form.instance.pk and form.instance.comentarios.exists %}
+    <div class="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-4 mb-4 text-sm text-amber-800">
+        <i class="fas fa-info-circle mr-1"></i>
+        Este livro tem comentários. Se você alterar o conteúdo, cada comentário será reposicionado procurando o mesmo trecho no novo texto;
+        os que não forem encontrados continuam na lista, marcados como "trecho não encontrado".
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="acervo-form bg-white rounded-2xl shadow-lg border border-gray-200 p-6 space-y-5">
+        {% csrf_token %}
+        {% include 'core/_acervo_form_campos.html' %}
+        <div class="flex justify-end gap-3 pt-2">
+            <a href="{% if form.instance.pk %}{% url 'livro-detail' form.instance.pk %}{% else %}{% url 'acervo' %}{% endif %}" class="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Cancelar</a>
+            <button type="submit" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition font-medium">Salvar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

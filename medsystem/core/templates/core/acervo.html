@@ -1,0 +1,68 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Acervo{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+    {% include 'core/_acervo_sidebar.html' %}
+
+    <section class="flex-1 min-w-0">
+        <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-white mb-1 flex items-center gap-3"><i class="fas fa-landmark"></i> Acervo</h1>
+            <p class="text-amber-50">A biblioteca do reino: temas, subtemas e livros, com comentários nos trechos que importam.</p>
+        </div>
+
+        {% if busca %}
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Resultados para "{{ busca }}" <span class="text-gray-400 font-normal">({{ resultados|length }})</span></h2>
+            {% if resultados %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for livro in resultados %}
+                    {% include 'core/_livro_card.html' with mostrar_tema=True %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="bg-white rounded-xl shadow-md p-10 text-center text-gray-500">
+                <i class="fas fa-search text-4xl text-gray-300 mb-3"></i>
+                <p>Nenhum livro encontrado.</p>
+                <a href="{% url 'acervo' %}" class="inline-block mt-3 text-amber-700 hover:underline">Limpar busca</a>
+            </div>
+            {% endif %}
+        {% else %}
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Temas</h2>
+            {% if temas_principais %}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-10">
+                {% for t in temas_principais %}
+                <a href="{% url 'tema-detail' t.pk %}" class="bg-white rounded-xl shadow-md p-5 card-hover border-t-4 border-amber-500">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center"><i class="fas fa-folder"></i></div>
+                        <h3 class="font-bold text-gray-800 truncate">{{ t.nome }}</h3>
+                    </div>
+                    {% if t.descricao %}<p class="text-sm text-gray-600 mb-3">{{ t.descricao|truncatewords:20 }}</p>{% endif %}
+                    <p class="text-xs text-gray-500 flex gap-4">
+                        <span><i class="fas fa-folder-tree mr-1"></i>{{ t.filhos|length }} subtema{{ t.filhos|length|pluralize }}</span>
+                        <span><i class="fas fa-book mr-1"></i>{{ t.total_livros }} livro{{ t.total_livros|pluralize }}</span>
+                    </p>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="bg-white rounded-xl shadow-md p-12 text-center mb-10">
+                <i class="fas fa-book-open text-5xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">O acervo está vazio</h3>
+                <p class="text-gray-500 mb-4">Comece criando um tema; depois adicione livros e subtemas dentro dele.</p>
+                <a href="{% url 'tema-create' %}" class="inline-block px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">Criar primeiro tema</a>
+            </div>
+            {% endif %}
+
+            {% if livros_recentes %}
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Adicionados recentemente</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for livro in livros_recentes %}
+                    {% include 'core/_livro_card.html' with mostrar_tema=True %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

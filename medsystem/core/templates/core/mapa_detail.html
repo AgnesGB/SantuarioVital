@@ -1,0 +1,598 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ mapa.titulo }} - Teorização{% endblock %}
+
+{% block extra_css %}
+<style>
+    #tela { user-select: none;
+        position: relative; overflow: hidden; touch-action: none; cursor: grab;
+        height: calc(100vh - 230px); min-height: 480px;
+        background-color: #f8fafc;
+        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    }
+    #tela.arrastando { cursor: grabbing; }
+    #mundo { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+    #arestas { position: absolute; left: 0; top: 0; overflow: visible; width: 1px; height: 1px; }
+    .no {
+        position: absolute; width: 210px; user-select: none; cursor: move;
+        border-radius: .75rem; background: #fff; border: 2px solid #e5e7eb;
+        box-shadow: 0 4px 10px -2px rgba(0,0,0,.08);
+    }
+    .no.selecionado { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,.2); }
+    .no.alvo { border-color: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.25); }
+    .no .alca {
+        position: absolute; right: -9px; top: 50%; transform: translateY(-50%);
+        width: 18px; height: 18px; border-radius: 9999px; background: #6366f1; border: 3px solid #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,.3); cursor: crosshair; opacity: 0; transition: opacity .15s;
+    }
+    .no:hover .alca, .no.selecionado .alca { opacity: 1; }
+    .no .texto-ideia[contenteditable="true"] { cursor: text; user-select: text; outline: 2px dashed #a5b4fc; outline-offset: 2px; border-radius: 4px; }
+    .aresta-linha { stroke: #94a3b8; stroke-width: 2; fill: none; }
+    .aresta-hit { stroke: transparent; stroke-width: 14; fill: none; cursor: pointer; }
+    .aresta.selecionada .aresta-linha { stroke: #6366f1; stroke-width: 3; }
+    .aresta-rotulo { font-size: 12px; fill: #475569; font-family: Inter, sans-serif; pointer-events: none; }
+    .item-livro[draggable="true"] { cursor: grab; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+    <div class="min-w-0">
+        <a href="{% url 'mapa-list' %}" class="text-sm text-gray-500 hover:text-indigo-700"><i class="fas fa-arrow-left mr-1"></i>Teorização</a>
+        <h1 class="text-2xl font-bold text-gray-900 truncate">{{ mapa.titulo }}</h1>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+        <span id="status-salvo" class="text-xs text-gray-400 mr-2"><i class="fas fa-check mr-1"></i>Tudo salvo</span>
+        <a href="{% url 'mapa-update' mapa.pk %}" class="px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 text-sm" title="Renomear"><i class="fas fa-pen"></i></a>
+        <a href="{% url 'mapa-delete' mapa.pk %}" class="px-3 py-2 bg-white border border-gray-200 text-red-600 rounded-lg hover:bg-red-50 text-sm" title="Excluir mapa"><i class="fas fa-trash"></i></a>
+    </div>
+</div>
+
+<div class="flex flex-col lg:flex-row gap-4">
+    <!-- Painel lateral -->
+    <aside class="lg:w-72 shrink-0 bg-white rounded-xl shadow-md p-4 flex flex-col lg:h-[calc(100vh-230px)] lg:min-h-[480px]">
+        <button id="nova-ideia" type="button" class="w-full mb-4 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition text-sm font-medium">
+            <i class="fas fa-lightbulb mr-2"></i>Nova ideia
+        </button>
+        <p class="text-sm font-semibold text-gray-800 mb-2"><i class="fas fa-landmark text-amber-600 mr-1"></i>Livros do acervo</p>
+        <input id="busca-livro" type="text" placeholder="Buscar livro..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-2 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none">
+        <ul id="lista-livros" class="flex-1 overflow-y-auto space-y-1 max-h-64 lg:max-h-none -mx-1 px-1"></ul>
+        <div class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500 space-y-1">
+            <p><i class="fas fa-hand-pointer w-4"></i> Arraste um livro para a tela (ou clique em <i class="fas fa-plus"></i>)</p>
+            <p><i class="fas fa-circle text-indigo-500 w-4"></i> Puxe a bolinha de um cartão até outro para conectar</p>
+            <p><i class="fas fa-mouse w-4"></i> Duplo clique: editar ideia / rótulo da conexão</p>
+            <p><i class="fas fa-arrows-up-down-left-right w-4"></i> Arraste o fundo para mover; roda do mouse para zoom</p>
+            <p><i class="fas fa-delete-left w-4"></i> Delete apaga o item selecionado</p>
+        </div>
+    </aside>
+
+    <!-- Tela -->
+    <section class="flex-1 min-w-0 bg-white rounded-xl shadow-md overflow-hidden flex flex-col">
+        <div class="flex items-center gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 flex-wrap min-h-[52px]">
+            <button data-zoom="1.2" type="button" class="w-8 h-8 rounded-lg hover:bg-gray-200 text-gray-600" title="Aproximar"><i class="fas fa-search-plus"></i></button>
+            <button data-zoom="0.833" type="button" class="w-8 h-8 rounded-lg hover:bg-gray-200 text-gray-600" title="Afastar"><i class="fas fa-search-minus"></i></button>
+            <button id="enquadrar" type="button" class="w-8 h-8 rounded-lg hover:bg-gray-200 text-gray-600" title="Enquadrar tudo"><i class="fas fa-expand"></i></button>
+            <span id="nivel-zoom" class="text-xs text-gray-400 w-10">100%</span>
+
+            <div id="acoes-selecao" class="hidden ml-auto items-center gap-2">
+                <div id="cores" class="flex items-center gap-1"></div>
+                <button id="editar-selecao" type="button" class="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-100"><i class="fas fa-pen mr-1"></i><span>Editar</span></button>
+                <a id="abrir-livro" href="#" class="hidden px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-100 text-amber-700"><i class="fas fa-book-open mr-1"></i>Abrir livro</a>
+                <button id="excluir-selecao" type="button" class="px-3 py-1.5 text-sm bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50"><i class="fas fa-trash mr-1"></i>Excluir</button>
+            </div>
+        </div>
+        <div id="tela">
+            <div id="mundo">
+                <svg id="arestas">
+                    <defs>
+                        <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"></path>
+                        </marker>
+                        <marker id="seta-sel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#6366f1"></path>
+                        </marker>
+                    </defs>
+                    <g id="grupo-arestas"></g>
+                    <line id="linha-temp" class="aresta-linha" stroke-dasharray="6 4" style="display:none"></line>
+                </svg>
+                <div id="camada-nos"></div>
+            </div>
+            <div id="vazio" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="text-center text-gray-400">
+                    <i class="fas fa-project-diagram text-5xl mb-3"></i>
+                    <p>Arraste livros do painel ou crie uma ideia para começar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{{ livros_json|json_script:"livros-acervo" }}
+{{ dados_json|json_script:"dados-mapa" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const livros = JSON.parse(document.getElementById('livros-acervo').textContent);
+    const livroPorId = Object.fromEntries(livros.map(l => [l.id, l]));
+    const estado = JSON.parse(document.getElementById('dados-mapa').textContent);
+    const urlSalvar = "{% url 'mapa-salvar' mapa.pk %}";
+    const csrf = "{{ csrf_token }}";
+
+    const CORES = ['#ffffff', '#fef3c7', '#dcfce7', '#dbeafe', '#fce7f3', '#ede9fe', '#fee2e2'];
+    const tela = document.getElementById('tela');
+    const mundo = document.getElementById('mundo');
+    const camadaNos = document.getElementById('camada-nos');
+    const grupoArestas = document.getElementById('grupo-arestas');
+    const linhaTemp = document.getElementById('linha-temp');
+    const statusSalvo = document.getElementById('status-salvo');
+
+    let view = { x: 40, y: 40, z: 1 };
+    let selecao = null;          // {tipo: 'no'|'aresta', id}
+    const elementos = {};        // id do nó -> elemento
+
+    const novoId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const no = (id) => estado.nos.find(n => n.id === id);
+
+    // ---------- Salvamento automático ----------
+    let timerSalvar = null;
+    function alterado() {
+        statusSalvo.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i>Salvando...';
+        clearTimeout(timerSalvar);
+        timerSalvar = setTimeout(salvar, 700);
+    }
+    async function salvar() {
+        try {
+            const resp = await fetch(urlSalvar, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+                body: JSON.stringify(estado),
+            });
+            const dados = await resp.json();
+            if (!resp.ok) throw new Error(dados.erro);
+            statusSalvo.innerHTML = '<i class="fas fa-check mr-1 text-green-500"></i>Salvo às ' + dados.salvo_em;
+        } catch (e) {
+            statusSalvo.innerHTML = '<i class="fas fa-exclamation-triangle mr-1 text-red-500"></i>Erro ao salvar — tentando de novo...';
+            timerSalvar = setTimeout(salvar, 4000);
+        }
+    }
+    window.addEventListener('beforeunload', (e) => { if (timerSalvar && statusSalvo.textContent.includes('Salvando')) { e.preventDefault(); e.returnValue = ''; } });
+
+    // ---------- Câmera ----------
+    function aplicarView() {
+        mundo.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.z})`;
+        const passo = 22 * view.z;
+        tela.style.backgroundSize = `${passo}px ${passo}px`;
+        tela.style.backgroundPosition = `${view.x}px ${view.y}px`;
+        document.getElementById('nivel-zoom').textContent = Math.round(view.z * 100) + '%';
+    }
+    function telaParaMundo(cx, cy) {
+        const r = tela.getBoundingClientRect();
+        return { x: (cx - r.left - view.x) / view.z, y: (cy - r.top - view.y) / view.z };
+    }
+    function zoom(fator, cx, cy) {
+        const r = tela.getBoundingClientRect();
+        if (cx === undefined) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
+        const antes = telaParaMundo(cx, cy);
+        view.z = Math.min(2.5, Math.max(0.25, view.z * fator));
+        view.x = cx - r.left - antes.x * view.z;
+        view.y = cy - r.top - antes.y * view.z;
+        aplicarView();
+    }
+    function enquadrar() {
+        if (!estado.nos.length) { view = { x: 40, y: 40, z: 1 }; aplicarView(); return; }
+        let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+        estado.nos.forEach(n => {
+            const el = elementos[n.id];
+            x1 = Math.min(x1, n.x); y1 = Math.min(y1, n.y);
+            x2 = Math.max(x2, n.x + el.offsetWidth); y2 = Math.max(y2, n.y + el.offsetHeight);
+        });
+        const r = tela.getBoundingClientRect(), m = 60;
+        view.z = Math.min(1.2, Math.max(0.25, Math.min((r.width - 2 * m) / (x2 - x1), (r.height - 2 * m) / (y2 - y1))));
+        view.x = (r.width - (x2 - x1) * view.z) / 2 - x1 * view.z;
+        view.y = (r.height - (y2 - y1) * view.z) / 2 - y1 * view.z;
+        aplicarView();
+    }
+    function centroDaTela() {
+        const r = tela.getBoundingClientRect();
+        const c = telaParaMundo(r.left + r.width / 2, r.top + r.height / 2);
+        return espacoLivre(c.x - 105, c.y - 40);
+    }
+    // Procura, em espiral a partir do ponto, um lugar onde o cartão novo não fique em cima de outro
+    function espacoLivre(x, y) {
+        const ocupa = (px, py) => estado.nos.some(n => {
+            const el = elementos[n.id];
+            return px < n.x + el.offsetWidth + 20 && px + 230 > n.x && py < n.y + el.offsetHeight + 20 && py + 100 > n.y;
+        });
+        for (let i = 0; i < 40; i++) {
+            const ang = i * 2.4, raio = 60 * Math.sqrt(i);
+            const px = x + Math.cos(ang) * raio * 2, py = y + Math.sin(ang) * raio;
+            if (!ocupa(px, py)) return { x: px, y: py };
+        }
+        return { x, y };
+    }
+
+    // ---------- Nós ----------
+    function conteudoNo(n, el) {
+        el.style.background = n.cor || '#ffffff';
+        if (n.tipo === 'livro') {
+            const l = livroPorId[n.livro_id];
+            el.innerHTML = `
+                <div class="h-1.5 rounded-t-[10px] bg-gradient-to-r from-amber-500 to-orange-600"></div>
+                <div class="p-3">
+                    <p class="text-[10px] uppercase tracking-wide text-amber-700 font-semibold mb-1"><i class="fas fa-book mr-1"></i><span class="tema"></span></p>
+                    <p class="titulo font-bold text-gray-800 leading-snug"></p>
+                    <p class="autor text-xs text-gray-500 mt-0.5"></p>
+                </div>`;
+            el.querySelector('.tema').textContent = l ? l.tema : 'Livro';
+            el.querySelector('.titulo').textContent = l ? l.titulo : 'Livro removido do acervo';
+            el.querySelector('.autor').textContent = l ? l.autor : '';
+            if (l && l.resumo) el.title = l.resumo;
+        } else {
+            el.innerHTML = `
+                <div class="p-3">
+                    <p class="text-[10px] uppercase tracking-wide text-indigo-600 font-semibold mb-1"><i class="fas fa-lightbulb mr-1"></i>Ideia</p>
+                    <p class="texto-ideia text-sm text-gray-800 whitespace-pre-wrap break-words"></p>
+                </div>`;
+            el.querySelector('.texto-ideia').textContent = n.texto || '';
+        }
+        const alca = document.createElement('div');
+        alca.className = 'alca';
+        alca.title = 'Arraste até outro cartão para conectar';
+        el.appendChild(alca);
+    }
+
+    function renderNos() {
+        camadaNos.replaceChildren();
+        for (const k in elementos) delete elementos[k];
+        estado.nos.forEach(n => {
+            const el = document.createElement('div');
+            el.className = 'no';
+            el.dataset.id = n.id;
+            el.style.left = n.x + 'px';
+            el.style.top = n.y + 'px';
+            conteudoNo(n, el);
+            if (selecao && selecao.tipo === 'no' && selecao.id === n.id) el.classList.add('selecionado');
+            camadaNos.appendChild(el);
+            elementos[n.id] = el;
+        });
+        document.getElementById('vazio').classList.toggle('hidden', estado.nos.length > 0);
+        renderListaLivros();
+    }
+
+    // ---------- Arestas ----------
+    function borda(n, alvoX, alvoY) {
+        // Ponto onde a reta do centro do nó até o alvo cruza a borda do cartão
+        const el = elementos[n.id];
+        const w = el.offsetWidth / 2, h = el.offsetHeight / 2;
+        const cx = n.x + w, cy = n.y + h;
+        const dx = alvoX - cx, dy = alvoY - cy;
+        if (!dx && !dy) return { x: cx, y: cy };
+        const t = Math.min(dx ? w / Math.abs(dx) : Infinity, dy ? h / Math.abs(dy) : Infinity);
+        return { x: cx + dx * t, y: cy + dy * t };
+    }
+    function centro(n) {
+        const el = elementos[n.id];
+        return { x: n.x + el.offsetWidth / 2, y: n.y + el.offsetHeight / 2 };
+    }
+
+    function renderArestas() {
+        const svgNS = 'http://www.w3.org/2000/svg';
+        grupoArestas.replaceChildren();
+        estado.conexoes.forEach(c => {
+            const a = no(c.de), b = no(c.para);
+            if (!a || !b || !elementos[a.id] || !elementos[b.id]) return;
+            const ca = centro(a), cb = centro(b);
+            const p1 = borda(a, cb.x, cb.y), p2 = borda(b, ca.x, ca.y);
+            const sel = selecao && selecao.tipo === 'aresta' && selecao.id === c.id;
+
+            const g = document.createElementNS(svgNS, 'g');
+            g.classList.add('aresta');
+            if (sel) g.classList.add('selecionada');
+            g.dataset.id = c.id;
+            const d = `M${p1.x},${p1.y} L${p2.x},${p2.y}`;
+            const linha = document.createElementNS(svgNS, 'path');
+            linha.setAttribute('d', d);
+            linha.setAttribute('class', 'aresta-linha');
+            linha.setAttribute('marker-end', sel ? 'url(#seta-sel)' : 'url(#seta)');
+            const hit = document.createElementNS(svgNS, 'path');
+            hit.setAttribute('d', d);
+            hit.setAttribute('class', 'aresta-hit');
+            g.append(linha, hit);
+            grupoArestas.appendChild(g);   // precisa estar no DOM para medir o rótulo
+
+            if (c.rotulo) {
+                const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+                const txt = document.createElementNS(svgNS, 'text');
+                txt.setAttribute('x', mx);
+                txt.setAttribute('y', my + 4);
+                txt.setAttribute('text-anchor', 'middle');
+                txt.setAttribute('class', 'aresta-rotulo');
+                txt.textContent = c.rotulo;
+                const fundo = document.createElementNS(svgNS, 'rect');
+                g.append(fundo, txt);
+                const bb = txt.getBBox();
+                fundo.setAttribute('x', bb.x - 6); fundo.setAttribute('y', bb.y - 3);
+                fundo.setAttribute('width', bb.width + 12); fundo.setAttribute('height', bb.height + 6);
+                fundo.setAttribute('rx', 6);
+                fundo.setAttribute('fill', '#fff');
+                fundo.setAttribute('stroke', sel ? '#6366f1' : '#cbd5e1');
+                fundo.style.cursor = 'pointer';
+                g.appendChild(txt);   // texto por cima do fundo
+            }
+        });
+    }
+
+    function renderTudo() { renderNos(); renderArestas(); renderSelecao(); }
+
+    // ---------- Seleção ----------
+    function selecionar(s) {
+        selecao = s;
+        Object.values(elementos).forEach(el => el.classList.toggle('selecionado', !!s && s.tipo === 'no' && el.dataset.id === s.id));
+        renderArestas();
+        renderSelecao();
+    }
+    function renderSelecao() {
+        const acoes = document.getElementById('acoes-selecao');
+        acoes.classList.toggle('hidden', !selecao);
+        acoes.classList.toggle('flex', !!selecao);
+        if (!selecao) return;
+        const cores = document.getElementById('cores');
+        const abrir = document.getElementById('abrir-livro');
+        const editar = document.getElementById('editar-selecao');
+        cores.replaceChildren();
+        abrir.classList.add('hidden');
+        editar.classList.remove('hidden');
+        if (selecao.tipo === 'no') {
+            const n = no(selecao.id);
+            CORES.forEach(cor => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'w-6 h-6 rounded-full border-2 ' + ((n.cor || '#ffffff') === cor ? 'border-indigo-500' : 'border-gray-300');
+                b.style.background = cor;
+                b.title = 'Cor do cartão';
+                b.addEventListener('click', () => { n.cor = cor; elementos[n.id].style.background = cor; renderSelecao(); alterado(); });
+                cores.appendChild(b);
+            });
+            if (n.tipo === 'livro') {
+                editar.classList.add('hidden');
+                const l = livroPorId[n.livro_id];
+                if (l) { abrir.href = l.url; abrir.classList.remove('hidden'); }
+            } else {
+                editar.querySelector('span').textContent = 'Editar ideia';
+            }
+        } else {
+            editar.querySelector('span').textContent = 'Rótulo';
+        }
+    }
+    function excluirSelecao() {
+        if (!selecao) return;
+        if (selecao.tipo === 'no') {
+            estado.nos = estado.nos.filter(n => n.id !== selecao.id);
+            estado.conexoes = estado.conexoes.filter(c => c.de !== selecao.id && c.para !== selecao.id);
+        } else {
+            estado.conexoes = estado.conexoes.filter(c => c.id !== selecao.id);
+        }
+        selecao = null;
+        renderTudo();
+        alterado();
+    }
+    function editarRotulo(id) {
+        const c = estado.conexoes.find(x => x.id === id);
+        const valor = prompt('Rótulo da conexão (ex.: "contradiz", "complementa", "baseia-se em"):', c.rotulo || '');
+        if (valor === null) return;
+        c.rotulo = valor.trim();
+        renderArestas();
+        alterado();
+    }
+    function editarIdeia(id) {
+        const el = elementos[id];
+        const t = el.querySelector('.texto-ideia');
+        if (!t) return;
+        t.contentEditable = 'true';
+        t.focus();
+        const r = document.createRange();
+        r.selectNodeContents(t);
+        const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        t.addEventListener('blur', function fim() {
+            t.removeEventListener('blur', fim);
+            t.contentEditable = 'false';
+            no(id).texto = t.innerText.trim();
+            renderArestas();   // a altura do cartão pode ter mudado
+            alterado();
+        });
+        t.addEventListener('keydown', (e) => { if (e.key === 'Escape' || (e.key === 'Enter' && (e.ctrlKey || e.metaKey))) t.blur(); });
+    }
+
+    // ---------- Adicionar ----------
+    function adicionarLivro(livroId, pos) {
+        const existente = estado.nos.find(n => n.tipo === 'livro' && n.livro_id === livroId);
+        if (existente) { selecionar({ tipo: 'no', id: existente.id }); focarNo(existente); return; }
+        const p = pos || centroDaTela();
+        const n = { id: novoId('n'), tipo: 'livro', livro_id: livroId, texto: '', x: Math.round(p.x), y: Math.round(p.y), cor: '#ffffff' };
+        estado.nos.push(n);
+        selecao = { tipo: 'no', id: n.id };
+        renderTudo();
+        alterado();
+    }
+    function adicionarIdeia() {
+        const p = centroDaTela();
+        const n = { id: novoId('n'), tipo: 'ideia', texto: 'Nova ideia', x: Math.round(p.x), y: Math.round(p.y), cor: '#ede9fe' };
+        estado.nos.push(n);
+        selecao = { tipo: 'no', id: n.id };
+        renderTudo();
+        alterado();
+        editarIdeia(n.id);
+    }
+    function focarNo(n) {
+        const r = tela.getBoundingClientRect(), el = elementos[n.id];
+        view.x = r.width / 2 - (n.x + el.offsetWidth / 2) * view.z;
+        view.y = r.height / 2 - (n.y + el.offsetHeight / 2) * view.z;
+        aplicarView();
+    }
+
+    // ---------- Lista de livros ----------
+    const buscaLivro = document.getElementById('busca-livro');
+    function renderListaLivros() {
+        const lista = document.getElementById('lista-livros');
+        const termo = buscaLivro.value.trim().toLowerCase();
+        const noMapa = new Set(estado.nos.filter(n => n.tipo === 'livro').map(n => n.livro_id));
+        lista.replaceChildren();
+        const filtrados = livros.filter(l => !termo || (l.titulo + ' ' + l.autor + ' ' + l.tema).toLowerCase().includes(termo));
+        if (!filtrados.length) {
+            lista.innerHTML = '<li class="text-sm text-gray-400 italic px-2 py-1">' + (livros.length ? 'Nenhum livro encontrado.' : 'O acervo ainda não tem livros.') + '</li>';
+            return;
+        }
+        filtrados.forEach(l => {
+            const li = document.createElement('li');
+            li.className = 'item-livro flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-indigo-50 group';
+            li.draggable = true;
+            li.innerHTML = `
+                <i class="fas fa-book text-amber-500 text-sm"></i>
+                <div class="flex-1 min-w-0"><p class="t text-sm text-gray-800 truncate"></p><p class="a text-xs text-gray-400 truncate"></p></div>
+                <button type="button" class="w-7 h-7 rounded-lg text-indigo-600 hover:bg-indigo-100 shrink-0"></button>`;
+            li.querySelector('.t').textContent = l.titulo;
+            li.querySelector('.a').textContent = l.tema;
+            const b = li.querySelector('button');
+            b.innerHTML = noMapa.has(l.id) ? '<i class="fas fa-crosshairs text-xs"></i>' : '<i class="fas fa-plus text-xs"></i>';
+            b.title = noMapa.has(l.id) ? 'Já está no mapa — mostrar' : 'Adicionar ao mapa';
+            if (noMapa.has(l.id)) li.querySelector('.t').classList.add('text-indigo-700', 'font-medium');
+            b.addEventListener('click', () => adicionarLivro(l.id));
+            li.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/livro-id', String(l.id)));
+            lista.appendChild(li);
+        });
+    }
+    buscaLivro.addEventListener('input', renderListaLivros);
+
+    tela.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('text/livro-id')) e.preventDefault(); });
+    tela.addEventListener('drop', (e) => {
+        const id = Number(e.dataTransfer.getData('text/livro-id'));
+        if (!id) return;
+        e.preventDefault();
+        const p = telaParaMundo(e.clientX, e.clientY);
+        adicionarLivro(id, { x: p.x - 105, y: p.y - 30 });
+    });
+
+    // ---------- Interações com o ponteiro ----------
+    let acao = null;   // {tipo: 'pan'|'mover'|'conectar', ...}
+
+    tela.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        if (e.target.isContentEditable) return;
+        const alca = e.target.closest('.alca');
+        const elNo = e.target.closest('.no');
+        const elAresta = e.target.closest('.aresta');
+
+        if (alca && elNo) {
+            const n = no(elNo.dataset.id);
+            acao = { tipo: 'conectar', de: n };
+            const c = centro(n);
+            linhaTemp.setAttribute('x1', c.x); linhaTemp.setAttribute('y1', c.y);
+            linhaTemp.setAttribute('x2', c.x); linhaTemp.setAttribute('y2', c.y);
+            linhaTemp.style.display = '';
+        } else if (elNo) {
+            const n = no(elNo.dataset.id);
+            selecionar({ tipo: 'no', id: n.id });
+            const p = telaParaMundo(e.clientX, e.clientY);
+            acao = { tipo: 'mover', no: n, dx: p.x - n.x, dy: p.y - n.y, moveu: false };
+        } else if (elAresta) {
+            selecionar({ tipo: 'aresta', id: elAresta.dataset.id });
+            return;
+        } else {
+            selecionar(null);
+            acao = { tipo: 'pan', sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
+            tela.classList.add('arrastando');
+        }
+    });
+
+    let alvoAtual = null;
+    window.addEventListener('pointermove', (e) => {
+        if (!acao) return;
+        if (acao.tipo === 'pan') {
+            view.x = acao.vx + e.clientX - acao.sx;
+            view.y = acao.vy + e.clientY - acao.sy;
+            aplicarView();
+        } else if (acao.tipo === 'mover') {
+            const p = telaParaMundo(e.clientX, e.clientY);
+            acao.no.x = Math.round(p.x - acao.dx);
+            acao.no.y = Math.round(p.y - acao.dy);
+            const el = elementos[acao.no.id];
+            el.style.left = acao.no.x + 'px';
+            el.style.top = acao.no.y + 'px';
+            acao.moveu = true;
+            renderArestas();
+        } else if (acao.tipo === 'conectar') {
+            const p = telaParaMundo(e.clientX, e.clientY);
+            linhaTemp.setAttribute('x2', p.x); linhaTemp.setAttribute('y2', p.y);
+            const sob = document.elementFromPoint(e.clientX, e.clientY);
+            const elNo = sob && sob.closest('.no');
+            const novo = elNo && elNo.dataset.id !== acao.de.id ? elNo : null;
+            if (alvoAtual !== novo) {
+                if (alvoAtual) alvoAtual.classList.remove('alvo');
+                if (novo) novo.classList.add('alvo');
+                alvoAtual = novo;
+            }
+        }
+    });
+
+    function terminarAcao() {
+        if (!acao) return;
+        if (acao.tipo === 'mover' && acao.moveu) alterado();
+        if (acao.tipo === 'conectar') {
+            linhaTemp.style.display = 'none';
+            if (alvoAtual) {
+                const de = acao.de.id, para = alvoAtual.dataset.id;
+                alvoAtual.classList.remove('alvo');
+                const repetida = estado.conexoes.some(c => (c.de === de && c.para === para) || (c.de === para && c.para === de));
+                if (!repetida) {
+                    const c = { id: novoId('c'), de, para, rotulo: '' };
+                    estado.conexoes.push(c);
+                    selecionar({ tipo: 'aresta', id: c.id });
+                    alterado();
+                    setTimeout(() => editarRotulo(c.id), 0);
+                }
+            }
+            alvoAtual = null;
+        }
+        tela.classList.remove('arrastando');
+        acao = null;
+    }
+    window.addEventListener('pointerup', terminarAcao);
+    window.addEventListener('pointercancel', terminarAcao);
+
+    tela.addEventListener('dblclick', (e) => {
+        const elNo = e.target.closest('.no');
+        const elAresta = e.target.closest('.aresta');
+        if (elNo && no(elNo.dataset.id).tipo === 'ideia') editarIdeia(elNo.dataset.id);
+        else if (elAresta) editarRotulo(elAresta.dataset.id);
+    });
+
+    tela.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        zoom(e.deltaY < 0 ? 1.1 : 1 / 1.1, e.clientX, e.clientY);
+    }, { passive: false });
+
+    document.addEventListener('keydown', (e) => {
+        const editando = e.target.isContentEditable || ['INPUT', 'TEXTAREA'].includes(e.target.tagName);
+        if (editando) return;
+        if ((e.key === 'Delete' || e.key === 'Backspace') && selecao) { e.preventDefault(); excluirSelecao(); }
+        if (e.key === 'Escape') selecionar(null);
+    });
+
+    document.querySelectorAll('[data-zoom]').forEach(b => b.addEventListener('click', () => zoom(Number(b.dataset.zoom))));
+    document.getElementById('enquadrar').addEventListener('click', enquadrar);
+    document.getElementById('nova-ideia').addEventListener('click', adicionarIdeia);
+    document.getElementById('excluir-selecao').addEventListener('click', excluirSelecao);
+    document.getElementById('editar-selecao').addEventListener('click', () => {
+        if (!selecao) return;
+        if (selecao.tipo === 'aresta') editarRotulo(selecao.id);
+        else editarIdeia(selecao.id);
+    });
+
+    aplicarView();
+    renderTudo();
+    if (estado.nos.length) enquadrar();
+})();
+</script>
+{% endblock %}

@@ -282,3 +282,107 @@ class RemedioIngrediente(models.Model):
 
     def __str__(self):
         return f"{self.ingrediente.nome} ({self.quantidade}) - {self.remedio.nome}"
+
+
+# Acervo (biblioteca)
+
+class Tema(models.Model):
+    nome = models.CharField(max_length=150, verbose_name="Nome")
+    descricao = models.TextField(blank=True, verbose_name="Descrição")
+    pai = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
+                            related_name='subtemas', verbose_name="Tema pai")
+    criado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Tema"
+        verbose_name_plural = "Temas"
+        ordering = ['nome']
+
+    def __str__(self):
+        return " / ".join(t.nome for t in self.caminho())
+
+    def caminho(self):
+        """Lista de temas da raiz até este (para o breadcrumb)."""
+        temas = []
+        atual = self
+        while atual is not None:
+            temas.insert(0, atual)
+            atual = atual.pai
+        return temas
+
+    def descendentes_ids(self):
+        ids = [self.pk]
+        for sub in self.subtemas.all():
+            ids.extend(sub.descendentes_ids())
+        return ids
+
+
+class Livro(models.Model):
+    titulo = models.CharField(max_length=200, verbose_name="Título")
+    autor = models.CharField(max_length=200, blank=True, verbose_name="Autor")
+    tema = models.ForeignKey(Tema, on_delete=models.CASCADE, related_name='livros', verbose_name="Tema")
+    resumo = models.TextField(blank=True, verbose_name="Resumo")
+    conteudo = models.TextField(blank=True, verbose_name="Conteúdo", help_text="Texto do livro (é nele que se fazem os comentários)")
+    adicionado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Livro"
+        verbose_name_plural = "Livros"
+        ordering = ['titulo']
+
+    def __str__(self):
+        return self.titulo
+
+    def realocar_comentarios(self):
+        """Depois de editar o conteúdo, reposiciona cada comentário procurando o trecho no novo texto."""
+        for comentario in self.comentarios.all():
+            if comentario.inicio is not None and self.conteudo[comentario.inicio:comentario.fim] == comentario.trecho:
+                continue
+            pos = self.conteudo.find(comentario.trecho) if comentario.trecho else -1
+            if pos >= 0:
+                comentario.inicio, comentario.fim = pos, pos + len(comentario.trecho)
+            else:
+                comentario.inicio = comentario.fim = None
+            comentario.save(update_fields=['inicio', 'fim'])
+
+
+class ComentarioLivro(models.Model):
+    livro = models.ForeignKey(Livro, on_delete=models.CASCADE, related_name='comentarios')
+    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='comentarios_livro')
+    trecho = models.TextField(verbose_name="Trecho selecionado")
+    inicio = models.PositiveIntegerField(null=True, blank=True)
+    fim = models.PositiveIntegerField(null=True, blank=True)
+    texto = models.TextField(verbose_name="Comentário")
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Comentário de livro"
+        verbose_name_plural = "Comentários de livros"
+        ordering = ['inicio', 'data_criacao']
+
+    def __str__(self):
+        return f"{self.autor} em {self.livro}: {self.texto[:40]}"
+
+
+# Teorização (mapas mentais pessoais)
+
+class MapaTeorizacao(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='mapas')
+    titulo = models.CharField(max_length=150, verbose_name="Título")
+    descricao = models.TextField(blank=True, verbose_name="Descrição")
+    # {"nos": [{"id", "tipo": "livro"|"ideia", "livro_id", "texto", "x", "y", "cor"}],
+    #  "conexoes": [{"id", "de", "para", "rotulo"}]}
+    dados = models.JSONField(default=dict, blank=True)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Mapa de teorização"
+        verbose_name_plural = "Mapas de teorização"
+        ordering = ['-data_atualizacao']
+
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario.nickname}"

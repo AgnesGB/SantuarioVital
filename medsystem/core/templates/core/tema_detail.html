@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ tema.nome }} - Acervo{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+    {% include 'core/_acervo_sidebar.html' %}
+
+    <section class="flex-1 min-w-0">
+        <nav class="text-sm text-gray-500 mb-3 flex flex-wrap items-center gap-1">
+            <a href="{% url 'acervo' %}" class="hover:text-amber-700"><i class="fas fa-landmark mr-1"></i>Acervo</a>
+            {% for t in caminho %}
+                <i class="fas fa-chevron-right text-[10px] mx-1 text-gray-300"></i>
+                {% if forloop.last %}<span class="text-gray-800 font-medium">{{ t.nome }}</span>
+                {% else %}<a href="{% url 'tema-detail' t.pk %}" class="hover:text-amber-700">{{ t.nome }}</a>{% endif %}
+            {% endfor %}
+        </nav>
+
+        <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl shadow-lg p-6 mb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-1 flex items-center gap-3"><i class="fas fa-folder-open"></i> {{ tema.nome }}</h1>
+                {% if tema.descricao %}<p class="text-amber-50 whitespace-pre-line">{{ tema.descricao }}</p>{% endif %}
+            </div>
+            {% if pode_editar %}
+            <div class="flex gap-2 shrink-0">
+                <a href="{% url 'tema-update' tema.pk %}" class="px-3 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition text-sm"><i class="fas fa-pen mr-1"></i>Editar</a>
+                <a href="{% url 'tema-delete' tema.pk %}" class="px-3 py-2 bg-white/20 text-white rounded-lg hover:bg-red-500 transition text-sm"><i class="fas fa-trash"></i></a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-gray-800"><i class="fas fa-folder-tree text-amber-600 mr-2"></i>Subtemas</h2>
+            <a href="{% url 'tema-create' %}?pai={{ tema.pk }}" class="text-sm text-amber-700 hover:underline"><i class="fas fa-plus mr-1"></i>Novo subtema</a>
+        </div>
+        {% if subtemas %}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-8">
+            {% for sub in subtemas %}
+            <a href="{% url 'tema-detail' sub.pk %}" class="bg-white rounded-lg shadow p-4 card-hover flex items-center gap-3 border-l-4 border-amber-400">
+                <i class="fas fa-folder text-amber-500 text-xl"></i>
+                <div class="min-w-0">
+                    <p class="font-semibold text-gray-800 truncate">{{ sub.nome }}</p>
+                    <p class="text-xs text-gray-500">{{ sub.total_subtemas }} subtema{{ sub.total_subtemas|pluralize }} · {{ sub.total_livros }} livro{{ sub.total_livros|pluralize }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-400 italic mb-8">Nenhum subtema.</p>
+        {% endif %}
+
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-gray-800"><i class="fas fa-book text-amber-600 mr-2"></i>Livros</h2>
+            <a href="{% url 'livro-create' %}?tema={{ tema.pk }}" class="text-sm text-amber-700 hover:underline"><i class="fas fa-plus mr-1"></i>Adicionar livro</a>
+        </div>
+        {% if livros %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for livro in livros %}
+                {% include 'core/_livro_card.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-xl shadow p-8 text-center text-gray-500">
+            <i class="fas fa-book text-3xl text-gray-300 mb-2"></i>
+            <p>Nenhum livro neste tema ainda.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

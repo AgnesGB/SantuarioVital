@@ -15,6 +15,7 @@ from .views import (
     IngredienteListView, IngredienteDetailView, IngredienteCreateView, IngredienteUpdateView, IngredienteDeleteView,
     RemedioListView, RemedioDetailView, RemedioCreateView, RemedioUpdateView, RemedioDeleteView, alterar_tipo_usuario
 )
+from . import views_acervo
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -97,5 +98,26 @@ urlpatterns = [
     path('remedios/novo/', RemedioCreateView.as_view(), name='remedio-create'),
     path('remedios/<int:pk>/editar/', RemedioUpdateView.as_view(), name='remedio-update'),
     path('remedios/<int:pk>/excluir/', RemedioDeleteView.as_view(), name='remedio-delete'),
+
+    # Acervo (biblioteca)
+    path('acervo/', views_acervo.AcervoView.as_view(), name='acervo'),
+    path('acervo/temas/novo/', views_acervo.TemaCreateView.as_view(), name='tema-create'),
+    path('acervo/temas/<int:pk>/', views_acervo.TemaDetailView.as_view(), name='tema-detail'),
+    path('acervo/temas/<int:pk>/editar/', views_acervo.TemaUpdateView.as_view(), name='tema-update'),
+    path('acervo/temas/<int:pk>/excluir/', views_acervo.TemaDeleteView.as_view(), name='tema-delete'),
+    path('acervo/livros/novo/', views_acervo.LivroCreateView.as_view(), name='livro-create'),
+    path('acervo/livros/<int:pk>/', views_acervo.LivroDetailView.as_view(), name='livro-detail'),
+    path('acervo/livros/<int:pk>/editar/', views_acervo.LivroUpdateView.as_view(), name='livro-update'),
+    path('acervo/livros/<int:pk>/excluir/', views_acervo.LivroDeleteView.as_view(), name='livro-delete'),
+    path('acervo/livros/<int:pk>/comentarios/', views_acervo.comentario_livro_criar, name='comentario-livro-create'),
+    path('acervo/comentarios/<int:pk>/excluir/', views_acervo.comentario_livro_excluir, name='comentario-livro-delete'),
+
+    # Teorização (mapas mentais pessoais)
+    path('teorizacao/', views_acervo.MapaListView.as_view(), name='mapa-list'),
+    path('teorizacao/novo/', views_acervo.MapaCreateView.as_view(), name='mapa-create'),
+    path('teorizacao/<int:pk>/', views_acervo.MapaDetailView.as_view(), name='mapa-detail'),
+    path('teorizacao/<int:pk>/editar/', views_acervo.MapaUpdateView.as_view(), name='mapa-update'),
+    path('teorizacao/<int:pk>/excluir/', views_acervo.MapaDeleteView.as_view(), name='mapa-delete'),
+    path('teorizacao/<int:pk>/salvar/', views_acervo.mapa_salvar, name='mapa-salvar'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

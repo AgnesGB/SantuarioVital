@@ -1,0 +1,28 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Novo{% endif %} Mapa{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg text-white text-2xl">
+            <i class="fas fa-project-diagram"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Editar mapa{% else %}Novo mapa de teorização{% endif %}</h1>
+            <p class="text-gray-600">Seus mapas são pessoais: só você pode vê-los.</p>
+        </div>
+    </div>
+
+    <form method="post" class="acervo-form bg-white rounded-2xl shadow-lg border border-gray-200 p-6 space-y-5">
+        {% csrf_token %}
+        {% include 'core/_acervo_form_campos.html' with cor_foco='#6366f1' %}
+        <div class="flex justify-end gap-3 pt-2">
+            <a href="{% if form.instance.pk %}{% url 'mapa-detail' form.instance.pk %}{% else %}{% url 'mapa-list' %}{% endif %}" class="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Cancelar</a>
+            <button type="submit" class="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition font-medium">
+                {% if form.instance.pk %}Salvar{% else %}Criar e abrir{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
