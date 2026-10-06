@@ -1,5 +1,6 @@
 from django.views.generic import DeleteView, ListView, DetailView, CreateView, UpdateView, TemplateView
 from django.urls import reverse_lazy, reverse
+from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse
 from .models import Doenca, RelatorioExpedicao, Usuario, Besta, Cidade, Paciente, RegistroMedico, Diagnostico, AnotacaoPessoal, Raca, Ingrediente, Remedio, RemedioIngrediente
@@ -92,8 +93,8 @@ class UsuarioDeleteView(AdminRequiredMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         u = self.object
-        # O que é apagado junto com a conta
-        context['apagados'] = [(nome, total) for nome, total in [
+        # O que passa para o administrador que está excluindo
+        context['transferidos'] = [(nome, total) for nome, total in [
             ('relatório(s) de expedição', u.relatorioexpedicao_set.count()),
             ('anotação(ões) pessoal(is)', u.anotacoes.count()),
             ('mapa(s) de teorização', u.mapas.count()),
@@ -102,8 +103,32 @@ class UsuarioDeleteView(AdminRequiredMixin, DeleteView):
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, f'Usuário {self.object.nickname} excluído.')
-        return super().form_valid(form)
+        antigo, novo_dono = self.object, self.request.user
+        de = f'de {antigo.nickname}'
+        with transaction.atomic():
+            # Tudo o que seria apagado em cascata passa para o administrador,
+            # guardando quem era o autor original
+            for anotacao in antigo.anotacoes.all():
+                anotacao.usuario = novo_dono
+                anotacao.tags = ', '.join(filter(None, [anotacao.tags, de]))
+                anotacao.save(update_fields=['usuario', 'tags'])
+            for relatorio in antigo.relatorioexpedicao_set.all():
+                relatorio.autor = novo_dono
+                relatorio.observacoes = '\n\n'.join(filter(None, [
+                    relatorio.observacoes, f'Relatório escrito originalmente por {antigo.nickname} (@{antigo.username}).']))
+                relatorio.save(update_fields=['autor', 'observacoes'])
+            for mapa in antigo.mapas.all():
+                mapa.usuario = novo_dono
+                mapa.titulo = f'{mapa.titulo} ({de})'[:150]
+                mapa.save(update_fields=['usuario', 'titulo'])
+                mapa.colaboradores.remove(novo_dono)   # agora é o dono
+            for comentario in antigo.comentarios_livro.all():
+                comentario.autor = novo_dono
+                comentario.texto = f'[{antigo.nickname}] {comentario.texto}'
+                comentario.save(update_fields=['autor', 'texto'])
+            resposta = super().form_valid(form)
+        messages.success(self.request, f'Usuário {antigo.nickname} excluído. O conteúdo dele agora é seu.')
+        return resposta
 
 class BunkerDetailView(DetailView):
     model = Cidade

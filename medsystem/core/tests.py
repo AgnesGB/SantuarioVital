@@ -294,15 +294,39 @@ class UsuariosAdminTests(TestCase):
         self.adm.refresh_from_db()
         self.assertEqual((self.adm.tipo, self.adm.is_active), ('ADM', True))
 
-    def test_excluir_usuario(self):
-        RelatorioExpedicao.objects.create(titulo='T', localizacao='L', descobertas='D', autor=self.joao)
+    def test_excluir_usuario_transfere_conteudo(self):
+        from .models import AnotacaoPessoal
+        relatorio = RelatorioExpedicao.objects.create(titulo='T', localizacao='L', descobertas='D', autor=self.joao)
+        anotacao = AnotacaoPessoal.objects.create(usuario=self.joao, titulo='Nota', conteudo='x', tags='ervas')
+        mapa = MapaTeorizacao.objects.create(usuario=self.joao, titulo='Mapa', dados={'nos': [], 'conexoes': []})
+        mapa.colaboradores.add(self.adm)
         tela = self.client.get(reverse('usuario-delete', args=[self.joao.pk]))
         self.assertContains(tela, '1 relatório(s) de expedição')
         self.client.post(reverse('usuario-delete', args=[self.joao.pk]))
         self.assertFalse(Usuario.objects.filter(pk=self.joao.pk).exists())
+        relatorio.refresh_from_db(); anotacao.refresh_from_db(); mapa.refresh_from_db()
+        self.assertEqual((relatorio.autor, anotacao.usuario, mapa.usuario), (self.adm, self.adm, self.adm))
+        self.assertIn('João', relatorio.observacoes)
+        self.assertEqual(anotacao.tags, 'ervas, de João')
+        self.assertEqual(mapa.titulo, 'Mapa (de João)')
+        self.assertFalse(mapa.colaboradores.exists())
         self.assertEqual(self.client.get(reverse('usuario-delete', args=[self.adm.pk])).status_code, 404)
 
     def test_nao_admin_nao_gerencia(self):
         self.client.force_login(self.joao)
         self.assertEqual(self.client.get(reverse('usuario-update', args=[self.adm.pk])).status_code, 403)
         self.assertEqual(self.client.post(reverse('usuario-delete', args=[self.adm.pk])).status_code, 403)
+
+
+class HomeTests(TestCase):
+    def test_cards_por_tipo_de_usuario(self):
+        comum = Usuario.objects.create_user(username='f', password='x', nickname='Ferreira', tipo='FER')
+        self.client.force_login(comum)
+        resp = self.client.get(reverse('home'))
+        for url in ['acervo', 'mapa-list', 'besta-list', 'relatorio-list', 'doenca-list', 'anotacao-list']:
+            self.assertContains(resp, f'href="{reverse(url)}" class="inline-flex', msg_prefix=url)
+        self.assertNotContains(resp, 'Gerenciar Pacientes')
+
+        medico = Usuario.objects.create_user(username='m', password='x', nickname='Med', tipo='MED')
+        self.client.force_login(medico)
+        self.assertContains(self.client.get(reverse('home')), 'Gerenciar Pacientes')
