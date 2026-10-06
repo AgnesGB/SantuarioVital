@@ -137,7 +137,7 @@ class BunkerDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['membros'] = Usuario.objects.filter(cidade=self.object)
-        context['pacientes'] = Paciente.objects.filter(cidade=self.object).only('nome', 'idade')
+        context['pacientes'] = Paciente.objects.filter(cidade=self.object).only('nome', 'idade', 'nome_ordenacao')
         return context
 
 class BunkertListView(ListView):
@@ -496,7 +496,7 @@ class PacienteListView(MedicoRequiredMixin, ListView):
     context_object_name = 'pacientes'
     
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('cidade').order_by('nome')  # Ordenação padrão por nome
+        queryset = super().get_queryset().select_related('cidade').order_by('nome_ordenacao', 'nome')  # Ordem alfabética, ignorando acentos
         
         # Aplica filtros se existirem
         nome = self.request.GET.get('nome')

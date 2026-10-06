@@ -1,3 +1,4 @@
+import unicodedata
 import uuid
 
 from django.db import models
@@ -6,6 +7,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+
+def chave_alfabetica(texto):
+    """Texto sem acentos e em minúsculas, para ordenar "Árvore" junto com "arvore" e antes de "Bruma"."""
+    sem_acento = ''.join(c for c in unicodedata.normalize('NFKD', texto or '') if not unicodedata.combining(c))
+    return sem_acento.casefold().strip()
+
 
 class Usuario(AbstractUser):
     # Só MED e ADM têm permissões especiais; as demais profissões são apenas identificação
@@ -161,12 +168,20 @@ class Paciente(models.Model):
     contatos_emergencia = models.TextField(blank=True, verbose_name="Contatos de Emergência", help_text="Nomes e informações de contato de emergência")
     observacoes = models.TextField(blank=True)
     doencas = models.ManyToManyField(Doenca, through='Diagnostico', related_name='pacientes')
+    # Preenchido automaticamente; é por ele que os pacientes ficam em ordem alfabética
+    nome_ordenacao = models.CharField(max_length=200, editable=False, db_index=True, default='')
 
     def __str__(self):
         return f"{self.nome} ({self.idade} anos, {self.get_status_display()})"
 
+    def save(self, *args, **kwargs):
+        self.nome_ordenacao = chave_alfabetica(self.nome)
+        if kwargs.get('update_fields') is not None and 'nome' in kwargs['update_fields']:
+            kwargs['update_fields'] = set(kwargs['update_fields']) | {'nome_ordenacao'}
+        super().save(*args, **kwargs)
+
     class Meta:
-        ordering = ['cidade__nome', 'nome']
+        ordering = ['cidade__nome', 'nome_ordenacao', 'nome']
         verbose_name_plural = "Pacientes"
 
 class Diagnostico(models.Model):
@@ -319,6 +334,7 @@ class RemedioIngrediente(models.Model):
 
 # Acervo (biblioteca)
 
+
 class Tema(models.Model):
     nome = models.CharField(max_length=150, verbose_name="Nome")
     descricao = models.TextField(blank=True, verbose_name="Descrição")
@@ -361,14 +377,22 @@ class Livro(models.Model):
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
     imagens = GenericRelation('Imagem')
+    # Preenchido automaticamente; é por ele que os livros ficam em ordem alfabética
+    titulo_ordenacao = models.CharField(max_length=200, editable=False, db_index=True, default='')
 
     class Meta:
         verbose_name = "Livro"
         verbose_name_plural = "Livros"
-        ordering = ['titulo']
+        ordering = ['titulo_ordenacao', 'titulo']
 
     def __str__(self):
         return self.titulo
+
+    def save(self, *args, **kwargs):
+        self.titulo_ordenacao = chave_alfabetica(self.titulo)
+        if kwargs.get('update_fields') is not None and 'titulo' in kwargs['update_fields']:
+            kwargs['update_fields'] = set(kwargs['update_fields']) | {'titulo_ordenacao'}
+        super().save(*args, **kwargs)
 
     def realocar_comentarios(self):
         """Depois de editar o conteúdo, reposiciona cada comentário procurando o trecho no novo texto."""

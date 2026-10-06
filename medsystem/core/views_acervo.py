@@ -413,7 +413,7 @@ TIPOS_TEORIZACAO = {
     'remedio': (lambda: Remedio.objects.prefetch_related('imagens'),
                 lambda r: _item('remedio', r, r.nome, '', r.descricao, 'remedio-detail'),
                 lambda u: True),
-    'paciente': (lambda: Paciente.objects.order_by('nome'),
+    'paciente': (lambda: Paciente.objects.order_by('nome_ordenacao', 'nome'),
                  lambda p: _item('paciente', p, p.nome, f'{p.idade} anos · {p.get_status_display()}', p.observacoes, 'paciente-detail'),
                  lambda u: u.tipo in ('MED', 'ADM')),
 }

@@ -330,3 +330,32 @@ class HomeTests(TestCase):
         medico = Usuario.objects.create_user(username='m', password='x', nickname='Med', tipo='MED')
         self.client.force_login(medico)
         self.assertContains(self.client.get(reverse('home')), 'Gerenciar Pacientes')
+
+
+class OrdemAlfabeticaTests(TestCase):
+    def test_livros_em_ordem_ignorando_acentos_e_maiusculas(self):
+        tema = Tema.objects.create(nome='Geral')
+        for titulo in ['Zumbis do Norte', 'Árvores Sagradas', 'bestas menores', 'Éter e Essência', 'Alquimia', 'ervas']:
+            Livro.objects.create(titulo=titulo, tema=tema)
+        esperado = ['Alquimia', 'Árvores Sagradas', 'bestas menores', 'ervas', 'Éter e Essência', 'Zumbis do Norte']
+        self.assertEqual([l.titulo for l in Livro.objects.all()], esperado)
+        self.assertEqual([l.titulo for l in tema.livros.all()], esperado)
+
+    def test_renomear_reordena(self):
+        tema = Tema.objects.create(nome='Geral')
+        livro = Livro.objects.create(titulo='Zeta', tema=tema)
+        Livro.objects.create(titulo='Beta', tema=tema)
+        livro.titulo = 'Água'
+        livro.save(update_fields=['titulo'])
+        self.assertEqual(Livro.objects.first().titulo, 'Água')
+
+    def test_pacientes_em_ordem_ignorando_acentos(self):
+        medico = Usuario.objects.create_user(username='m', password='x', nickname='Med', tipo='MED')
+        cidade = Cidade.objects.create(nome='Norte', funcao='Vila')
+        for nome in ['Zélia', 'Ícaro', 'bruno', 'Ana', 'Íris', 'Igor']:
+            Paciente.objects.create(nome=nome, idade=30, cidade=cidade)
+        esperado = ['Ana', 'bruno', 'Ícaro', 'Igor', 'Íris', 'Zélia']
+        self.assertEqual([p.nome for p in Paciente.objects.all()], esperado)
+        self.client.force_login(medico)
+        lista = self.client.get(reverse('paciente-list')).context['pacientes']
+        self.assertEqual([p.nome for p in lista], esperado)
